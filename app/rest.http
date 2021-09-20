@@ -1,0 +1,54 @@
+GET http://localhost:8000
+
+###
+GET http://localhost:8000/adg
+
+
+###
+POST http://localhost:8000/api/auth/signin
+Content-Type: application/json
+
+{
+    "username":"karthikboddu",
+    "password":"OpRbFV+dR/rnYtwBi2jL/w=="
+}
+
+###
+POST http://localhost:8000/api/auth/refresh-token
+Content-Type: application/json
+
+{
+    "refreshToken" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwOTU0OThlY2I0ODVlNDVlMmU4YTBjMiIsImlhdCI6MTYyMTk1NDc4NSwiZXhwIjoxNjIyNTU5NTg1fQ.OMpNItuSIOz-aqrE4zHqpWE116g5mp5-YkSzscg63x0"
+}
+
+###
+GET http://localhost:8000/api/test/user
+x-access-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwOTU0OThlY2I0ODVlNDVlMmU4YTBjMiIsImlhdCI6MTYyMTk1NDgxOCwiZXhwIjoxNjIxOTU4NDE4fQ.mVz7ai5yyu1P7kMKnhcASBXMU_JYV3-vdPlZBLTKECo
+
+
+
+###
+POST http://localhost:8000/api/auth/logout
+Content-Type: application/json
+
+{
+    "refreshToken" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwOTU0OThlY2I0ODVlNDVlMmU4YTBjMiIsImlhdCI6MTYyMjAzMTMwNCwiZXhwIjoxNjIyNjM2MTA0fQ.NTL5YTMexl9zBRDCfgEMOyeqQ-6uspQYSFKFotz-ZMo"
+}
+
+###
+GET http://localhost:8000/api/user/userLoginInfo
+x-access-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwOTU0OThlY2I0ODVlNDVlMmU4YTBjMiIsImlhdCI6MTYyMjIxNDY5NCwiZXhwIjoxNjIyMjE4Mjk0fQ.-y_y6RkI2pNF_3xCB_jsxpd7CPhnnnnFiXwaiphVsoI
+
+
+###
+POST  http://localhost:8000/api/auth/addConfig
+Content-Type: application/json
+
+{
+    "name":"sample",
+    "key": "TEST",
+    "value" : "TEST"
+}
+
+###
+GET http://localhost:8000/api/auth/getConfig
