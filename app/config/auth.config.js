@@ -1,7 +1,7 @@
 const { getConfigur} = require('../services/config.service')
 
-const data =  getConfigur();
-console.log(data,"s");
+//const data =  getConfigur();
+//console.log(data,"s");
 
 module.exports = {
     secret: "karthik-secret-key",

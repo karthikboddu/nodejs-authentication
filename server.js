@@ -14,7 +14,7 @@ var a = require('crypto').randomBytes(64).toString('hex');
 
 
 var corsOptions = {
- origin : "http://localhost:4200"
+ origin : "*"
 }
 
 app.use(cors(corsOptions));
@@ -24,6 +24,10 @@ app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }))
 
 app.get("/",(req,res)=>{
+ res.json({message: "welcome to sample" });
+});
+app.post("/signup",(req,res)=>{
+console.log(req.body)
  res.json({message: "welcome to sample" });
 });
 require("./app/routes/tutorial.routes.js")(app);

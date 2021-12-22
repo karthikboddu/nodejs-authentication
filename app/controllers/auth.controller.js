@@ -20,8 +20,9 @@ const Role = db.role;
 
 
 exports.signup = (req, res) => {
-  console.log(req, "req")
-  const userData = JSON.parse(req.body.data);
+   console.log(req.body, "req123")
+  const userData = req.body;
+ 
   const user = new User({
     username: userData.username,
     email: userData.email,
@@ -112,7 +113,8 @@ exports.signin = (req, res) => {
         return res.status(404).send({ status:false, message: "User Not found." });
       }
       //decrypt(req.body.password,key,iv);
-      var pass = decrypt(Buffer.from(req.body.password, "base64"), key, "utf8")
+      //var pass = decrypt(Buffer.from(req.body.password, "base64"), key, "utf8")
+      var pass = req.body.password
       //aes.decrpt()
       console.log(pass, "pass")
       pass = pass.replace(/^"|"$/g, '');
