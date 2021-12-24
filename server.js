@@ -30,6 +30,9 @@ var chat_messages = [];
 
 // Subscribe to all channels which name complies with the '*' pattern
 // '*' means we'll subscribe to ALL possible channels
+app.get("/socket.io",(req,res)=>{
+
+
 redis.psubscribe('*');
 
 // Listen for new messages
@@ -45,6 +48,7 @@ redis.on('pmessage', function (pattern, channel, message) {
     console.log(channel, message.event,message.data,pattern);
 });
 
+});
 
 
 
