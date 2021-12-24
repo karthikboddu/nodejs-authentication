@@ -20,7 +20,7 @@ var server = require('http').Server();
 // Requiring the ioredis package
 var Redis = require('ioredis');
 // A redis client
-var redis = new Redis();
+var redis = new Redis(process.env.REDIS_URL);
 var io = require('socket.io')(server);
 // Store people in chatroom
 var chatters = [];
@@ -31,7 +31,7 @@ var chat_messages = [];
 // Subscribe to all channels which name complies with the '*' pattern
 // '*' means we'll subscribe to ALL possible channels
 app.get("/socket.io",(req,res)=>{
-
+console.log("socket started")
 
 redis.psubscribe('*');
 
