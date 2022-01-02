@@ -5,21 +5,21 @@ const redis = require("redis");
 
 
 module.exports = (cfg, data) => {
-
-  const redisCli = redis.createClient({
-    port: cfg.db.redis.port,
-    host: cfg.db.redis.host
-  });
-
   if (process.env.REDIS_ON == "ON") {
+    const redisCli = redis.createClient({
+      port: cfg.db.redis.port,
+      host: cfg.db.redis.host
+    });
+
     redisCli.on("connect", function () {
       console.log("Redis plugged in.");
     });
+    return redisCli;
   } else {
     console.log("Redis is OFF.");
   }
 
 
-  return redisCli;
+  
 }
 
