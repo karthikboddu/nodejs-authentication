@@ -12,6 +12,7 @@ db.role = require("./role.model");
 db.token = require("./resetpassword.model");
 db.userlogin = require('./userLogin')(mongoose);
 db.configs = require('./configs.model')(mongoose);
+db.tenant = require('./tenant')(mongoose,dbConfig);
 db.ROLES = ["user", "admin", "moderator"];
 
 module.exports = db;

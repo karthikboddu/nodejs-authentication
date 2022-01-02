@@ -1,0 +1,86 @@
+Table -Tenant
+
+Id
+Parent_id
+Full name
+Username
+Password
+Email
+Mobile no
+Aadhar I'd
+Address
+Start at
+End at
+Status
+Activated at
+Last Login at
+Created at
+Updated at
+
+Table - building 
+
+Id
+Name
+Code
+Status
+Created at
+Updated at
+
+Table- floors
+
+Id
+Building id (fk_building table)
+Name
+Code
+Status
+Created at
+Updated at
+
+Table- Rooms
+
+Id
+Floor id (fk_floors table)
+Name
+Code
+Status 
+Created at
+Updated at
+
+Table - tenant_building
+
+Id
+building_id (fk building table)
+tenant_id (fk tenant id)
+Status 
+Created at
+Updated at
+
+Table - tenant_floor
+
+Id
+Tenant_id
+Floor_id ( fk floor table)
+Status
+Created at
+Updated at
+
+Table- tenant_floor_rooms
+
+Id
+Tenant_id
+Floor_id
+Room_id
+Status
+Created at
+Updated at
+
+Table - orders
+
+Id
+Tenant_id
+Floor_room_id
+Payment_type
+Amount
+Status
+Created at
+Updated at

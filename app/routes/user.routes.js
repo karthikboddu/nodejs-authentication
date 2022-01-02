@@ -27,7 +27,7 @@ module.exports = function(app) {
   );
 
   app.get("/api/user/userLoginInfo", [authJwt.verifyToken], controller.getUserLoginDetails);
-
+  app.get("/api/user/userDetais", [authJwt.verifyToken], controller.getUserDetails);
   app.get("/api/user/userPreLoginInfo", controller.getPreUserLoginDetails);
 
   //app.get("api/user/userDetails",controller);

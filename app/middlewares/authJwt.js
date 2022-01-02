@@ -3,84 +3,138 @@ const config = require("../config/auth.config.js");
 const db = require("../models");
 const User = db.user;
 const Role = db.role;
+const { jwtSignAccessRefreshToken } = require('../helpers/jwt_helpers')
+const { verifyTokenPromise, verifyRefreshTokenPromise } = require('./validateJwt')
 
 
-verifyToken = (req,res,next) => {
+verifyToken = async(req, res, next) => {
 
-   let token = req.headers["x-access-token"];
-    console.log(token)
-   if (!token) {
-    return res.status(403).send({ message: "No token provided!" });
-   }
+  let token = req.headers["x-access-token"];
+  let result = {};
 
-  jwt.verify(token, config.secret, (err, decoded) => {
-    if (err) {
-      return res.status(401).send({ message: "Unauthorized!" });
+  if (!token) {
+    const error = {
+      code: 'UNAUTHENTICATED',
+      message: 'No token provided!'
     }
-    req.userId = decoded.id;
-    next();
-  });
+    result = {
+      status: 403,
+      errors: error,
+      data: ''
+    }
+    return res.send(result);
+  }
 
+  const tokenDecoded = await verifyTokenPromise(
+    token
+  ).catch(err => {
+    result = {
+      status: 401,
+      errors: err,
+      data: ''
+    }
+  }) || {};
+
+  if (tokenDecoded.id) {
+    req.userId = tokenDecoded.id;
+  }
+  next();
 }
 
-verifyRefreshToken = async (req,res,next) =>{
+verifyRefreshToken = async (req, res, next) => {
 
   let token = req.body.refreshToken;
-  console.log(token);
+  let result = {};
   if (!token) {
-    return res.status(403).send({ message: "No token provided!" });
-   }
 
-   jwt.verify(token,config.refreshtokenkey,(err,decoded) =>{
-    if (err) {
-      return res.status(401).send({ message: "Unauthorized!" });
+    const error = {
+      code: 'UNAUTHENTICATED',
+      message: 'No token provided!'
+    }
+    result = {
+      status: 403,
+      errors: error,
+      data: ''
+    }
+    return res.send(result);
+  }
+
+  const tokenDecoded = await verifyRefreshTokenPromise(
+    token
+  ).catch(err => {
+    result = {
+      status: 401,
+      errors: err,
+      data: ''
     }
 
-    const userId = decoded.id;
+  }) || {};
 
-    var accesstoken = jwt.sign({ id: userId }, config.secret, {
-      expiresIn: 3600 // 24 hours
-    });
-    var refreshtoken = jwt.sign({ id: userId }, config.refreshtokenkey, {
-      expiresIn: 604800 // 168 hours
-    });
-    return res.status(200).send({ accessToken: accesstoken,refreshToken : refreshtoken});
+  if (tokenDecoded.id) {
+    const userId = tokenDecoded.id;
+    const jwtData = jwtSignAccessRefreshToken(userId);
+    result = {
+      status: 200,
+      data: jwtData
+    }
 
-   })
+  }
+  return res.status(200).send(result);
 }
 
 
-verifyAccessToken = async (req,res,next) => {
+verifyAccessToken = async (req, res, next) => {
+
   let token = req.body.accessToken;
-
+  let result = {};
   if (!token) {
-    return res.status(200).send({ status:false, message: "Unauthorized!" });
-   }
-
-   jwt.verify(token,config.secret,(err,decoded) =>{
-    if (err) {
-      return res.status(200).send({ status:false, message: "Unauthorized!" });
+    const error = {
+      code: 'UNAUTHENTICATED',
+      message: 'No token provided!'
+    }
+    result = {
+      status: 403,
+      errors: error,
+      data: ''
+    }
+    return res.send(result);
+  }
+  const tokenD = await verifyTokenPromise(
+    token
+  ).catch(err => {
+    result = {
+      status: 401,
+      errors: err,
+      data: ''
     }
 
-    return res.status(200).send({  status:true, message: "Authorized!" });
+  }) || {};
+console.log(tokenD)
+  if (tokenD.id) {
+    result = {
+      status: 200,
+      message: 'Authorized!',
+      data: ''
+    };
+  }
 
-   })
+  return res.status(200).send(result)
 }
 
-isAdmin = (req,res,next) => {
-  
- User.findById(req.userId).exec((err,user) => {
-  if(err){
+isAdmin = (req, res, next) => {
+
+  User.findById(req.userId).exec((err, user) => {
+    if (err) {
       res.status(500).send({ message: err });
       return;
-  }
- 
-  Role.find(
-  {
-   _id:  { $in: user.roles}
+    }
 
-  },
-  (err,roles) => {
+    Role.find(
+      {
+        _id: { $in: user.roles }
+
+      },
+      (err, roles) => {
         if (err) {
           res.status(500).send({ message: err });
           return;

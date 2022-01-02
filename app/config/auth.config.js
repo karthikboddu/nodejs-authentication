@@ -4,10 +4,12 @@ const { getConfigur} = require('../services/config.service')
 //console.log(data,"s");
 
 module.exports = {
-    secret: "karthik-secret-key",
-    refreshtokenkey : "karthik-refreshtoken-key",
-    aesKey: "0123456789123456",
-    aesIv : "ABCDEFGHJKLMNOPQRSTUVWXYZABCDEF",
-    aesAlgo : "aes-256-ecb",
-    googleRecaptcha : "6Ldo9NUaAAAAAON9Q0WlW72_QR76W1khFxRO2_q1",
+    secret: process.env.JWT_SECRET_KEY,
+    refreshtokenkey : process.env.JWT_REFRESH_TOKEN_KEY,
+    jwtExpiry : process.env.JWT_EXPIRY,
+    jwtRefreshExpiry : process.env.JWT_REFRESH_EXPIRY,
+    aesKey: process.env.AES_KEY,
+    aesIv : process.env.AES_IV,
+    aesAlgo : process.env.AES_ALGO,
+    googleRecaptcha : process.env.GOOGLE_RECAPTCHA_KEY
   };

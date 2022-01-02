@@ -6,13 +6,13 @@ const sendPasswordReset = async(email,url) => {
   var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'bkarthik184@gmail.com',
-      pass: 'Kartik@23'
+      user: process.env.EMAIL_FROM_ID,
+      pass: process.env.EMAIL_PASSWORD,
     }
   });
   
   var mailOptions = {
-    from: 'bkarthik184@gmail.com',
+    from: process.env.EMAIL_FROM_ID,
     to: email,
     subject: 'Reset password from local',
     text: url
