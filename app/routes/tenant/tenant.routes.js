@@ -8,7 +8,7 @@ module.exports = function(app) {
         "x-access-token, Origin, Content-Type, Accept"
       );
       next();
-    });
+    }); 
 
     app.get("/api/tenant/tenants",[authJwt.verifyToken,authJwt.isAdmin], controller.tenants);
     app.post("/api/tenant/tenants", [authJwt.verifyToken],controller.createTenant);
