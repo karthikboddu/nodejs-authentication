@@ -11,7 +11,7 @@ module.exports = function(app) {
     });
 
     app.get("/api/tenant/tenants",[authJwt.verifyToken,authJwt.isAdmin], controller.tenants);
-    app.post("/api/tenant/tenants", [authJwt.verifyToken,authJwt.isAdmin],controller.createTenant);
+    app.post("/api/tenant/tenants", [authJwt.verifyToken],controller.createTenant);
     app.post("/api/tenant/login", controller.signInTenant);
     
 }
