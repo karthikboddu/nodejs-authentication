@@ -75,7 +75,7 @@ verifyRefreshToken = async (req, res, next) => {
     }
 
   }) || {};
-  if(result){
+  if(result.status){
     return res.send(result);
   }
   if (tokenDecoded.id) {
