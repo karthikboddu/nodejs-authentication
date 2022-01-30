@@ -1,4 +1,5 @@
-const controller = require('../../controllers/tenant/tenant.controller')
+const controller = require('../../controllers/tenant/tenant.controller'),
+      {authJwt} = require('../../middlewares')
 
 module.exports = function(app) {
     app.use(function(req, res, next) {
@@ -9,7 +10,8 @@ module.exports = function(app) {
       next();
     });
 
-    app.get("/api/tenant/tenants", controller.tenants);
-    app.post("/api/tenant/tenants", controller.createTenant);
-
+    app.get("/api/tenant/tenants",[authJwt.verifyToken,authJwt.isAdmin], controller.tenants);
+    app.post("/api/tenant/tenants", [authJwt.verifyToken,authJwt.isAdmin],controller.createTenant);
+    app.post("/api/tenant/login", controller.signInTenant);
+    
 }

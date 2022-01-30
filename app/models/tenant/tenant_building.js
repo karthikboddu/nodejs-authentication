@@ -15,6 +15,10 @@ module.exports = (mongoose) => {
                                     type: String,
                                     required :true
                                 },
+                                building_image: {
+                                    type: String,
+                                    required :true
+                                },
                                 status: {
                                     type: Boolean,
                                     default :false

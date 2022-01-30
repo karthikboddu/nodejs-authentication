@@ -2,7 +2,8 @@
 
 const _     = require('lodash'),
     modules = [
-        'tenant.service'
+        'tenant.service',
+        'building.service'
     ];
 
 function init(cfg) {

@@ -6,6 +6,7 @@ const redis = require("redis");
 
 module.exports = (cfg, data) => {
   if (process.env.REDIS_ON == "ON") {
+    
     const redisCli = redis.createClient({
       port: cfg.db.redis.port,
       host: cfg.db.redis.host

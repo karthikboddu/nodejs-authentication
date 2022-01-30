@@ -14,7 +14,6 @@ module.exports = (mongoose) => {
                                             },
                                             block_id :{
                                                 type : mongoose.Schema.Types.ObjectId,
-                                                required: true,
                                                 ref: "tenant_building_blocks",
                                                 default: null
                                             },

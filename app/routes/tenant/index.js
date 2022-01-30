@@ -2,7 +2,9 @@
 
 const _     = require('lodash'),
     modules = [
-        'tenant.routes'
+        'tenant.routes',
+        'building.routes',
+        'floor.routes'
     ];
 
 function init(app) {

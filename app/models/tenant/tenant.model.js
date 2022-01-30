@@ -3,11 +3,16 @@ module.exports = (mongoose) => {
     const tenant = mongoose.model("tenant",
                     new mongoose.Schema({
                         parent_id: {
-                            type: Number,
+                            type: String,
+                        },
+                        user_role: {
+                            type : mongoose.Schema.Types.ObjectId,
+                            required: true,
+                            ref: "Role"
                         },
                         full_name: {
-                        type: String,
-                        required : false
+                            type: String,
+                            required : false
                         },
                         username: {
                             type: String,

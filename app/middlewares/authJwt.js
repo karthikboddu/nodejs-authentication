@@ -1,11 +1,12 @@
 const jwt = require("jsonwebtoken");
 const config = require("../config/auth.config.js");
 const db = require("../models");
+const tenant = db.tenant.tenantModel
 const User = db.user;
 const Role = db.role;
 const { jwtSignAccessRefreshToken } = require('../helpers/jwt_helpers')
 const { verifyTokenPromise, verifyRefreshTokenPromise } = require('./validateJwt')
-
+const errorCode = require('../common/errorCode')
 
 verifyToken = async(req, res, next) => {
 
@@ -33,7 +34,12 @@ verifyToken = async(req, res, next) => {
       errors: err,
       data: ''
     }
-  }) || {};
+  });
+
+
+  if (result.status) {
+    return res.send(result);
+  }
 
   if (tokenDecoded.id) {
     req.userId = tokenDecoded.id;
@@ -69,7 +75,9 @@ verifyRefreshToken = async (req, res, next) => {
     }
 
   }) || {};
-
+  if(result){
+    return res.send(result);
+  }
   if (tokenDecoded.id) {
     const userId = tokenDecoded.id;
     const jwtData = jwtSignAccessRefreshToken(userId);
@@ -109,6 +117,9 @@ verifyAccessToken = async (req, res, next) => {
     }
 
   }) || {};
+  if(result){
+    return res.send(result);
+  }
 console.log(tokenD)
   if (tokenD.id) {
     result = {
@@ -123,7 +134,7 @@ console.log(tokenD)
 
 isAdmin = (req, res, next) => {
 
-  User.findById(req.userId).exec((err, user) => {
+  tenant.findById(req.userId).exec((err, user) => {
     if (err) {
       res.status(500).send({ message: err });
       return;
@@ -131,7 +142,7 @@ isAdmin = (req, res, next) => {
 
     Role.find(
       {
-        _id: { $in: user.roles }
+        _id: { $in: user.user_role }
 
       },
       (err, roles) => {
@@ -147,7 +158,7 @@ isAdmin = (req, res, next) => {
           }
         }
 
-        res.status(403).send({ message: "Require Admin Role!" });
+        res.status(403).send({ status: 403, error: errorCode.ACCESS_DENIED });
         return;
       }
     );
@@ -187,12 +198,43 @@ isModerator = (req, res, next) => {
   });
 };
 
+verifyTokenNext = async(req, res, next) => {
+
+  let token = req.headers["x-access-token"];
+  let result = {};
+
+  if (token) {
+    const tokenDecoded = await verifyTokenPromise(
+      token
+    ).catch(err => {
+      result = {
+        status: 401,
+        errors: err,
+        data: ''
+      }
+    });
+  
+  
+    if (result.status) {
+      return res.send(result);
+    }
+  
+    if (tokenDecoded.id) {
+      req.userId = tokenDecoded.id;
+    }
+  }
+
+ 
+  next();
+}
+
 const authJwt = {
   verifyToken,
   isAdmin,
   isModerator,
   verifyRefreshToken,
-  verifyAccessToken
+  verifyAccessToken,
+  verifyTokenNext
 };
 module.exports = authJwt;
 

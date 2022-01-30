@@ -85,9 +85,9 @@ const signInData = (req, res, data) => {
         if (err) {
           reject({ status: 500, message: err });
         }
-	console.log(user,"user")
-        if (!user || user==null) {
-        console.log(user,"user")
+        console.log(user, "user")
+        if (!user || user == null) {
+          console.log(user, "user")
           //reject({ status: 404, message: "User Not found." });
           return res.status(404).send({ status: 404, message: "User Not found." });
         }
@@ -335,7 +335,7 @@ const getUserInfoFromToken = async (req, next, token) => {
   if (tokenDecoded.id) {
     req.userId = tokenDecoded.id;
     let userId = tokenDecoded.id;
-    const user = await User.findOne({ _id :userId  });
+    const user = await User.findOne({ _id: userId });
     console.log(userId, "user")
     if (!user) throw new Error("User does not exist");
     return user;
