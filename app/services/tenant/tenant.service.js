@@ -91,7 +91,7 @@ const logInTenants = async(data) => {
               return;
             }
             var pass = data.password
-            pass = pass.replace(/^"|"$/g, '');
+            //pass = pass.replace(/^"|"$/g, '');
             var passwordIsValid = bcrypt.compareSync(
               pass,
               user.password
