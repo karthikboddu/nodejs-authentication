@@ -1,5 +1,5 @@
 const errorCode = require('../../common/errorCode'),
-    { saveTenantBuildings, listTenantBuildings, saveTenantBuildingsBlocks, listTenantBuildingsBlocks } = require('../../services/tenant/building.service');
+    { saveTenantBuildings, listTenantBuildings, saveTenantBuildingsBlocks, listTenantBuildingsById,listTenantBuildingsBlocks } = require('../../services/tenant/building.service');
 
 exports.buildings = async (req, res, next) => {
     try {
@@ -51,6 +51,20 @@ exports.buildingsBlocks = async (req, res, next) => {
             res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
         }
         const result = await listTenantBuildingsBlocks(req.userId, buildingId);
+        res.send(result);
+    } catch (error) {
+        return res.send(error);
+    }
+}
+
+exports.tenantBuildingById = async (req,res, next) => {
+    try {
+        console.log(req.userId)
+        const buildingId = req.params.buildingId;
+        if (!req.params.buildingId || !req.userId) {
+            res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
+        }
+        const result = await listTenantBuildingsById(req.userId, buildingId);
         res.send(result);
     } catch (error) {
         return res.send(error);

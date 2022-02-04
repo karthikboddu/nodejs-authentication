@@ -107,9 +107,14 @@ const saveTenantBuildingsBlocks = (data,tenantId,buildingId) => {
 const listTenantBuildingsBlocks = async (tenantId, buildingId) => {
     return await tenantBuildingBlocks.find({ tenant_id: tenantId, building_id:buildingId  }).populate({ path: 'tenant_id', select: ['username'] });
 }
+
+const listTenantBuildingsById = async (tenantId, buildingId) => {
+    return await tenantBuilding.find({ tenant_id: tenantId,building_id:buildingId  }).populate({ path: 'tenant_id', select: ['username'] });
+}
 module.exports = {
     saveTenantBuildings,
     listTenantBuildings,
     saveTenantBuildingsBlocks,
-    listTenantBuildingsBlocks
+    listTenantBuildingsBlocks,
+    listTenantBuildingsById
 }
