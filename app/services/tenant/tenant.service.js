@@ -78,6 +78,7 @@ const saveTenants = async (data,role,parentId) => {
 }
 
 const logInTenants = async(data) => {
+  console.log(data,"data")
     return new Promise((resolve, reject) => {
         tenant.findOne({
           username: data.username
@@ -91,7 +92,8 @@ const logInTenants = async(data) => {
               return;
             }
             var pass = data.password
-            //pass = pass.replace(/^"|"$/g, '');
+            console.log(pass)
+            pass = pass.replace(/^"|"$/g, '');
             var passwordIsValid = bcrypt.compareSync(
               pass,
               user.password
