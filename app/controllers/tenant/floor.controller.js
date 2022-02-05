@@ -1,8 +1,18 @@
 const errorCode = require('../../common/errorCode'),
-        {saveTenantBuildingsFloors} = require('../../services/tenant/floor.service');
+        {saveTenantBuildingsFloors,listFoorsByBuildingId} = require('../../services/tenant/floor.service');
 
-exports.floors = async = (req, res, next) => {
+exports.floorsByBuildingId = async (req, res, next) => {
+    const buildingId = req.params.buildingId;
 
+    if (!buildingId) {
+        res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
+    }
+    try {
+        const result = await listFoorsByBuildingId(req.userId, buildingId);
+        res.send(result);
+    } catch (error) {
+        return res.send(error);
+    }
 }
 
 

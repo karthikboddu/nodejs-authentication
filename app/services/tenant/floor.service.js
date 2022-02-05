@@ -6,8 +6,8 @@ const db = require("../../models"),
 
 
 
-const listTenantBuildingsFloors = async (req) => {    
-
+const listFoorsByBuildingId = async (tenantId,buildingId) => {    
+    return await tenantBuildingFloors.find({ tenant_id: tenantId,building_id:buildingId  });
 }
 
 const saveTenantBuildingsFloors = async (data,tenantId,buildingId,blockId) => {
@@ -63,6 +63,6 @@ const saveTenantBuildingsFloors = async (data,tenantId,buildingId,blockId) => {
 
 
 module.exports = {
-    listTenantBuildingsFloors,
+    listFoorsByBuildingId,
     saveTenantBuildingsFloors
 }
