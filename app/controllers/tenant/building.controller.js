@@ -65,6 +65,7 @@ exports.tenantBuildingById = async (req,res, next) => {
             res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
         }
         const result = await listTenantBuildingsById(req.userId, buildingId);
+        console.log(result,"res")
         res.send(result);
     } catch (error) {
         return res.send(error);

@@ -20,6 +20,11 @@ module.exports = (mongoose) => {
                                         type: String,
                                         required :true
                                     },
+                                    default_no_of_persons: {
+                                        type: Number,
+                                        required :true,
+                                        default: 3
+                                    },                                    
                                     status: {
                                         type: Boolean,
                                         default :false

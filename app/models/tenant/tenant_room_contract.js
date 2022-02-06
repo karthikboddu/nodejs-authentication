@@ -1,38 +1,40 @@
 module.exports = (mongoose) => {
 
-    const tenantBuilding = mongoose.model("tenant_building",
+    const tenantRoomContract = mongoose.model("tenant_room_contract",
                             new mongoose.Schema({
                                 tenant_id :{
                                     type : mongoose.Schema.Types.ObjectId,
                                     required: true,
                                     ref: "tenant"
                                 },
-                                building_name: {
-                                    type: String,
+                                floor_room_id: {
+                                    type : mongoose.Schema.Types.ObjectId,
+                                    required: true,
+                                    ref: "tenant_floor_rooms"
+                                },
+                                advance_amount: {
+                                    type: Number,
                                     required :true
                                 },
-                                building_address: {
-                                    type: String,
+                                advance_paid: {
+                                    type: Boolean,
+                                    required :true,
+                                    default: false
+                                },
+                                actual_price: {
+                                    type: Number,
                                     required :true
                                 },
-                                building_code: {
-                                    type: String,
-                                    required :true
-                                },
-                                building_image: {
-                                    type: String,
-                                    required :true
-                                },
-                                no_of_floors: {
+                                price: {
                                     type: Number,
                                     required :false
                                 },
-                                no_of_rooms: {
+                                no_of_persons: {
                                     type: Number,
                                     required :false
                                 },
                                 total_amount: {
-                                    type: Number,
+                                    type: String,
                                     required :false
                                 },
                                 status: {
@@ -49,6 +51,7 @@ module.exports = (mongoose) => {
                                 }
                             }))
 
-                            return tenantBuilding;
 
+
+    return tenantRoomContract;
 }
