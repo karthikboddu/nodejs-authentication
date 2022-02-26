@@ -1,6 +1,6 @@
 module.exports = (mongoose) => {
 
-    const tenantRoomContract = mongoose.model("tenant_room_contract",
+    const orderMaster = mongoose.model("order_master",
                             new mongoose.Schema({
                                 tenant_id :{
                                     type : mongoose.Schema.Types.ObjectId,
@@ -8,42 +8,35 @@ module.exports = (mongoose) => {
                                     unique: true,
                                     ref: "tenant"
                                 },
-                                floor_room_id: {
+                                room_contract_id: {
                                     type : mongoose.Schema.Types.ObjectId,
                                     required: true,
-                                    ref: "tenant_floor_rooms"
+                                    ref: "tenant_room_contract"
                                 },
-                                advance_amount: {
+                                payment_type: {
+                                    type: String,
+                                    required :false,
+                                    default: 'PAYTM'
+                                },
+                                amount_paid: {
                                     type: Number,
-                                    required :true
-                                },
-                                advance_paid: {
-                                    type: Boolean,
                                     required :true,
-                                    default: false
                                 },
-                                actual_price: {
+                                ref_transaction_id: {
                                     type: Number,
-                                    required :true
+                                    required :false,
+                                    default: null
                                 },
-                                price: {
-                                    type: Number,
-                                    required :false
-                                },
-                                no_of_persons: {
-                                    type: Number,
-                                    required :false
+                                payment_status: {
+                                    type: String,
+                                    required :false,
+                                    default: 'P'
                                 },
                                 total_amount: {
                                     type: Number,
                                     required :false,
                                     default: 0
-                                },
-                                balance_amount: {
-                                    type: Number,
-                                    required :false,
-                                    default:0
-                                },                                
+                                },                               
                                 status: {
                                     type: Boolean,
                                     default :false
@@ -60,5 +53,5 @@ module.exports = (mongoose) => {
 
 
 
-    return tenantRoomContract;
+    return orderMaster;
 }

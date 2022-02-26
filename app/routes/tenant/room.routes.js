@@ -13,4 +13,8 @@ module.exports = function(app) {
     app.get("/api/rooms/:floorId",[authJwt.verifyToken,authJwt.isAdmin], controller.rooms);
     app.post("/api/room/:floorId",[authJwt.verifyToken,authJwt.isAdmin], controller.createRoom);
 
+    app.post("/api/room/:roomId/tenant/:tenantId",[authJwt.verifyToken,authJwt.isAdmin], controller.linkTenantRoom);
+
+    app.get("/api/rooms/roomDetails/:floorId",[authJwt.verifyToken,authJwt.isAdmin], controller.roomDetails);
+
 }

@@ -11,5 +11,7 @@ module.exports = (mongoose,dbConfig) => {
     db.tenantBuildingBlocks = require('./tenant_building_blocks')(mongoose);
     db.tenantBuildingFloors = require('./tenant_building_floors')(mongoose);
     db.tenantFloorRooms = require('./tenant_floor_rooms')(mongoose);
+    db.tenantRoomContract = require('./tenant_room_contract')(mongoose);
+    db.orderMaster = require('./order_master')(mongoose);
     return db
 }
