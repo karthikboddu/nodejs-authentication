@@ -17,6 +17,10 @@ const saveTenantBuildings = async (data,tenantId) => {
                 building_name: data.buildingName,
                 building_code: data.buildingCode,
                 building_image: data.buildingImage,
+                building_address: data.buildingAddress,
+                no_of_floors: data.noOfFloors,
+                no_of_rooms: data.noOfRooms,
+                total_amount: data.totalAmount,
                 status: true,
             });
 
