@@ -1,5 +1,5 @@
 const errorCode = require('../../common/errorCode'),
-      {saveFloorRooms,listFloorRooms,saveTenantRoomContract,listRoomDetails} = require('../../services/tenant/room.service');
+      {saveFloorRooms,listFloorRooms,saveTenantRoomContract,listRoomDetails,fetchRoomDetails} = require('../../services/tenant/room.service');
 
 exports.createRoom = async (req, res , next) => {
     const roomData = req.body;

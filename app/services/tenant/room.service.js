@@ -265,7 +265,7 @@ const fetchRoomDetails = async(tenantId, roomId) => {
             {
                 $match: {
                     "tenant_id": tid,
-                    "building_floor_id": fid
+                    "_id": fid
                 }
             },
 
@@ -329,5 +329,6 @@ module.exports = {
     saveFloorRooms,
     listFloorRooms,
     saveTenantRoomContract,
-    listRoomDetails
+    listRoomDetails,
+    fetchRoomDetails
 }
