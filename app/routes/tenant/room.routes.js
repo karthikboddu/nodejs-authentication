@@ -15,6 +15,8 @@ module.exports = function(app) {
 
     app.post("/api/room/:roomId/tenant/:tenantId",[authJwt.verifyToken,authJwt.isAdmin], controller.linkTenantRoom);
 
-    app.get("/api/rooms/roomDetails/:floorId",[authJwt.verifyToken,authJwt.isAdmin], controller.floorRoomListDetails);
+    app.get("/api/floor/roomDetails/:floorId",[authJwt.verifyToken,authJwt.isAdmin], controller.floorRoomListDetails);
+
+    app.get("/api/room/roomDetails/:roomId",[authJwt.verifyToken,authJwt.isAdmin], controller.floorRoomListDetails);
 
 }
