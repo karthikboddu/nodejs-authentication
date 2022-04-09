@@ -44,13 +44,26 @@ exports.linkTenantRoom = async(req, res, next) => {
 }
 
 
-exports.roomDetails = async (req, res, next) => {
+exports.floorRoomListDetails = async (req, res, next) => {
     const floorId = req.params.floorId;
     if (!floorId) {
         res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
     }
     try {
         const result = await listRoomDetails(req.userId, floorId);
+        res.send(result);
+    } catch (error) {
+        return res.send(error);
+    }
+}
+
+exports.roomDetails = async (req, res, next) => {
+    const roomId = req.params.roomId;
+    if (!roomId) {
+        res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
+    }
+    try {
+        const result = await fetchRoomDetails(req.userId, roomId);
         res.send(result);
     } catch (error) {
         return res.send(error);

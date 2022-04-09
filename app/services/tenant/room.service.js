@@ -256,6 +256,75 @@ const listRoomDetails = async(tenantId, floorId) => {
     }
 }
 
+const fetchRoomDetails = async(tenantId, roomId) => {
+    console.log("users",tenantId)
+    try {
+        var tid = mongoose.Types.ObjectId(tenantId);
+        var fid  = mongoose.Types.ObjectId(roomId);
+        const result = await tenantFloorRooms.aggregate([
+            {
+                $match: {
+                    "tenant_id": tid,
+                    "building_floor_id": fid
+                }
+            },
+
+            {
+                
+                $lookup: {
+                    from: "tenant_room_contracts",
+                    let: { "roomId": "$_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: { $eq: ["$floor_room_id", "$$roomId"] }
+                            }
+                        },
+                        {
+                            $lookup: {
+                                from: "order_masters",
+                                let: { "contractId": "$_id" },
+                                pipeline: [
+                                    {
+                                        $match: {
+                                            $expr: { $eq: ["$room_contract_id", "$$contractId"] }
+                                        }
+                                    },
+                                    {
+                                        $project: {
+                                            _id: 0,
+                                        }
+                                    }
+                                ],
+                                as: "orderDetails"
+                            },
+                        },
+
+                        {
+                            $project: {
+                                _id: 0,
+                            }
+                        }
+                    ],
+                    as: "contractDetails"
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                }
+            }
+        ])
+        console.log(result,"result")
+        const res ={ status: 200, error: "", data: result }
+        return res;
+        //res.json(result[0] || {})
+    } catch (error) {
+        console.log(error,"Eror")
+        res.json({ error: error.message })
+    }
+}
+
 module.exports = {
     saveFloorRooms,
     listFloorRooms,
