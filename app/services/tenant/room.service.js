@@ -233,7 +233,7 @@ const listRoomDetails = async(tenantId, floorId) => {
 
                         {
                             $project: {
-                                _id: 0,
+                                _v: 0,
                             }
                         }
                     ],
@@ -242,7 +242,7 @@ const listRoomDetails = async(tenantId, floorId) => {
             },
             {
                 $project: {
-                    _id: 0,
+                    __v: 0,
                 }
             }
         ])
