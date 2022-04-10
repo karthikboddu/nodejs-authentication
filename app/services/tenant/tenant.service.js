@@ -134,9 +134,9 @@ const saveSSOTenants = async (data,role,parentId) => {
                     user_role : role._id,
                     username : data.username,
                     email : data.email,
-                    mobile_no : data.mobileNo,
-                    aadhar_id : data.aadharId,
-                    address : data.address,
+                    mobile_no : data.mobileNo ? data.mobileNo : 9999999999,
+                    aadhar_id : data.aadharId ? data.aadharId : 9999999999,
+                    address : data.address ? data.address : 'null',
                     photoUrl: data.photoUrl,
                     status : true,
               });
