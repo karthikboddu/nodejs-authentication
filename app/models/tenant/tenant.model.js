@@ -24,7 +24,7 @@ module.exports = (mongoose) => {
                         },
                         password: {
                             type: String,
-                            required : true
+                            required : false
                         },
                         bio : {
                             type: String,
@@ -42,6 +42,15 @@ module.exports = (mongoose) => {
                             type: String,
                             required : true
                         },
+                        photoUrl: {
+                            type: String,
+                            required : false
+                        },
+                        userType: {
+                            type: String,
+                            required : false,
+                            default : 'INTERNAL'
+                        },
                         start_at: {
                             type : Date,
                             default : Date.now,
@@ -51,7 +60,7 @@ module.exports = (mongoose) => {
                             default : Date.now,
                         },
                         status: {
-                            type: String,
+                            type: Boolean,
                             required : true
                         },
                         activated_at: {

@@ -1,5 +1,5 @@
 const errorCode = require('../../common/errorCode'),
-      {listTenants,saveTenants,logInTenants} = require('../../services/tenant/tenant.service'),
+      {listTenants,saveTenants,logInTenants,saveSSOTenants} = require('../../services/tenant/tenant.service'),
       {getRolesByName}  = require('../../helpers/roles.helper');
 
 exports.tenants = async (req, res, next) => {
@@ -28,12 +28,6 @@ exports.createTenant = async (req, res, next) => {
         return res.send(error);
       }
 
-    // const result = {
-    //     status: 200,
-    //     errors: 'error',
-    //     data: '',
-    //   }
-    //   return res.send(result);
 }
 
 exports.signInTenant = async (req, res, next) => {
@@ -48,4 +42,23 @@ exports.signInTenant = async (req, res, next) => {
     } catch (error) {
       return res.send(error);
     }
+}
+
+
+exports.createTenantSSOLogin = async (req, res, next) => {
+
+  const tenantData = req.body;
+  const parentId = req.userId ? req.userId : null;
+  
+  if(!tenantData) {
+      res.status(500).send({ message: errorCode.BAD_REQUEST });
+  }
+  try {
+      const role = await getRolesByName("user");
+      const result = await saveSSOTenants(tenantData,role,parentId);
+      res.send(result);
+    } catch (error) {
+      return res.send(error);
+    }
+
 }

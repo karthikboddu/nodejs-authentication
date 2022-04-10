@@ -111,8 +111,84 @@ const logInTenants = async(data) => {
       });
 }
 
+
+const saveSSOTenants = async (data,role,parentId) => {
+    
+  return new Promise((resolve, reject) => {
+      try {
+
+        tenant.findOne({
+          email: data.email
+        }).populate({ path: 'user_role', select: ['name'] })
+          .exec((err, user) => {
+            if (err) {
+              reject({ status: 500, message: err });
+            }
+            if (!user || user == null) {
+
+              const tenantObject = new tenant(
+                {
+                    parent_id : parentId ? parentId : null,
+                    full_name : data.fullName ? data.fullName : '',
+                    password :  '',
+                    user_role : role._id,
+                    username : data.username,
+                    email : data.email,
+                    mobile_no : data.mobileNo,
+                    aadhar_id : data.aadharId,
+                    address : data.address,
+                    photoUrl: data.photoUrl,
+                    status : true,
+              });
+
+
+              const checkusername = data.username;
+              tenant.findOne({ username: checkusername })
+              .then(existingTenant => {
+                  if (existingTenant) {
+                      reject ({ status: 404, message: 'Tenant already exists' })
+                      
+                  } else {
+                      tenantObject.save((err,t) => {
+                          if (err) {
+                            reject({ status: 500, message: err })
+                            return;
+                          }
+                          const jwtData = jwtSignAccessRefreshTokenTenant(t.id,t.user_role.name,t.full_name)
+                          resolve({ status: 200, data: jwtData })
+                          return;
+
+                        });
+                  }
+              })
+              .catch(err => {
+                  reject({
+                      status: 500,
+                      message:
+                        err.message || "Some error occurred while retrieving tutorials."
+                    })
+                  return;
+                });
+
+          
+              return;
+              
+            }
+            const jwtData = jwtSignAccessRefreshTokenTenant(user.id,user.user_role.name,user.full_name)
+            resolve({ status: 200, data: jwtData })
+          });
+
+      } catch (error) {
+          reject({ status: 500, message: error })
+          console.log(error)
+      }          
+  });
+}
+
+
 module.exports = {
     listTenants,
     saveTenants,
-    logInTenants
+    logInTenants,
+    saveSSOTenants
 }
