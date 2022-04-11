@@ -8,6 +8,7 @@ const JWT = require("jsonwebtoken"),
   User = db.user,
   Token = db.token,
   Role = db.role,
+  tenant = db.tenant.tenantModel,
   userLogin = db.userlogin,
   customId = require("custom-id"),
   emailService = require('../middlewares/emailSend'),
@@ -335,7 +336,8 @@ const getUserInfoFromToken = async (req, next, token) => {
   if (tokenDecoded.id) {
     req.userId = tokenDecoded.id;
     let userId = tokenDecoded.id;
-    const user = await User.findOne({ _id: userId });
+    //const user = await User.findOne({ _id: userId });
+    const user = await tenant.findOne({ _id: userId });
     console.log(userId, "user")
     if (!user) throw new Error("User does not exist");
     return user;
