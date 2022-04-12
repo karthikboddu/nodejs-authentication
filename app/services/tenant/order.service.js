@@ -8,17 +8,17 @@ const PaytmChecksum = require('../../common/PaytmChecksum');
 
 
 
-const generateToken = async (res) => {
+const generateToken = async (data) => {
     var paytmParams = {};
 
     paytmParams.body = {
         "requestType"   : "Payment",
         "mid"           : "nikYWM52585118708761",
         "websiteName"   : "WEBSTAGING",
-        "orderId"       : "ORDERID_987651",
-        "callbackUrl"   : "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=ORDERID_987651",
+        "orderId"       : data.orderId,
+        "callbackUrl"   : 'https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID='+data.orderId,
         "txnAmount"     : {
-            "value"     : "1.00",
+            "value"     : data.amt,
             "currency"  : "INR",
         },
         "userInfo"      : {

@@ -10,5 +10,5 @@ module.exports = function(app) {
       next();
     }); 
 
-    app.get("/api/order/generatePaytmToken",controller.createPaytmToken);
+    app.post("/api/order/generatePaytmToken", [authJwt.verifyToken],controller.createPaytmToken);
 }
