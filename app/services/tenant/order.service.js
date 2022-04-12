@@ -16,9 +16,9 @@ const generateToken = async (data) => {
         "mid"           : "nikYWM52585118708761",
         "websiteName"   : "WEBSTAGING",
         "orderId"       : data.orderId,
-        "callbackUrl"   : 'https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID='+data.orderId,
+        "callbackUrl"   : "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID="+data.orderId,
         "txnAmount"     : {
-            "value"     : data.amt,
+            "value"     : "1.00",
             "currency"  : "INR",
         },
         "userInfo"      : {
@@ -47,7 +47,7 @@ const generateToken = async (data) => {
                 // hostname: 'securegw.paytm.in',
         
                 port: 443,
-                path: '/theia/api/v1/initiateTransaction?mid=nikYWM52585118708761&orderId=ORDERID_987651',
+                path: '/theia/api/v1/initiateTransaction?mid=nikYWM52585118708761&orderId='+data.orderId,
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
