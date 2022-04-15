@@ -23,7 +23,7 @@ verifyToken = async(req, res, next) => {
       errors: error,
       data: ''
     }
-    return res.send(result);
+    return res.status(403).send(result);
   }
 
   const tokenDecoded = await verifyTokenPromise(
@@ -38,7 +38,7 @@ verifyToken = async(req, res, next) => {
 
 
   if (result.status) {
-    return res.send(result);
+    return res.status(401).send(result);
   }
 
   if (tokenDecoded.id) {
@@ -62,7 +62,7 @@ verifyRefreshToken = async (req, res, next) => {
       errors: error,
       data: ''
     }
-    return res.send(result);
+    return res.status(403).send(result);
   }
 
   const tokenDecoded = await verifyRefreshTokenPromise(
@@ -76,7 +76,7 @@ verifyRefreshToken = async (req, res, next) => {
 
   }) || {};
   if(result.status){
-    return res.send(result);
+    return res.status(401).send(result);
   }
   if (tokenDecoded.id) {
     const userId = tokenDecoded.id;
@@ -114,7 +114,7 @@ verifyAccessToken = async (req, res, next) => {
       errors: error,
       data: ''
     }
-    return res.send(result);
+    return res.status(403).send(result);
   }
   const tokenD = await verifyTokenPromise(
     token
@@ -127,7 +127,7 @@ verifyAccessToken = async (req, res, next) => {
 
   }) || {};
   if(result){
-    return res.send(result);
+    return res.status(401).send(result);
   }
 console.log(tokenD)
   if (tokenD.id) {
@@ -225,7 +225,7 @@ verifyTokenNext = async(req, res, next) => {
   
   
     if (result.status) {
-      return res.send(result);
+      return res.status(403).send(result);
     }
   
     if (tokenDecoded.id) {
