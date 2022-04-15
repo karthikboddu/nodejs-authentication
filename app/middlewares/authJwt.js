@@ -4,7 +4,7 @@ const db = require("../models");
 const tenant = db.tenant.tenantModel
 const User = db.user;
 const Role = db.role;
-const { jwtSignAccessRefreshToken } = require('../helpers/jwt_helpers')
+const { jwtSignAccessRefreshToken, jwtSignAccessRefreshTokenTenant } = require('../helpers/jwt_helpers')
 const { verifyTokenPromise, verifyRefreshTokenPromise } = require('./validateJwt')
 const errorCode = require('../common/errorCode')
 
@@ -80,11 +80,19 @@ verifyRefreshToken = async (req, res, next) => {
   }
   if (tokenDecoded.id) {
     const userId = tokenDecoded.id;
-    const jwtData = jwtSignAccessRefreshToken(userId);
-    result = {
-      status: 200,
-      data: jwtData
-    }
+
+    tenant.findOne({
+      _id: userId
+    }).populate({ path: 'user_role', select: ['name'] })
+      .exec((err, user) => {
+
+        const jwtData = jwtSignAccessRefreshTokenTenant(user.id,user.user_role.name,user.full_name);
+        result = {
+          status: 200,
+          data: jwtData
+        }
+    });   
+
 
   }
   return res.status(200).send(result);
