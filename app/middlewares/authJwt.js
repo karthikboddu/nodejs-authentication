@@ -91,11 +91,12 @@ verifyRefreshToken = async (req, res, next) => {
           status: 200,
           data: jwtData
         }
+        return res.status(200).send(result);
     });   
 
 
   }
-  return res.status(200).send(result);
+  
 }
 
 
