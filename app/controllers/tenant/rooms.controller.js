@@ -1,5 +1,5 @@
 const errorCode = require('../../common/errorCode'),
-      {saveFloorRooms,listFloorRooms,saveTenantRoomContract,listRoomDetails,fetchRoomDetails} = require('../../services/tenant/room.service');
+      {saveFloorRooms,listFloorRooms,saveTenantRoomContract,listRoomDetails,fetchRoomDetails,fetchTenantRoomDetails} = require('../../services/tenant/room.service');
 
 exports.createRoom = async (req, res , next) => {
     const roomData = req.body;
@@ -64,6 +64,15 @@ exports.roomDetails = async (req, res, next) => {
     }
     try {
         const result = await fetchRoomDetails(req.userId, roomId);
+        res.send(result);
+    } catch (error) {
+        return res.send(error);
+    }
+}
+
+exports.tenantRoomDetails = async (req, res, next) => {
+    try {
+        const result = await fetchTenantRoomDetails(req.userId);
         res.send(result);
     } catch (error) {
         return res.send(error);

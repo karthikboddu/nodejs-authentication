@@ -11,4 +11,5 @@ module.exports = function(app) {
     }); 
 
     app.post("/api/order/generatePaytmToken", [authJwt.verifyToken],controller.createPaytmToken);
+    app.post("/api/order/initRoomPayment", [authJwt.verifyToken],controller.initRoomPayment);
 }

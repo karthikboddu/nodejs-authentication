@@ -1,6 +1,6 @@
 module.exports = (mongoose) => {
 
-    const tenantRoomContract = mongoose.model("tenant_room_contract",
+    const tenantRoomPayments = mongoose.model("tenant_room_payments",
                             new mongoose.Schema({
                                 tenant_id :{
                                     type : mongoose.Schema.Types.ObjectId,
@@ -12,15 +12,6 @@ module.exports = (mongoose) => {
                                     required: true,
                                     ref: "tenant_floor_rooms"
                                 },
-                                advance_amount: {
-                                    type: Number,
-                                    required :true
-                                },
-                                advance_paid: {
-                                    type: Boolean,
-                                    required :true,
-                                    default: false
-                                },
                                 actual_price: {
                                     type: Number,
                                     required :true
@@ -29,24 +20,24 @@ module.exports = (mongoose) => {
                                     type: Number,
                                     required :false
                                 },
-                                no_of_persons: {
-                                    type: Number,
-                                    required :false
-                                },
                                 total_amount: {
                                     type: Number,
                                     required :false,
                                     default: 0
                                 },
-                                balance_amount: {
-                                    type: Number,
+                                payment_for_date: {
+                                    type : Date,
+                                    default : Date.now,
+                                },               
+                                paymeny_status: {
+                                    type: String,
                                     required :false,
-                                    default:0
-                                },                                
+                                    default: 'P'
+                                },
                                 status: {
                                     type: Boolean,
-                                    default :false
-                                },
+                                    default :true
+                                },                                
                                 created_at: {
                                     type : Date,
                                     default : Date.now,
@@ -59,5 +50,5 @@ module.exports = (mongoose) => {
 
 
 
-    return tenantRoomContract;
+    return tenantRoomPayments;
 }

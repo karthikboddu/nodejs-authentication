@@ -5,7 +5,6 @@ module.exports = (mongoose) => {
                                 tenant_id :{
                                     type : mongoose.Schema.Types.ObjectId,
                                     required: true,
-                                    unique: true,
                                     ref: "tenant"
                                 },
                                 room_contract_id: {

@@ -19,4 +19,6 @@ module.exports = function(app) {
 
     app.get("/api/room/roomDetails/:roomId",[authJwt.verifyToken,authJwt.isAdmin], controller.roomDetails);
 
+    app.get("/api/room/tenantRoomDetails",[authJwt.verifyToken], controller.tenantRoomDetails);
+
 }
