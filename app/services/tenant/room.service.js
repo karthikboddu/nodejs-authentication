@@ -409,7 +409,7 @@ const fetchTenantRoomDetails = async (tenantId) => {
                 }
             }
         ])
-        console.log(result, "result")
+        console.log(result, "result") 
 
         const res = { status: 200, error: "", data: result[0] ? result[0] : result}
         return res;
