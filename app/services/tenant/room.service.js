@@ -410,7 +410,8 @@ const fetchTenantRoomDetails = async (tenantId) => {
             }
         ])
         console.log(result, "result")
-        const res = { status: 200, error: "", data: result }
+
+        const res = { status: 200, error: "", data: result[0] ? result[0] : result}
         return res;
         //res.json(result[0] || {})
     } catch (error) {
