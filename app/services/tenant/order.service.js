@@ -94,19 +94,20 @@ const initiateRoomTransactionDetails = async (data, userId) => {
                     actual_price : data.amount,
                     price: data.amount,
                     total_amount : data.amount,
-                    payment_for_date : data.paymentForDate
+                    payment_for_date : data.paymentForDate,
+                    type : data.type ? data.type : 'ROOM_RENT'
                 }
             );
             var date = new Date();
             var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
             var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
             
-            tenantRoomPayments.findOne({floor_room_id: data.roomId, tenant_id: userId, payment_for_date:{
+            tenantRoomPayments.findOne({floor_room_id: data.roomId, tenant_id: userId, type: data.type, payment_for_date:{
                 '$gte': firstDay , '$lt': lastDay
             } })
             .then(payments => {
                 if (payments) {
-                    reject ({ status: 404, message: 'Room Payments found' })
+                    reject ({ status: 404, message: 'Room Payments not found' })
                     return;
                 } 
                     tenantRoomContract.findOne({floor_room_id : data.roomId, tenant_id: userId})

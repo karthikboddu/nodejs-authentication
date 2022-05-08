@@ -25,6 +25,11 @@ module.exports = (mongoose) => {
                                     required :false,
                                     default: 0
                                 },
+                                type: {
+                                    type: String,
+                                    required :false,
+                                    default: 'ROOM'
+                                },
                                 payment_for_date: {
                                     type : Date,
                                     default : Date.now,
