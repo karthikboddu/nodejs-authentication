@@ -125,7 +125,6 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
     return new Promise((resolve, reject) => {
 
         try {
-            console.log(db)
             const tenantRoomContractObject = new tenantRoomContract(
                 {
                     tenant_id: tenantId,
@@ -137,6 +136,9 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
                     no_of_persons: data.noOfPersons,
                     total_amount: data.totalAmount,
                     balance_amount: data.balanceAmount,
+                    building_id : data.buildingId,
+                    building_floor_id: data.buildingFloorId,
+                    parent_id : parentId,
                     status: true
                 })
             const orderMasterObject = new orderMaster({

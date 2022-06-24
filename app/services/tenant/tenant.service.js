@@ -1,18 +1,19 @@
 const db = require("../../models"),
       Role = db.role,
       tenant = db.tenant.tenantModel ,
+      tenantRoomContract = db.tenant.tenantRoomContract,
       bcrypt = require("bcrypt"),
       Promise = require('bluebird'),
       {jwtSignAccessRefreshTokenTenant } = require('../../helpers/jwt_helpers'),
       {loginTenant} = require('../../repository/UserRepository');
-      var mongoose = require('mongoose');
 
-const listTenants = async (req, limit, skip) => {
+const listTenants = async (req, limit, skip, buildingId) => {
 
     return new Promise((resolve, reject) => {
-      var parentId = req.userId
-      console.log(parentId,"userId")
-        tenant.find({parent_id :parentId},{ password: 0 })
+      var parentId = req.userId;
+
+      tenantRoomContract.find({parent_id :parentId, building_id: buildingId, status:true}).populate({ path: 'tenant_id', select: ['username','full_name','email','mobile_no','address','start_at','end_at','created_at'] })
+        .limit(limit).skip(skip).sort({updated_at: -1})
             .then(d => {
                 resolve({ status: 200, data: d})
             })

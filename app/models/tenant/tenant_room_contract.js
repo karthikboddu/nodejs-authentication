@@ -12,6 +12,21 @@ module.exports = (mongoose) => {
                                     required: true,
                                     ref: "tenant_floor_rooms"
                                 },
+                                parent_id :{
+                                    type : mongoose.Schema.Types.ObjectId,
+                                    required: true,
+                                    ref: "tenant"
+                                },                                
+                                building_id :{
+                                    type : mongoose.Schema.Types.ObjectId,
+                                    required: true,
+                                    ref: "tenant_building"
+                                },
+                                building_floor_id :{
+                                    type : mongoose.Schema.Types.ObjectId,
+                                    required: true,
+                                    ref: "tenant_building_floors"
+                                },
                                 advance_amount: {
                                     type: Number,
                                     required :true

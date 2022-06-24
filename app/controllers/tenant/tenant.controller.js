@@ -12,10 +12,10 @@ exports.tenants = async (req, res, next) => {
       if (!size) {
           size = 100;
       }
-
+      const buildingId = req.query.buildingId ? req.query.buildingId : null;
       const limit = parseInt (size);
       const skip = (page - 1) * size;
-        const result = await listTenants(req, limit, skip);
+        const result = await listTenants(req, limit, skip, buildingId);
         res.send(result);
     } catch (error) {
       return res.send(error);
