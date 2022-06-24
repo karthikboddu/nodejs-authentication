@@ -3,12 +3,13 @@ const db = require("../../models"),
       tenant = db.tenant.tenantModel ,
       bcrypt = require("bcrypt"),
       Promise = require('bluebird'),
-      {jwtSignAccessRefreshTokenTenant } = require('../../helpers/jwt_helpers');
+      {jwtSignAccessRefreshTokenTenant } = require('../../helpers/jwt_helpers'),
+      {loginTenant} = require('../../repository/UserRepository');
 
-const listTenants = async (res) => {
+const listTenants = async (req, limit, skip) => {
 
     return new Promise((resolve, reject) => {
-        tenant.find()
+        tenant.find({parent_id :req.userId, status: true}).limit(limit).skip(skip).sort({updated_at: -1})
             .then(d => {
                 resolve({ status: 200, data: d})
             })
@@ -80,9 +81,18 @@ const saveTenants = async (data,role,parentId) => {
 const logInTenants = async(data) => {
   console.log(data,"data")
     return new Promise((resolve, reject) => {
-        tenant.findOne({
-          username: data.username
-        }).populate({ path: 'user_role', select: ['name'] })
+      var now = new Date();
+      
+      const use = loginTenant(data.username);
+      console.log(use,"now")
+      tenant.findOne({ username: data.username,
+         start_at: {
+        '$lte': now
+        },
+        end_at : {
+          '$gte' : now
+        }
+   }).populate({ path: 'user_role', select: ['name'] })
           .exec((err, user) => {
             if (err) {
               reject({ status: 500, message: err });
@@ -105,7 +115,12 @@ const logInTenants = async(data) => {
                 message: "Invalid Password!"
               });
             }
-            const jwtData = jwtSignAccessRefreshTokenTenant(user.id,user.user_role.name,user.full_name)
+            const jwtData = jwtSignAccessRefreshTokenTenant(user.id,user.user_role.name,user.full_name, user.parent_id)
+            if (user.user_role.name == 'admin') {
+              jwtData.isAdmin = true
+            } else {
+              jwtData.isAdmin = false
+            }
             resolve({ status: 200, data: jwtData })
           });
       });
@@ -143,6 +158,7 @@ const saveSSOTenants = async (data,role,parentId) => {
 
 
               const checkusername = data.username;
+              var now = new Date();
               tenant.findOne({ username: checkusername })
               .then(existingTenant => {
                   if (existingTenant) {
@@ -154,7 +170,7 @@ const saveSSOTenants = async (data,role,parentId) => {
                             reject({ status: 500, message: err })
                             return;
                           }
-                          const jwtData = jwtSignAccessRefreshTokenTenant(t.id,t.user_role.name,t.full_name)
+                          const jwtData = jwtSignAccessRefreshTokenTenant(t.id,t.user_role.name,t.full_name, user.parent_id)
                           resolve({ status: 200, data: jwtData })
                           return;
 
@@ -174,7 +190,7 @@ const saveSSOTenants = async (data,role,parentId) => {
               return;
               
             }
-            const jwtData = jwtSignAccessRefreshTokenTenant(user.id,user.user_role.name,user.full_name)
+            const jwtData = jwtSignAccessRefreshTokenTenant(user.id,user.user_role.name,user.full_name, user.parent_id)
             resolve({ status: 200, data: jwtData })
           });
 

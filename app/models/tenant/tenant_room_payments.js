@@ -12,6 +12,11 @@ module.exports = (mongoose) => {
                                     required: true,
                                     ref: "tenant_floor_rooms"
                                 },
+                                room_contract_id: {
+                                    type : mongoose.Schema.Types.ObjectId,
+                                    required: true,
+                                    ref: "tenant_room_contract"
+                                },
                                 actual_price: {
                                     type: Number,
                                     required :true
@@ -25,7 +30,7 @@ module.exports = (mongoose) => {
                                     required :false,
                                     default: 0
                                 },
-                                type: {
+                                room_payment_type: {
                                     type: String,
                                     required :false,
                                     default: 'ROOM'

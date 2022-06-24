@@ -43,6 +43,7 @@ verifyToken = async(req, res, next) => {
 
   if (tokenDecoded.id) {
     req.userId = tokenDecoded.id;
+    req.parentId = tokenDecoded.parentId;
   }
   next();
 }
@@ -230,6 +231,7 @@ verifyTokenNext = async(req, res, next) => {
   
     if (tokenDecoded.id) {
       req.userId = tokenDecoded.id;
+      req.parentId = tokenDecoded.parentId;
     }
   }
 

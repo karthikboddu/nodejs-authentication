@@ -4,7 +4,7 @@ const authConfig = require("../config/auth.config");
 const jwtSignAccessRefreshToken = (userId) => {
 
     var token = jwt.sign({ id: userId }, authConfig.secret, {
-      expiresIn: 3600 // 24 hours
+      expiresIn: 31556952000 // 1 day
     });
     var refreshtoken = jwt.sign({ id: userId }, authConfig.refreshtokenkey, {
       expiresIn: 604800 // 168 hours
@@ -18,10 +18,10 @@ const jwtSignAccessRefreshToken = (userId) => {
     return jToken;
 }
 
-const jwtSignAccessRefreshTokenTenant = (userId,userRole,fullname) => {
+const jwtSignAccessRefreshTokenTenant = (userId,userRole,fullname, tenant_id) => {
   //console.log(fullname,"asdasdas")
-  var token = jwt.sign({ id: userId,type:userRole,name:fullname }, authConfig.secret, {
-    expiresIn: 3600 // 24 hours
+  var token = jwt.sign({ id: userId,type:userRole,name:fullname,parentId: tenant_id }, authConfig.secret, {
+    expiresIn: 31556952000 // 24 hours
   });
   var refreshtoken = jwt.sign({ id: userId }, authConfig.refreshtokenkey, {
     expiresIn: 604800 // 168 hours

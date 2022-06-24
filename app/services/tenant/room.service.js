@@ -3,6 +3,8 @@ const db = require("../../models"),
     tenantRoomContract = db.tenant.tenantRoomContract,
     orderMaster = db.tenant.orderMaster;
 var mongoose = require('mongoose');
+const { getPagination } = require("../../common/util");
+
 const saveFloorRooms = async (data, tenantId, floorId) => {
     return new Promise((resolve, reject) => {
 
@@ -252,7 +254,8 @@ const listRoomDetails = async (tenantId, floorId) => {
         //res.json(result[0] || {})
     } catch (error) {
         console.log(error, "Eror")
-        res.json({ error: error.message })
+        const res = { status: 500, error: error.message, data: "" }
+        return res;
     }
 }
 
@@ -321,13 +324,16 @@ const fetchRoomDetails = async (tenantId, roomId) => {
         //res.json(result[0] || {})
     } catch (error) {
         console.log(error, "Eror")
-        res.json({ error: error.message })
+        const res = { status: 500, error: error.message, data: "" }
+        return res;
     }
 }
 
 
-const fetchTenantRoomDetails = async (tenantId) => {
+const fetchTenantRoomDetails = async (tenantId, status, limit, skip) => {
     console.log("users", tenantId)
+    const paymentStatus =  status ? status.split(',') : [];
+
     try {
         var tid = mongoose.Types.ObjectId(tenantId);
         const result = await tenantRoomContract.aggregate([
@@ -379,23 +385,72 @@ const fetchTenantRoomDetails = async (tenantId) => {
             
             {
                 $lookup: {
-                    from: "order_masters",
+                    from: "tenant_room_payments",
                     let: { "contractId": "$_id" },
                     pipeline: [
                         {
                             $match: {
-                                $expr: { $eq: ["$room_contract_id", "$$contractId"] }
+                                $expr: { 
+                                    $and : [
+                                        {$eq: ["$room_contract_id", "$$contractId"]},
+                                        { $eq: ["$tenant_id", tid] },
+                                        { $in: ["$paymeny_status", paymentStatus] }
+                                    ]
+                                    
+                                },
+                            },
+                        },
+ 
+
+                        {
+                            $skip: skip
+                        }, {
+                            $limit: limit
+                        }, 
+                        {
+                            $project: {
+                                __v: 0,
                             }
+                        },
+                    ],
+                    as: "orderDetails"
+                },
+            },
+
+           {
+                $lookup: {
+                    from: "tenant_room_payments",
+                    let: { "contractId": "$_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: { 
+                                    $and : [
+                                        {$eq: ["$room_contract_id", "$$contractId"]},
+                                        { $eq: ["$tenant_id", tid] },
+                                        { $in: ["$paymeny_status", paymentStatus] }
+                                    ]
+                                    
+                                },
+                            },
                         },
                         {
                             $project: {
                                 __v: 0,
                             }
-                        }
+                        },
+                        {
+                            $group:{
+                              _id: null,
+                              count: {
+                                $sum: "$total_amount"
+                              }
+                            }
+                          },
                     ],
-                    as: "orderDetails"
+                    as: "totalAmount"
                 },
-            },
+            },            
 
             {
                 $project: {
@@ -411,12 +466,14 @@ const fetchTenantRoomDetails = async (tenantId) => {
         ])
         console.log(result, "result") 
 
+
         const res = { status: 200, error: "", data: result[0] ? result[0] : result}
         return res;
         //res.json(result[0] || {})
     } catch (error) {
         console.log(error, "Eror")
-        res.json({ error: error.message })
+        const res = { status: 500, error: error.message, data: "" }
+        return res;
     }
 }
 

@@ -1,5 +1,6 @@
 const errorCode = require('../../common/errorCode'),
       {saveFloorRooms,listFloorRooms,saveTenantRoomContract,listRoomDetails,fetchRoomDetails,fetchTenantRoomDetails} = require('../../services/tenant/room.service');
+const { getPagination } = require('../../common/util');
 
 exports.createRoom = async (req, res , next) => {
     const roomData = req.body;
@@ -72,7 +73,23 @@ exports.roomDetails = async (req, res, next) => {
 
 exports.tenantRoomDetails = async (req, res, next) => {
     try {
-        const result = await fetchTenantRoomDetails(req.userId);
+        const status = req.query.paymentStatus ? req.query.paymentStatus : 'P';
+        let {page, size} = req.query;
+        if (!page) {
+            page = 1;
+        }
+        if (!size) {
+            size = 10;
+        }
+
+        const limit = parseInt (size);
+        const skip = (page - 1) * size;
+
+        const result = await fetchTenantRoomDetails(req.userId, status, limit, skip);
+        const totalCount = result.data.orderDetails ? result.data.orderDetails.length : 0;
+        const pagination = getPagination(page, size, totalCount);
+        result.data._pagination = pagination;
+        console.log(totalCount)
         res.send(result);
     } catch (error) {
         return res.send(error);

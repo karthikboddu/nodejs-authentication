@@ -12,6 +12,11 @@ module.exports = (mongoose) => {
                                     required: true,
                                     ref: "tenant_room_contract"
                                 },
+                                room_payments_id: {
+                                    type : mongoose.Schema.Types.ObjectId,
+                                    required: true,
+                                    ref: "tenant_room_payments"
+                                },
                                 payment_type: {
                                     type: String,
                                     required :false,
@@ -30,6 +35,11 @@ module.exports = (mongoose) => {
                                     type: String,
                                     required :false,
                                     default: 'P'
+                                },
+                                payment_response: {
+                                    type: String,
+                                    required :false,
+                                    default: ''
                                 },
                                 total_amount: {
                                     type: Number,

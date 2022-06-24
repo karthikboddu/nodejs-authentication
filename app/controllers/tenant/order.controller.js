@@ -1,13 +1,16 @@
 const errorCode = require('../../common/errorCode');
-const {generateToken, initiateRoomTransactionDetails} = require('../../services/tenant/order.service')
+const {generateToken, initiateRoomTransactionDetails, updateOrderDetails,
+   fetchTenantRoomOrderDetails, fetchRecentAllTenantRoomOrderDetails} = require('../../services/tenant/order.service')
+const { getPagination } = require('../../common/util');
 exports.createPaytmToken = async (req, res, next) => {
 
     try {
+     
         const orderData = req.body;
         if(!orderData) {
           res.status(500).send({ message: errorCode.BAD_REQUEST });
         }
-        const result = await generateToken(orderData);
+        const result = await generateToken(orderData,req.userId);
         console.log(result,"result")
         res.send(result);
       } catch (error) {
@@ -31,3 +34,73 @@ exports.initRoomPayment = async (req, res, next) => {
       return res.send(error);
     }
 }
+
+
+exports.updateOrderStatus = async (req, res, next) => {
+
+  try {
+      const orderData = req.body;
+      if(!orderData) {
+        res.status(500).send({ message: errorCode.BAD_REQUEST });
+      }
+
+      const result = await updateOrderDetails(orderData, req.userId);
+      console.log(result,"result")
+      res.send(result);
+    } catch (error) {
+      return res.send(error);
+    }
+}
+
+
+
+exports.tenantRoomOrderDetails = async (req, res, next) => {
+  try {
+      const status = req.query.paymentStatus ? req.query.paymentStatus : 'P';
+      let {page, size} = req.query;
+      if (!page) {
+          page = 1;
+      }
+      if (!size) {
+          size = 10;
+      }
+
+      const limit = parseInt (size);
+      const skip = (page - 1) * size;
+
+      const result = await fetchTenantRoomOrderDetails(req.userId, status, limit, skip);
+      const totalCount = result.data.orderDetails ? result.data.orderDetails.length : 0;
+      const pagination = getPagination(page, size, totalCount);
+      result.data._pagination = pagination;
+      console.log(totalCount)
+      res.send(result);
+  } catch (error) {
+      return res.send(error);
+  }
+}
+
+exports.recentAllTenantRoomOrderDetails = async (req, res, next) => {
+  try {
+      const status = req.query.paymentStatus ? req.query.paymentStatus : 'P';
+      let {page, size} = req.query;
+      if (!page) {
+          page = 1;
+      }
+      if (!size) {
+          size = 100;
+      }
+
+      const limit = parseInt (size);
+      const skip = (page - 1) * size;
+
+      const result = await fetchRecentAllTenantRoomOrderDetails(req.userId, status, limit, skip);
+      const totalCount = result.data ? result.data.length : 0;
+      const pagination = getPagination(page, size, totalCount);
+      result.data._pagination = pagination;
+      console.log(pagination)
+      res.send(result);
+  } catch (error) {
+      return res.send(error);
+  }
+}
+

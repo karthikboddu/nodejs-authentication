@@ -12,4 +12,11 @@ module.exports = function(app) {
 
     app.post("/api/order/generatePaytmToken", [authJwt.verifyToken],controller.createPaytmToken);
     app.post("/api/order/initRoomPayment", [authJwt.verifyToken],controller.initRoomPayment);
-}
+
+    app.post("/api/order/updateOrder", [authJwt.verifyToken],controller.updateOrderStatus);
+
+    app.get("/api/order/tenantRoomOrderDetails",[authJwt.verifyToken], controller.tenantRoomOrderDetails);
+
+    app.get("/api/order/recentAllTenantRoomOrderDetails",[authJwt.verifyToken,authJwt.isAdmin], controller.recentAllTenantRoomOrderDetails);
+
+  }

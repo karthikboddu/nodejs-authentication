@@ -5,11 +5,21 @@ const errorCode = require('../../common/errorCode'),
 exports.tenants = async (req, res, next) => {
 
     try {
-        const result = await listTenants(res);
-        res.send(result);
-      } catch (error) {
-        return res.send(error);
+      let {page, size} = req.query;
+      if (!page) {
+          page = 1;
       }
+      if (!size) {
+          size = 100;
+      }
+
+      const limit = parseInt (size);
+      const skip = (page - 1) * size;
+        const result = await listTenants(req, limit, skip);
+        res.send(result);
+    } catch (error) {
+      return res.send(error);
+    }
 }
 
 exports.createTenant = async (req, res, next) => {
