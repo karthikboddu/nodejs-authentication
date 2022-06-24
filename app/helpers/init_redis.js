@@ -9,6 +9,7 @@ module.exports = (cfg, data) => {
     
     const redisCli = redis.createClient({
       port: cfg.db.redis.port,
+      no_ready_check: true,
       host: cfg.db.redis.host
     });
 

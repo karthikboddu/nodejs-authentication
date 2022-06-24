@@ -5,11 +5,14 @@ const db = require("../../models"),
       Promise = require('bluebird'),
       {jwtSignAccessRefreshTokenTenant } = require('../../helpers/jwt_helpers'),
       {loginTenant} = require('../../repository/UserRepository');
+      var mongoose = require('mongoose');
 
 const listTenants = async (req, limit, skip) => {
 
     return new Promise((resolve, reject) => {
-        tenant.find({parent_id :req.userId, status: true}).limit(limit).skip(skip).sort({updated_at: -1})
+      var parentId = req.userId
+      console.log(parentId,"userId")
+        tenant.find({parent_id :parentId},{ password: 0 })
             .then(d => {
                 resolve({ status: 200, data: d})
             })

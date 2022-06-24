@@ -337,7 +337,7 @@ const getUserInfoFromToken = async (req, next, token) => {
     req.userId = tokenDecoded.id;
     let userId = tokenDecoded.id;
     //const user = await User.findOne({ _id: userId });
-    const user = await tenant.findOne({ _id: userId });
+    const user = await tenant.findOne({ _id: userId },{ password: 0});
     console.log(userId, "user")
     if (!user) throw new Error("User does not exist");
     return user;
