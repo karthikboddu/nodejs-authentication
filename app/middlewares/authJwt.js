@@ -136,6 +136,7 @@ verifyAccessToken = async (req, res, next) => {
       message: 'Authorized!',
       data: ''
     };
+    return res.status(200).send(result);
   }
   if(result){
     return res.status(401).send(result);
