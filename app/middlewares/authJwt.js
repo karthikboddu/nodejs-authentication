@@ -105,6 +105,7 @@ verifyAccessToken = async (req, res, next) => {
 
   let token = req.body.accessToken;
   let result = {};
+
   if (!token) {
     const error = {
       code: 'UNAUTHENTICATED',
@@ -120,6 +121,7 @@ verifyAccessToken = async (req, res, next) => {
   const tokenD = await verifyTokenPromise(
     token
   ).catch(err => {
+    
     result = {
       status: 401,
       errors: err,
@@ -127,16 +129,16 @@ verifyAccessToken = async (req, res, next) => {
     }
 
   }) || {};
-  if(result){
-    return res.status(401).send(result);
-  }
-console.log(tokenD)
+
   if (tokenD.id) {
     result = {
       status: 200,
       message: 'Authorized!',
       data: ''
     };
+  }
+  if(result){
+    return res.status(401).send(result);
   }
 
   return res.status(200).send(result)
