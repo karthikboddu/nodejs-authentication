@@ -387,7 +387,7 @@ const fetchTenantRoomOrderDetails = async (tenantId, status, limit, skip) => {
 
 const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, skip) => {
 
-    var tid = mongoose.Types.ObjectId(tenantId);
+    var tid = tenantId;
     const paymentStatus =  status ? status.split(',') : [];
     
         try {
