@@ -299,9 +299,34 @@ const fetchRoomDetails = async (tenantId, roomId) => {
                                         $project: {
                                             _id: 0,
                                         }
+                                    },
+                                    {
+                                        $limit: 1
                                     }
                                 ],
                                 as: "orderDetails"
+                            },
+                        },
+                        {
+                            $lookup: {
+                                from: "tenants",
+                                let: { "tid": "$tenant_id" },
+                                pipeline: [
+                                    {
+                                        $match: {
+                                            $expr: { $eq: ["$_id", "$$tid"] }
+                                        }
+                                    },
+                                    {
+                                        $project: {
+                                            _id: 0,
+                                        }
+                                    },
+                                    {
+                                        $limit: 1
+                                    }
+                                ],
+                                as: "tenantDetails"
                             },
                         },
 

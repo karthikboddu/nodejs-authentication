@@ -309,23 +309,24 @@ const updateOrderDetails = async (data, userId) => {
             payment_response : data.paymentResponse ? data.paymentResponse : ''
         }
         orderMaster.findByIdAndUpdate(data.orderId, saveData, { useFindAndModify: false })
-        .then(data => {
-          if (!data) {
+        .then(orderData => {
+          if (!orderData) {
             reject({ status: 404, message: "Not found!" })
           } else {
               console.log("updated ")
 
-              if(data.room_payments_id) {
+              if(orderData.room_payments_id) {
                 const savePaymentData = {
                     paymeny_status: orderStatus
                 }
-                tenantRoomPayments.findByIdAndUpdate(data.room_payments_id, savePaymentData, { useFindAndModify: false })
-                .then(data => {
+                tenantRoomPayments.findByIdAndUpdate(orderData.room_payments_id, savePaymentData, { useFindAndModify: false })
+                .then(res => {
                     const buildingData = {
                         total_amount : data.buildingAmount + data.amount
                     }
+                    console.log(buildingData)
                     tenantBuilding.findByIdAndUpdate(data.buildingId, buildingData, {useFindAndModify: false})
-                    .then(data => {
+                    .then(res => {
                     })
                     .catch(err => {
                         console.log(err, "err")
