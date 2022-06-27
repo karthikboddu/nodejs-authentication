@@ -5,7 +5,8 @@ const db = require("../../models"),
     tenant = db.tenant.tenantModel,
     tenantRoomPayments = db.tenant.tenantRoomPayments,
     tenantRoomContract = db.tenant.tenantRoomContract,
-    orderMaster = db.tenant.orderMaster;
+    orderMaster = db.tenant.orderMaster,
+    tenantBuilding = db.tenant.tenantBuilding;
 
     var mongoose = require('mongoose');
 
@@ -94,6 +95,8 @@ const generateToken = async (data, userId) => {
                                     
                                     var d = JSON.parse(response);
                                     d.orderId = t._id;
+                                    d.buildingId = data.buildingId;
+                                    d.buildingAmount = data.buildingAmount;
                                     resolve({ status: 200, data: d })
                                     console.log('Response: ', response);
                                 });
@@ -155,6 +158,8 @@ const generateToken = async (data, userId) => {
                                 
                                 var d = JSON.parse(response);
                                 d.orderId = orders._id;
+                                d.buildingId = data.buildingId;
+                                d.buildingAmount = data.buildingAmount;
                                 resolve({ status: 200, data: d })
                                 console.log('Response: ', response);
                             });
@@ -316,6 +321,17 @@ const updateOrderDetails = async (data, userId) => {
                 }
                 tenantRoomPayments.findByIdAndUpdate(data.room_payments_id, savePaymentData, { useFindAndModify: false })
                 .then(data => {
+                    const buildingData = {
+                        total_amount : data.buildingAmount + data.amount
+                    }
+                    tenantBuilding.findByIdAndUpdate(data.buildingId, buildingData, {useFindAndModify: false})
+                    .then(data => {
+                    })
+                    .catch(err => {
+                        console.log(err, "err")
+                        reject({ status: 500, message: err })
+              
+                      });
                 })
                 .catch(err => {
                   console.log(err, "err")
