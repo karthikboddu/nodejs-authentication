@@ -297,7 +297,7 @@ const fetchRoomDetails = async (tenantId, roomId) => {
                                     },
                                     {
                                         $project: {
-                                            _id: 0,
+                                            __v: 0,
                                         }
                                     },
                                     {
@@ -319,7 +319,9 @@ const fetchRoomDetails = async (tenantId, roomId) => {
                                     },
                                     {
                                         $project: {
-                                            _id: 0,
+                                            __v: 0,
+                                            password: 0,
+                                            aadhar_id: 0
                                         }
                                     },
                                     {
@@ -332,7 +334,7 @@ const fetchRoomDetails = async (tenantId, roomId) => {
 
                         {
                             $project: {
-                                _id: 0,
+                                __v: 0,
                             }
                         }
                     ],
