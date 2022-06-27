@@ -344,7 +344,25 @@ const fetchTenantRoomDetails = async (tenantId, status, limit, skip) => {
                     "tenant_id": tid
                 }
             },
-
+            {
+                $lookup: {
+                    from: "tenant_buildings",
+                    let: { "bid": "$building_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: { $eq: ["$_id", "$$bid"] }
+                            }
+                        },
+                        {
+                            $project: {
+                                __v: 0
+                            }
+                        }
+                    ],
+                    as: "buildingDetails"
+                },
+            },  
             {
                 $lookup: {
                     from: "tenant_floor_rooms",
