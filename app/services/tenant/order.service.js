@@ -308,7 +308,7 @@ const updateOrderDetails = async (data, userId) => {
           if (!data) {
             reject({ status: 404, message: "Not found!" })
           } else {
-              console.log("updated")
+              console.log("updated ")
 
               if(data.room_payments_id) {
                 const savePaymentData = {
