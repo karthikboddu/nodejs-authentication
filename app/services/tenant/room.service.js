@@ -390,7 +390,8 @@ const fetchTenantRoomDetails = async (tenantId, status, limit, skip) => {
         const result = await tenantRoomContract.aggregate([
             {
                 $match: {
-                    "tenant_id": tid
+                    "tenant_id": tid,
+                    "status": true
                 }
             },
             {
