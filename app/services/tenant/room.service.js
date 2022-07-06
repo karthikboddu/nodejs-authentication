@@ -558,7 +558,7 @@ const fetchTenantRoomDetails = async (tenantId, status, limit, skip) => {
 
 
 
-const unlinkTenantRoomContract = async (data, parentId, roomId, tenantId) => {
+const unlinkTenantRoomContract = async (data, parentId) => {
     return new Promise((resolve, reject) => {
 
         try {
@@ -580,11 +580,11 @@ const unlinkTenantRoomContract = async (data, parentId, roomId, tenantId) => {
                 //     status: true
                 // })
     
-                tenantRoomPayments.updateMany({ room_contract_id: data.contractId, tenant_id : tenantId},{ $set : {status:data.status}})
+                tenantRoomPayments.updateMany({ room_contract_id: data.contractId, tenant_id : data.tenantId},{ $set : {status:data.status}})
                     .then(existingPayments => {
                         if (existingPayments) {
                             console.log("a",existingPayments)
-                            orderMaster.updateMany({ room_contract_id: data.contractId, tenant_id : tenantId}, { $set : {status:data.status}})
+                            orderMaster.updateMany({ room_contract_id: data.contractId, tenant_id : data.tenantId}, { $set : {status:data.status}})
                             .then(existingOrders => {
                                     resolve({
                                         status: 200,

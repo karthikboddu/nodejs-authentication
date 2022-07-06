@@ -98,14 +98,14 @@ exports.tenantRoomDetails = async (req, res, next) => {
 
 
 exports.unLinkTenantRoomContract = async(req, res, next) => {
-    const contractId = req.params.contractId;
-    const tenantId = req.params.tenantId;
+
     const roomTenantData = req.body;
-    if (!contractId || !tenantId) {
+    if (!roomTenantData.contractId || !roomTenantData.tenantId) {
+        console.log("ASd")
         return res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
     }
     try {
-        const result = await unlinkTenantRoomContract(roomTenantData, req.userId, contractId,tenantId);
+        const result = await unlinkTenantRoomContract(roomTenantData, req.userId);
         res.send(result);
     } catch (error) {
         return res.send(error);
