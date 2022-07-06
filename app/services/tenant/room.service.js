@@ -1,7 +1,9 @@
 const db = require("../../models"),
     tenantFloorRooms = db.tenant.tenantFloorRooms,
     tenantRoomContract = db.tenant.tenantRoomContract,
+    tenantRoomPayments = db.tenant.tenantRoomPayments,
     orderMaster = db.tenant.orderMaster;
+    
 var mongoose = require('mongoose');
 const { getPagination } = require("../../common/util");
 
@@ -282,7 +284,14 @@ const fetchRoomDetails = async (tenantId, roomId) => {
                     pipeline: [
                         {
                             $match: {
-                                $expr: { $eq: ["$floor_room_id", "$$roomId"] }
+                                $expr: { 
+                                    $and : [
+                                        {$eq: ["$floor_room_id", "$$roomId"]},
+                                        { $eq: ["$status", true] }
+                            
+                                    ]
+                                    
+                                },
                             }
                         },
                         {
@@ -547,11 +556,87 @@ const fetchTenantRoomDetails = async (tenantId, status, limit, skip) => {
     }
 }
 
+
+
+const unlinkTenantRoomContract = async (data, parentId, roomId, tenantId) => {
+    return new Promise((resolve, reject) => {
+
+        try {
+            const saveData = {
+                status: data.status,
+            }
+            tenantRoomContract.findByIdAndUpdate(data.contractId, saveData, { useFindAndModify: false })
+            .then(result => {
+              if (!result) {
+                reject({ status: 404, message: "Not found!" })
+              } else {
+
+
+                // const orderMasterObject = new orderMaster({
+                //     tenant_id: tenantId,
+                //     room_contract_id: tenantRoomContractObject._id,
+                //     amount_paid: data.price,
+                //     payment_status: data.paymentStatus,
+                //     status: true
+                // })
+    
+                tenantRoomPayments.updateMany({ room_contract_id: data.contractId, tenant_id : tenantId},{ $set : {status:data.status}})
+                    .then(existingPayments => {
+                        if (existingPayments) {
+                            console.log("a",existingPayments)
+                            orderMaster.updateMany({ room_contract_id: data.contractId, tenant_id : tenantId}, { $set : {status:data.status}})
+                            .then(existingOrders => {
+                                    resolve({
+                                        status: 200,
+                                        data: {},
+                                        error : {}
+                                    });
+                            })
+                            .catch(err => {
+                                reject({
+                                    status: 500,
+                                    message:
+                                        err.message || "Some error occurred while retrieving."
+                                })
+                            });
+
+                        } else {
+                            reject({ status: 404, message: "Not found!" })
+                        }
+                    })
+                    .catch(err => {
+                        reject({
+                            status: 500,
+                            message:
+                                err.message || "Some error occurred while retrieving."
+                        })
+                    });
+
+              }})
+              .catch(err => {
+                reject({
+                    status: 500,
+                    message:
+                        err.message || "Some error occurred while retrieving."
+                })
+            });
+   
+
+
+        } catch (error) {
+            reject({ status: 500, message: error })
+            console.log(error)
+        }
+
+    });
+}
+
 module.exports = {
     saveFloorRooms,
     listFloorRooms,
     saveTenantRoomContract,
     listRoomDetails,
     fetchRoomDetails,
-    fetchTenantRoomDetails
+    fetchTenantRoomDetails,
+    unlinkTenantRoomContract
 }

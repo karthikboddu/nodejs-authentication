@@ -1,12 +1,12 @@
 const errorCode = require('../../common/errorCode'),
-      {saveFloorRooms,listFloorRooms,saveTenantRoomContract,listRoomDetails,fetchRoomDetails,fetchTenantRoomDetails} = require('../../services/tenant/room.service');
+      {saveFloorRooms,listFloorRooms,saveTenantRoomContract,listRoomDetails,fetchRoomDetails,fetchTenantRoomDetails, unlinkTenantRoomContract} = require('../../services/tenant/room.service');
 const { getPagination } = require('../../common/util');
 
 exports.createRoom = async (req, res , next) => {
     const roomData = req.body;
     const floorId = req.params.floorId;
     if (!floorId) {
-        res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
+        return res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
     }
     try {
         const result = await saveFloorRooms(roomData, req.userId, floorId);
@@ -19,7 +19,7 @@ exports.createRoom = async (req, res , next) => {
 exports.rooms = async(req, res, next) => {
     const floorId = req.params.floorId;
     if (!floorId) {
-        res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
+        return res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
     }
     try {
         const result = await listFloorRooms(req.userId, floorId);
@@ -34,7 +34,7 @@ exports.linkTenantRoom = async(req, res, next) => {
     const tenantId = req.params.tenantId;
     const roomTenantData = req.body;
     if (!roomId || !tenantId) {
-        res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
+        return res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
     }
     try {
         const result = await saveTenantRoomContract(roomTenantData, req.userId, roomId,tenantId);
@@ -48,7 +48,7 @@ exports.linkTenantRoom = async(req, res, next) => {
 exports.floorRoomListDetails = async (req, res, next) => {
     const floorId = req.params.floorId;
     if (!floorId) {
-        res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
+        return res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
     }
     try {
         const result = await listRoomDetails(req.userId, floorId);
@@ -61,7 +61,7 @@ exports.floorRoomListDetails = async (req, res, next) => {
 exports.roomDetails = async (req, res, next) => {
     const roomId = req.params.roomId;
     if (!roomId) {
-        res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
+        return res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
     }
     try {
         const result = await fetchRoomDetails(req.userId, roomId);
@@ -90,6 +90,22 @@ exports.tenantRoomDetails = async (req, res, next) => {
         const pagination = getPagination(page, size, totalCount);
         result.data._pagination = pagination;
         console.log(totalCount)
+        res.send(result);
+    } catch (error) {
+        return res.send(error);
+    }
+}
+
+
+exports.unLinkTenantRoomContract = async(req, res, next) => {
+    const contractId = req.params.contractId;
+    const tenantId = req.params.tenantId;
+    const roomTenantData = req.body;
+    if (!contractId || !tenantId) {
+        return res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
+    }
+    try {
+        const result = await unlinkTenantRoomContract(roomTenantData, req.userId, contractId,tenantId);
         res.send(result);
     } catch (error) {
         return res.send(error);
