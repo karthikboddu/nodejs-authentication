@@ -189,8 +189,7 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
                                     total_amount: data.price,
                                     payment_for_date: new Date(),
                                     room_payment_type: 'BALANCE_AMOUNT',
-                                    room_contract_id: t._id,
-                                    paymeny_status: "C"
+                                    room_contract_id: t._id
                                 }
                             );
 
