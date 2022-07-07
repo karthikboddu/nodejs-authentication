@@ -178,20 +178,11 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
                                     room_payment_type: 'ROOM_RENT',
                                     room_contract_id: t._id,
                                     paymeny_status: "C"
-                                },                                
-                                {
-                                    tenant_id: tenantId,
-                                    floor_room_id: roomId,
-                                    actual_price: balance,
-                                    price: balance,
-                                    total_amount: balance,
-                                    payment_for_date: new Date(),
-                                    room_payment_type: 'BALANCE_AMOUNT',
-                                    room_contract_id: t._id
                                 }
                             );
 
                             tenantRoomPaymentsObject.save((err, t) => {
+                                
                                 if (err) {
                                     reject({ status: 500, message: err })
                                     return;
@@ -243,7 +234,14 @@ const listRoomDetails = async (tenantId, floorId) => {
                     pipeline: [
                         {
                             $match: {
-                                $expr: { $eq: ["$floor_room_id", "$$roomId"] }
+                                $expr: 
+                                    { 
+                                    $and : [
+                                        {$eq: ["$floor_room_id", "$$roomId"]},
+                                        { $eq: ["$status", true] }
+                            
+                                    ]
+                                    }
                             }
                         },
                         {
