@@ -180,6 +180,19 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
                                     paymeny_status: "C"
                                 }
                             );
+                            const tenantRoomPaymentsObject1 = new tenantRoomPayments(
+                                {
+                                    tenant_id: tenantId,
+                                    floor_room_id: roomId,
+                                    actual_price: data.price,
+                                    price: data.price,
+                                    total_amount: data.price,
+                                    payment_for_date: new Date(),
+                                    room_payment_type: 'BALANCE_AMOUNT',
+                                    room_contract_id: t._id,
+                                    paymeny_status: "C"
+                                }
+                            );
 
                             tenantRoomPaymentsObject.save((err, t) => {
                                 
@@ -187,6 +200,12 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
                                     reject({ status: 500, message: err })
                                     return;
                                 }
+                                tenantRoomPaymentsObject1.save((err, t) => {
+                                    if (err) {
+                                        reject({ status: 500, message: err })
+                                        return;
+                                    }   
+                                })
                             })
                             resolve({
                                 status: 200,

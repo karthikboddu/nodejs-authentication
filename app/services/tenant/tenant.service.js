@@ -102,7 +102,8 @@ const logInTenants = async(data) => {
         },
         end_at : {
           '$gte' : now
-        }
+        },
+        status : true
    }).populate({ path: 'user_role', select: ['name'] })
           .exec((err, user) => {
             if (err) {
