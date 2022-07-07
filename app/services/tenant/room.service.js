@@ -1,4 +1,5 @@
 const db = require("../../models"),
+    tenant = db.tenant.tenantModel ,
     tenantFloorRooms = db.tenant.tenantFloorRooms,
     tenantRoomContract = db.tenant.tenantRoomContract,
     tenantRoomPayments = db.tenant.tenantRoomPayments,
@@ -127,6 +128,7 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
     return new Promise((resolve, reject) => {
 
         try {
+            const balance = data.actualPrice - data.price;
             const tenantRoomContractObject = new tenantRoomContract(
                 {
                     tenant_id: tenantId,
@@ -137,7 +139,7 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
                     price: data.price,
                     no_of_persons: data.noOfPersons,
                     total_amount: data.totalAmount,
-                    balance_amount: data.balanceAmount,
+                    balance_amount: balance,
                     building_id : data.buildingId,
                     building_floor_id: data.buildingFloorId,
                     parent_id : parentId,
@@ -151,6 +153,8 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
                 status: true
             })
 
+
+
             tenantRoomContract.findOne({ tenant_id: tenantId, floor_room_id: roomId, status: true })
                 .then(existingRoom => {
                     if (existingRoom) {
@@ -162,7 +166,32 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
                                 reject({ status: 500, message: err })
                                 return;
                             }
-                            orderMasterObject.save((err, t) => {
+
+                            const tenantRoomPaymentsObject = new tenantRoomPayments(
+                                {
+                                    tenant_id: tenantId,
+                                    floor_room_id: roomId,
+                                    actual_price: balance,
+                                    price: balance,
+                                    total_amount: balance,
+                                    payment_for_date: new Date(),
+                                    room_payment_type: 'ROOM_RENT',
+                                    room_contract_id: t._id,
+                                    paymeny_status: "C"
+                                },                                
+                                {
+                                    tenant_id: tenantId,
+                                    floor_room_id: roomId,
+                                    actual_price: balance,
+                                    price: balance,
+                                    total_amount: balance,
+                                    payment_for_date: new Date(),
+                                    room_payment_type: 'BALANCE_AMOUNT',
+                                    room_contract_id: t._id
+                                }
+                            );
+
+                            tenantRoomPaymentsObject.save((err, t) => {
                                 if (err) {
                                     reject({ status: 500, message: err })
                                     return;
@@ -565,61 +594,80 @@ const unlinkTenantRoomContract = async (data, parentId) => {
             const saveData = {
                 status: data.status,
             }
-            tenantRoomContract.findByIdAndUpdate(data.contractId, saveData, { useFindAndModify: false })
-            .then(result => {
-              if (!result) {
-                reject({ status: 404, message: "Not found!" })
-              } else {
+            tenant.findByIdAndUpdate(data.tenantId, saveData, { useFindAndModify: false })
+            .then(tenantResult => {
+                if (!tenantResult) {
+                  reject({ status: 404, message: "Not found!" })
+                } else {
 
-
-                // const orderMasterObject = new orderMaster({
-                //     tenant_id: tenantId,
-                //     room_contract_id: tenantRoomContractObject._id,
-                //     amount_paid: data.price,
-                //     payment_status: data.paymentStatus,
-                //     status: true
-                // })
-    
-                tenantRoomPayments.updateMany({ room_contract_id: data.contractId, tenant_id : data.tenantId},{ $set : {status:data.status}})
-                    .then(existingPayments => {
-                        if (existingPayments) {
-                            console.log("a",existingPayments)
-                            orderMaster.updateMany({ room_contract_id: data.contractId, tenant_id : data.tenantId}, { $set : {status:data.status}})
-                            .then(existingOrders => {
-                                    resolve({
-                                        status: 200,
-                                        data: {},
-                                        error : {}
-                                    });
-                            })
-                            .catch(err => {
-                                reject({
-                                    status: 500,
-                                    message:
-                                        err.message || "Some error occurred while retrieving."
-                                })
-                            });
-
-                        } else {
+                        tenantRoomContract.findByIdAndUpdate(data.contractId, saveData, { useFindAndModify: false })
+                        .then(result => {
+                        if (!result) {
                             reject({ status: 404, message: "Not found!" })
-                        }
-                    })
-                    .catch(err => {
-                        reject({
-                            status: 500,
-                            message:
-                                err.message || "Some error occurred while retrieving."
-                        })
-                    });
+                        } else {
 
-              }})
-              .catch(err => {
-                reject({
-                    status: 500,
-                    message:
-                        err.message || "Some error occurred while retrieving."
-                })
-            });
+                                                resolve({
+                                                    status: 200,
+                                                    data: {},
+                                                    error : {}
+                                                });
+                            // const orderMasterObject = new orderMaster({
+                            //     tenant_id: tenantId,
+                            //     room_contract_id: tenantRoomContractObject._id,
+                            //     amount_paid: data.price,
+                            //     payment_status: data.paymentStatus,
+                            //     status: true
+                            // })
+                
+                            // tenantRoomPayments.updateMany({ room_contract_id: data.contractId, tenant_id : data.tenantId},{ $set : {status:data.status}})
+                            //     .then(existingPayments => {
+                            //         if (existingPayments) {
+                            //             console.log("a",existingPayments)
+                            //             orderMaster.updateMany({ room_contract_id: data.contractId, tenant_id : data.tenantId}, { $set : {status:data.status}})
+                            //             .then(existingOrders => {
+                            //                     resolve({
+                            //                         status: 200,
+                            //                         data: {},
+                            //                         error : {}
+                            //                     });
+                            //             })
+                            //             .catch(err => {
+                            //                 reject({
+                            //                     status: 500,
+                            //                     message:
+                            //                         err.message || "Some error occurred while retrieving."
+                            //                 })
+                            //             });
+
+                            //         } else {
+                            //             reject({ status: 404, message: "Not found!" })
+                            //         }
+                            //     })
+                            //     .catch(err => {
+                            //         reject({
+                            //             status: 500,
+                            //             message:
+                            //                 err.message || "Some error occurred while retrieving."
+                            //         })
+                            //     });
+
+                        }})
+                        .catch(err => {
+                            reject({
+                                status: 500,
+                                message:
+                                    err.message || "Some error occurred while retrieving."
+                            })
+                        });
+        }
+    })
+    .catch(err => {
+        reject({
+            status: 500,
+            message:
+                err.message || "Some error occurred while retrieving."
+        })
+    });
    
 
 

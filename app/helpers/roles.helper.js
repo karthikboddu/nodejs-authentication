@@ -17,6 +17,7 @@ const getRolesByName = async (userRole) => {
                             message:
                               err.message || "Some error occurred while retrieving tutorials."
                           })
+                          return;
                       });
             })
         

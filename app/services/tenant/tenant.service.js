@@ -1,3 +1,5 @@
+const { saveTenantRoomContract } = require("./room.service");
+
 const db = require("../../models"),
       Role = db.role,
       tenant = db.tenant.tenantModel ,
@@ -31,7 +33,9 @@ const saveTenants = async (data,role,parentId) => {
     
     return new Promise((resolve, reject) => {
         try {
-
+          console.log(role)
+          const expiryDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
+          
             const tenantObject = new tenant(
                 {
                     parent_id : parentId ? parentId : null,
@@ -43,10 +47,11 @@ const saveTenants = async (data,role,parentId) => {
                     mobile_no : data.mobileNo,
                     aadhar_id : data.aadharId,
                     address : data.address,
+                    end_at : expiryDate,
                     status : true,
                 })
 
-
+            
             const checkusername = data.username;
             tenant.findOne({ username: checkusername })
             .then(existingTenant => {
@@ -58,6 +63,8 @@ const saveTenants = async (data,role,parentId) => {
                         if (err) {
                           reject({ status: 500, message: err })
                           return;
+                        } else {
+                          saveTenantRoomContract(data, parentId, data.roomId, t._id)
                         }
                         resolve({
                             status: 200,
