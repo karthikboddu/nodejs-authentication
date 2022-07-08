@@ -1,4 +1,5 @@
 const errorCode = require('../../common/errorCode'),
+      _ = require('lodash'),
       {listTenants,saveTenants,logInTenants,saveSSOTenants} = require('../../services/tenant/tenant.service'),
       {getRolesByName}  = require('../../helpers/roles.helper');
 
@@ -44,16 +45,27 @@ exports.createTenant = async (req, res, next) => {
 }
 
 exports.signInTenant = async (req, res, next) => {
-    const tenantLoginData = req.body;
-    if(!tenantLoginData) {
-      res.status(500).send({ message: errorCode.BAD_REQUEST });
+    const {username,password} = req.body;
+
+    if(!username || !password) {
+      res.api.status = 400;
+      res.api.errors.code = errorCode.BAD_REQUEST;
+      res.api.errors.message = 'Validation error';
+      req.app.get('log').error(_.assign(req.app.get('logEntry'), {
+        'status': res.api.status
+      }));
+      
+      return res.status(500).send(res.api);
     }
+   
 
     try {
-      const result = await logInTenants(tenantLoginData);
+
+      const result = await logInTenants(req, res, username, password);
+      
       res.send(result);
     } catch (error) {
-      return res.send(error);
+      return next(error);
     }
 }
 

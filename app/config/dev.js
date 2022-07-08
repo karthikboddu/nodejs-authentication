@@ -4,18 +4,11 @@
 module.exports = {
     'api': {
         'host'    : '0.0.0.0',
-        'port'    : process.env.PORT || 8081,
-        'logPath' : '/tmp/phoenix/logs/analytics-api/',
+        'port'    : process.env.PORT || 8000,
+        'logPath' : '/tmp/tenant/logs/tenant-api/api-log.logs',
         'bcrypt': {
             'rounds': 8
-        },
-        'collector':{
-            'event': {
-                'name'     : 'eventCollector',
-                'fileName' : 'events',
-                'level'    : 'trace',
-            },
-        },
+        }
     },
     'db': {    
         'default': {

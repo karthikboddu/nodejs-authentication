@@ -1,3 +1,4 @@
+const errorCode = require("../../common/errorCode");
 const { saveTenantRoomContract } = require("./room.service");
 
 const db = require("../../models"),
@@ -6,8 +7,10 @@ const db = require("../../models"),
       tenantRoomContract = db.tenant.tenantRoomContract,
       bcrypt = require("bcrypt"),
       Promise = require('bluebird'),
+      _ = require('lodash'),
       {jwtSignAccessRefreshTokenTenant } = require('../../helpers/jwt_helpers'),
       {loginTenant} = require('../../repository/UserRepository');
+      
 
 const listTenants = async (req, limit, skip, buildingId) => {
 
@@ -33,7 +36,7 @@ const saveTenants = async (data,role,parentId) => {
     
     return new Promise((resolve, reject) => {
         try {
-          console.log(role)
+
           const expiryDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
           
             const tenantObject = new tenant(
@@ -89,14 +92,20 @@ const saveTenants = async (data,role,parentId) => {
     });
 }
 
-const logInTenants = async(data) => {
-  console.log(data,"data")
+const logInTenants = async(req, res, username , password) => {
+
     return new Promise((resolve, reject) => {
+
+
+      req.app.get('log').info(_.assign(req.app.get('logEntry'), {
+        'status': res.api.status
+      }));
+ 
       var now = new Date();
       
-      const use = loginTenant(data.username);
-      console.log(use,"now")
-      tenant.findOne({ username: data.username,
+      // const use = loginTenant(data.username);
+
+      tenant.findOne({ username: username,
          start_at: {
         '$lte': now
         },
@@ -104,28 +113,37 @@ const logInTenants = async(data) => {
           '$gte' : now
         },
         status : true
-   }).populate({ path: 'user_role', select: ['name'] })
+      }).populate({ path: 'user_role', select: ['name'] })
           .exec((err, user) => {
             if (err) {
               reject({ status: 500, message: err });
             }
             if (!user || user == null) {
-              reject({ status: 404, message: "User Not found." });
+
+              req.app.get('log').warn(_.assign(req.app.get('logEntry'), {
+                'status': res.api.status, message: "User Not found."
+              }));
+              res.api.status = 404;
+              res.api.errors.code = errorCode.NOT_FOUND;
+              res.api.errors.message = 'User Not found.';
+              resolve(res.api);
               return;
             }
-            var pass = data.password
-            console.log(pass)
+            var pass = password
+
             pass = pass.replace(/^"|"$/g, '');
             var passwordIsValid = bcrypt.compareSync(
               pass,
               user.password
             );
             if (!passwordIsValid) {
-              reject({
-                status: 403,
-                data: '',
-                message: "Invalid Password!"
-              });
+              req.app.get('log').warn(_.assign(req.app.get('logEntry'), {
+                'status': res.api.status, message: "Invalid Password!"
+              }));
+              res.api.status = 404;
+              res.api.errors.code = errorCode.NOT_FOUND;
+              res.api.errors.message = 'Invalid Password!';
+              resolve(res.api);
             }
             const jwtData = jwtSignAccessRefreshTokenTenant(user.id,user.user_role.name,user.full_name, user.parent_id)
             if (user.user_role.name == 'admin') {
