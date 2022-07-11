@@ -412,7 +412,7 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
         
             const paymentStatus =  status ? status.split(',') : [];
         
-            if (startDate && endDate) {
+            if (startDate) {
                 let startDate1 = new Date(new Date(startDate).toISOString(0, 0, 0, 0)); 
                 conditions.push({ $gte: [ "$created_at", startDate1] });
             }
