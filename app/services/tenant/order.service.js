@@ -363,7 +363,9 @@ const fetchTenantRoomOrderDetails = async (tenantId, status, limit, skip) => {
     return new Promise((resolve, reject) => {
     try {
 
-            tenantRoomPayments.find({ tenant_id: tenantId}).limit(limit).skip(skip).sort({updated_at: -1})
+            tenantRoomPayments.find({ tenant_id: tenantId})
+            .populate({ path: 'tenant_id', select: ['username','full_name','email','mobile_no','address','start_at','end_at','created_at','photoUrl'] })
+            .limit(limit).skip(skip).sort({updated_at: -1})
                 .then(orders => {
 
                     resolve({
