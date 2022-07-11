@@ -1,7 +1,10 @@
 const errorCode = require('../../common/errorCode');
+const _           = require('lodash');
 const {generateToken, initiateRoomTransactionDetails, updateOrderDetails,
    fetchTenantRoomOrderDetails, fetchRecentAllTenantRoomOrderDetails} = require('../../services/tenant/order.service')
 const { getPagination } = require('../../common/util');
+
+
 exports.createPaytmToken = async (req, res, next) => {
 
     try {
@@ -81,8 +84,9 @@ exports.tenantRoomOrderDetails = async (req, res, next) => {
 
 exports.recentAllTenantRoomOrderDetails = async (req, res, next) => {
   try {
+
       const status = req.query.paymentStatus ? req.query.paymentStatus : 'P';
-      let {page, size} = req.query;
+      let {page, size, startDate, endDate} = req.query;
       if (!page) {
           page = 1;
       }
@@ -93,12 +97,19 @@ exports.recentAllTenantRoomOrderDetails = async (req, res, next) => {
       const limit = parseInt (size);
       const skip = (page - 1) * size;
 
-      const result = await fetchRecentAllTenantRoomOrderDetails(req.userId, status, limit, skip);
-      const totalCount = result.data ? result.data.length : 0;
+      const result = await fetchRecentAllTenantRoomOrderDetails(req.userId, status, limit, skip, startDate, endDate);
+      const totalCount = result ? result.length : 0;
+
       const pagination = getPagination(page, size, totalCount);
-      result.data._pagination = pagination;
-      console.log(pagination)
-      res.send(result);
+      res.api.data = {
+        orderDetails: result,
+        _pagination : pagination
+      };
+      req.app.get('log').info(_.assign(req.app.get('logEntry'), {
+        'status': res.api.status
+      }));
+
+      res.send(res.api);
   } catch (error) {
       return res.send(error);
   }

@@ -402,25 +402,45 @@ const fetchTenantRoomOrderDetails = async (tenantId, status, limit, skip) => {
 
 
 
-const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, skip) => {
+const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, skip, startDate, endDate) => {
 
-    var tid = tenantId;
-    const paymentStatus =  status ? status.split(',') : [];
     
         try {
-            
+
+            var tid = tenantId;
+            let conditions = [];
+        
+            const paymentStatus =  status ? status.split(',') : [];
+        
+            if (startDate && endDate) {
+                let startDate1 = new Date(new Date(startDate).toISOString(0, 0, 0, 0)); 
+                let endDate1 = new Date(new Date(endDate).toISOString(23, 59, 59, 999));
+                conditions.push({ $gte: [ "$created_at", startDate1] });
+                conditions.push({ $lt: [ "$created_at",  endDate1] });
+            }
+        
+            if (status) {
+                conditions.push({  $in: ["$paymeny_status", paymentStatus]  });
+            }
+        
+            let final_condition = conditions.length ? conditions : [];
 
             const result = await tenantRoomPayments.aggregate([
                 {
                     $match: {
-                        $expr: {  $in: ["$paymeny_status", paymentStatus] }
+                        $expr: {  
+                            $and : final_condition
+                        }
                     }
+                },
+                {
+                    $sort : {'updated_at': 1}
                 },
                 {
                     $skip: skip
                 }, {
                     $limit: limit
-                }, 
+                },
                 {
     
                     $lookup: {
@@ -454,12 +474,11 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
 
             ])
 
-            const res = { status: 200, error: "", data: result }
-            return res;
+            return result;
 
         } catch (error) {
             console.log(error, "Eror")
-            const res = { status: 500, error: error.message, data: "" }
+            const res = { error: error.message }
             return res;
         }
 
