@@ -414,14 +414,18 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
         
             if (startDate && endDate) {
                 let startDate1 = new Date(new Date(startDate).toISOString(0, 0, 0, 0)); 
-                let endDate1 = new Date(new Date(endDate).toISOString(23, 59, 59, 999));
                 conditions.push({ $gte: [ "$created_at", startDate1] });
+            }
+
+            if (endDate) {
+                let endDate1 = new Date(new Date(endDate).toISOString(23, 59, 59, 999));
                 conditions.push({ $lt: [ "$created_at",  endDate1] });
             }
         
             if (status) {
                 conditions.push({  $in: ["$paymeny_status", paymentStatus]  });
             }
+            console.log(conditions)
         
             let final_condition = conditions.length ? conditions : [];
 
