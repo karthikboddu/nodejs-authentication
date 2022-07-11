@@ -438,7 +438,7 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
                     }
                 },
                 {
-                    $sort : {'updated_at': -1}
+                    $sort : {'updated_at': 1}
                 },
                 {
                     $skip: skip
