@@ -87,3 +87,29 @@ exports.createTenantSSOLogin = async (req, res, next) => {
     }
 
 }
+
+exports.getTenantsSettings = async (req, res, next) => {
+
+  try {
+      const data = {
+        aesKey: process.env.AES_KEY,
+        aesIv : process.env.AES_IV,
+        aesAlgo : process.env.AES_ALGO,
+        googleRecaptcha : process.env.GOOGLE_RECAPTCHA_KEY,
+        paymentEnabled : process.env.PAYMENT_ENABLED,
+        paymentMethod : process.env.PAYMENT_METHOD,
+        paymentEnv : process.env.PAYMENT_ENV,
+        paytmPaymentSettings : {
+          merchantId : process.env.MID,
+          merchantKey : process.env.MERCHANT_KEY,
+          callBackUrl : process.env.CALL_BACK_URL,
+          urlScheme : process.env.URL_SCHEME
+        }
+      }
+      res.api.data = data;
+      return res.status(200).send(res.api);
+  } catch (error) {
+    return next(error);
+  }
+
+}
