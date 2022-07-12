@@ -5,7 +5,8 @@ exports.buildings = async (req, res, next) => {
     try {
         console.log(req.userId)
         const result = await listTenantBuildings(req);
-        res.send(result);
+        res.api.data = result;
+        res.send(res.api);
     } catch (error) {
         return res.send(error);
     }

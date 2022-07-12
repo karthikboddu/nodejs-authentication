@@ -2,9 +2,86 @@ const db = require("../../models"),
     tenantBuilding = db.tenant.tenantBuilding,
     tenantBuildingBlocks = db.tenant.tenantBuildingBlocks,
     Promise = require('bluebird');
+    var mongoose = require('mongoose');
 
 const listTenantBuildings = async (req) => {
-    return await tenantBuilding.find({ tenant_id: req.userId }).populate({ path: 'tenant_id', select: ['username'] });
+
+        try {
+            var tenantId = mongoose.Types.ObjectId(req.userId);
+
+            const result = await tenantBuilding.aggregate([
+
+                {
+                    $match: {
+                        $expr: {  
+                            $and : [
+                                { $eq: ["$tenant_id", tenantId] },
+                                { $eq: ["$status", true]} 
+                            ]
+                        }
+                    }
+                },
+                {
+                    $sort : {'updated_at': -1}
+                },
+                {
+    
+                    $lookup: {
+                        from: "tenants",
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: { 
+                                        $and : [
+                                            { $eq: ["$_id", tenantId] },
+                                            { $eq: ["$status", true]} 
+                                        ]
+                                        
+                                        
+                                    }
+                                }
+                            },
+    
+                            {
+                                $project: {
+                                    _v: 0,
+                                    password: 0,
+
+                                }
+                            },
+
+                        ],
+                        as: "tenant"
+                    }
+                    
+                },
+                
+
+            ])
+
+            const totalAmount = await tenantBuilding.aggregate([
+                {
+                    $group : {
+                    _id: null,
+                    count: {
+                      $sum: "$total_amount"
+                    }
+                  }
+                },
+            ])
+            const resultData = {
+                buildingsList : result,
+                totalAmount : totalAmount[0] ? totalAmount[0].count : 0
+            }
+            
+            return resultData;
+            
+        } catch (error) {
+            console.log(error)
+        }   
+        
+        
+    //return await tenantBuilding.find({ tenant_id: req.userId, status:true}).populate({ path: 'tenant_id', select: ['username'] });
 }
 const saveTenantBuildings = async (data,tenantId) => {
 
