@@ -404,7 +404,7 @@ const fetchTenantRoomOrderDetails = async (tenantId, status, limit, skip) => {
 
 
 
-const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, skip, startDate, endDate, tenantUserId) => {
+const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, skip, startDate, endDate, tenantUserId, roomPaymentId) => {
 
     
         try {
@@ -438,6 +438,10 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
             } else  {
                 tenantConditions.push( { $eq: ["$_id", "$$tenantId"] }  );
                 tenantConditions.push( { $eq: ["$parent_id", tid]}   );
+            }
+
+            if (roomPaymentId) {
+                conditions.push({ $eq: ["$_id", roomPaymentId]} );
             }
             console.log(conditions,tenantConditions)
         

@@ -91,6 +91,7 @@ exports.recentAllTenantRoomOrderDetails = async (req, res, next) => {
 
       const status = req.query.paymentStatus ? req.query.paymentStatus : 'P';
       const tenantUserId = req.query.tenantId ? req.query.tenantId : null;
+      const roomPaymentId = req.query.roomPaymentId ? req.query.roomPaymentId : null;
 
       let {page, size, startDate, endDate} = req.query;
       if (!page) {
@@ -103,7 +104,7 @@ exports.recentAllTenantRoomOrderDetails = async (req, res, next) => {
       const limit = parseInt (size);
       const skip = (page - 1) * size;
 
-      const result = await fetchRecentAllTenantRoomOrderDetails(req.userId, status, limit, skip, startDate, endDate, tenantUserId);
+      const result = await fetchRecentAllTenantRoomOrderDetails(req.userId, status, limit, skip, startDate, endDate, tenantUserId, roomPaymentId);
       const totalCount = result ? result.length : 0;
 
       const pagination = getPagination(page, size, totalCount);
