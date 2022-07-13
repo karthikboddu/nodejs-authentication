@@ -432,13 +432,14 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
 
             if (tenantUserId) {
                 tid = tenantUserId;
-                conditions.push({ $eq: ["$tenant_id", tenantUserId]} );
-                tenantConditions.push( { $eq: ["$_id", tenantUserId]}  );
+                var tUId = mongoose.Types.ObjectId(tenantUserId);
+                conditions.push({ $eq: ["$tenant_id", tUId]} );
+                tenantConditions.push( { $eq: ["$_id", tUId]}  );
             } else  {
                 tenantConditions.push( { $eq: ["$_id", "$$tenantId"] }  );
                 tenantConditions.push( { $eq: ["$parent_id", tid]}   );
             }
-            console.log(conditions)
+            console.log(conditions,tenantConditions)
         
             let final_condition = conditions.length ? conditions : [];
 
