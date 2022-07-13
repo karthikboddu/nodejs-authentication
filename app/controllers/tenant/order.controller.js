@@ -60,12 +60,16 @@ exports.updateOrderStatus = async (req, res, next) => {
 exports.tenantRoomOrderDetails = async (req, res, next) => {
   try {
       const status = req.query.paymentStatus ? req.query.paymentStatus : 'P';
+      const tenantId = req.query.tenantId ? req.query.tenantId : null;
       let {page, size} = req.query;
       if (!page) {
           page = 1;
       }
       if (!size) {
           size = 10;
+      }
+      if (tenantId) {
+        req.userId = tenantId;
       }
 
       const limit = parseInt (size);
@@ -86,6 +90,8 @@ exports.recentAllTenantRoomOrderDetails = async (req, res, next) => {
   try {
 
       const status = req.query.paymentStatus ? req.query.paymentStatus : 'P';
+      const tenantUserId = req.query.tenantId ? req.query.tenantId : null;
+
       let {page, size, startDate, endDate} = req.query;
       if (!page) {
           page = 1;
@@ -97,7 +103,7 @@ exports.recentAllTenantRoomOrderDetails = async (req, res, next) => {
       const limit = parseInt (size);
       const skip = (page - 1) * size;
 
-      const result = await fetchRecentAllTenantRoomOrderDetails(req.userId, status, limit, skip, startDate, endDate);
+      const result = await fetchRecentAllTenantRoomOrderDetails(req.userId, status, limit, skip, startDate, endDate, tenantUserId);
       const totalCount = result ? result.length : 0;
 
       const pagination = getPagination(page, size, totalCount);

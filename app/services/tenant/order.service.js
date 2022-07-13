@@ -404,13 +404,15 @@ const fetchTenantRoomOrderDetails = async (tenantId, status, limit, skip) => {
 
 
 
-const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, skip, startDate, endDate) => {
+const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, skip, startDate, endDate, tenantUserId) => {
 
     
         try {
 
             var tid = tenantId;
+
             let conditions = [];
+            let tenantConditions = [];
         
             const paymentStatus =  status ? status.split(',') : [];
         
@@ -426,6 +428,15 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
         
             if (status) {
                 conditions.push({  $in: ["$paymeny_status", paymentStatus]  });
+            }
+
+            if (tenantUserId) {
+                tid = tenantUserId;
+                conditions.push({ $eq: ["$tenant_id", tenantUserId]} );
+                tenantConditions.push( { $eq: ["$_id", tenantUserId]}  );
+            } else  {
+                tenantConditions.push( { $eq: ["$_id", "$$tenantId"] }  );
+                tenantConditions.push( { $eq: ["$parent_id", tid]}   );
             }
             console.log(conditions)
         
@@ -456,12 +467,7 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
                             {
                                 $match: {
                                     $expr: { 
-                                        $and : [
-                                            { $eq: ["$_id", "$$tenantId"] },
-                                            { $eq: ["$parent_id", tid]} 
-                                        ]
-                                        
-                                        
+                                        $and : tenantConditions
                                     }
                                 }
                             },
