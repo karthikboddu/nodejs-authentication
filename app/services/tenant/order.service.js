@@ -441,7 +441,8 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
             }
 
             if (roomPaymentId) {
-                conditions.push({ $eq: ["$_id", roomPaymentId]} );
+                var roomPaymentObjectId = mongoose.Types.ObjectId(roomPaymentId);
+                conditions.push({ $eq: ["$_id", roomPaymentObjectId]} );
             }
             console.log(conditions,tenantConditions)
         
