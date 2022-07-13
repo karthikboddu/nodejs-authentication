@@ -484,7 +484,59 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
                         as: "tenant"
                     }
                 },
+                {
+    
+                    $lookup: {
+                        from: "tenant_room_contracts",
+                        let: { "contractId": "$room_contract_id" },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: { 
+                                        $and : [
+                                            { $eq: ["$_id", "$$contractId"] } 
+                                        ]
+                                    }
+                                }
+                            },
+    
+                            {
+                                $project: {
+                                    _v: 0,
+                                    password: 0,
 
+                                }
+                            }
+                        ],
+                        as: "contractDetails"
+                    }
+                },
+                {
+    
+                    $lookup: {
+                        from: "tenant_buildings",
+                        let: { "buildingId": "$building_id" },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: { 
+                                        $and : [
+                                            { $eq: ["$_id", "$$buildingId"] } 
+                                        ]
+                                    }
+                                }
+                            },
+    
+                            {
+                                $project: {
+                                    _v: 0,
+
+                                }
+                            }
+                        ],
+                        as: "buildingDetails"
+                    }
+                },
             ])
 
             return result;
