@@ -556,7 +556,7 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
 const saveOrderDetailsAndComplete = async (data, parentId) => {
     return new Promise((resolve, reject) => {
         const saveData = {
-            paymeny_status: "C",
+            paymeny_status: data.paymentStatus,
             updated_at : new Date()
         }
         tenantRoomPayments.findByIdAndUpdate(data.roomPaymentId, saveData, { useFindAndModify: false })
@@ -576,7 +576,7 @@ const saveOrderDetailsAndComplete = async (data, parentId) => {
                         amount_paid: paymentData.price,
                         room_payments_id: paymentData._id,
                         status: true,
-                        payment_status: "C",
+                        payment_status: data.paymentStatus,
                         payment_response :  data.paymentResponse ? data.paymentResponse : '{}',
                         payment_type : "INTERNAL"
                     })
@@ -594,11 +594,11 @@ const saveOrderDetailsAndComplete = async (data, parentId) => {
                     });
                 } else {
                     const ordersData = {
-                        payment_status: "C",
+                        payment_status: data.paymentStatus,
                         payment_type : "INTERNAL",
                         payment_response : data.paymentResponse ? data.paymentResponse : '{}'
                     }
-                    orderMasterObject.findByIdAndUpdate(orders._id, ordersData, { useFindAndModify: false })
+                    orderMaster.findByIdAndUpdate(orders._id, ordersData, { useFindAndModify: false })
                     .then(paymentData => {
                         resolve({
                             status: 200,
