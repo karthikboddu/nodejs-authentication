@@ -626,7 +626,7 @@ const saveOrderDetailsAndComplete = async (data, parentId) => {
 
                         resolve({
                             status: 200,
-                            data: t,
+                            data: paymentData,
                             message: "Tenant Room payment successfully!"
                         });
                     })
