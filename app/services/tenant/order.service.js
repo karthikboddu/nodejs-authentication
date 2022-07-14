@@ -553,10 +553,84 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
 
 }
 
+const saveOrderDetailsAndComplete = async (data, parentId) => {
+    return new Promise((resolve, reject) => {
+        const saveData = {
+            payment_status: data.status,
+            updated_at : new Date.now()
+        }
+        tenantRoomPayments.findByIdAndUpdate(data.roomPaymentId, saveData, { useFindAndModify: false })
+        .then(paymentData => {
+          if (!paymentData) {
+
+            reject({ status: 404, message: "Not found!" })
+
+          } else {
+
+            orderMaster.findOne({ room_payments_id: data.roomPaymentId, payment_status: "P" })
+            .then(orders => {
+                if (!orders) {
+                    const orderMasterObject = new orderMaster({
+                        tenant_id: data.tenantId,
+                        room_contract_id: paymentData.room_contract_id,
+                        amount_paid: paymentData.price,
+                        room_payments_id: paymentData._id,
+                        status: true,
+                        payment_response : data.status,
+                        payment_type : "INTERNAL"
+                    })
+                    orderMasterObject.save((err, t) => {
+                        if (err) {
+                            console.log(err)
+                            reject({ status: 500, message: err })
+                            return;
+                        }
+                        resolve({
+                            status: 200,
+                            data: t,
+                            message: "Tenant Room payment successfully!"
+                        });
+                    });
+                } else {
+                    const ordersData = {
+                        payment_status: data.status,
+                        payment_type : "INTERNAL",
+                        payment_response : data.paymentResponse ? data.paymentResponse : '{}'
+                    }
+                    orderMasterObject.findByIdAndUpdate(orders._id, ordersData, { useFindAndModify: false })
+                    .then(paymentData => {
+                        resolve({
+                            status: 200,
+                            data: t,
+                            message: "Tenant Room payment successfully!"
+                        });
+                    })
+                    .catch(err => {
+                        console.log(err, "err")
+                        reject({ status: 500, message: err })
+                    });
+                }
+            })
+            .catch(err => {
+                console.log(err, "err")
+                reject({ status: 500, message: err })
+      
+            });
+
+          }})
+        .catch(err => {
+            console.log(err, "err")
+            reject({ status: 500, message: err })
+  
+          });
+    })
+}
+
 module.exports = {
     generateToken,
     initiateRoomTransactionDetails,
     updateOrderDetails,
     fetchTenantRoomOrderDetails,
-    fetchRecentAllTenantRoomOrderDetails
+    fetchRecentAllTenantRoomOrderDetails,
+    saveOrderDetailsAndComplete
 }

@@ -19,4 +19,7 @@ module.exports = function(app) {
 
     app.get("/api/order/recentAllTenantRoomOrderDetails",[authJwt.verifyToken,authJwt.isAdmin], controller.recentAllTenantRoomOrderDetails);
 
+    app.post("/api/order/createOrderAndComplete", [authJwt.verifyToken],controller.createOrderAndComplete);
+
+
   }
