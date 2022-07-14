@@ -132,9 +132,10 @@ exports.createOrderAndComplete = async( req, res, next) => {
     }
 
     const result = await saveOrderDetailsAndComplete(orderData, req.userId);
-    console.log(result,"result")
+    
     res.send(result);
   } catch (error) {
+    console.log(error,"result")
     return next(error);
   }
 
