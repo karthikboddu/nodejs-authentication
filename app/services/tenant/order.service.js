@@ -586,6 +586,17 @@ const saveOrderDetailsAndComplete = async (data, parentId) => {
                             reject({ status: 500, message: err })
                             return;
                         }
+                        const buildingData = {
+                            total_amount : data.amount
+                        }
+                        tenantBuilding.findByIdAndUpdate(data.buildingId, buildingData, {useFindAndModify: false})
+                        .then(res => {
+                        })
+                        .catch(err => {
+                            console.log(err, "err")
+                            reject({ status: 500, message: err })
+                  
+                        });
                         resolve({
                             status: 200,
                             data: t,
@@ -600,6 +611,19 @@ const saveOrderDetailsAndComplete = async (data, parentId) => {
                     }
                     orderMaster.findByIdAndUpdate(orders._id, ordersData, { useFindAndModify: false })
                     .then(paymentData => {
+
+                        const buildingData = {
+                            total_amount : data.amount
+                        }
+                        tenantBuilding.findByIdAndUpdate(data.buildingId, buildingData, {useFindAndModify: false})
+                        .then(res => {
+                        })
+                        .catch(err => {
+                            console.log(err, "err")
+                            reject({ status: 500, message: err })
+                  
+                        });
+
                         resolve({
                             status: 200,
                             data: t,
