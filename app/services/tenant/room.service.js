@@ -308,11 +308,20 @@ const listRoomDetails = async (tenantId, floorId) => {
     }
 }
 
-const fetchRoomDetails = async (tenantId, roomId) => {
-    console.log("users", tenantId)
+const fetchRoomDetails = async (tenantId, roomId, roomPaymentId) => {
+
     try {
         var tid = mongoose.Types.ObjectId(tenantId);
         var fid = mongoose.Types.ObjectId(roomId);
+        
+        var conditions = {};
+        if (roomPaymentId) {
+            var paymentId = mongoose.Types.ObjectId(roomPaymentId);
+            conditions = { $eq: ["$_id", paymentId] }
+        } else {
+            conditions = { $eq: ["$room_contract_id", "$$contractId"] };
+        }
+        console.log(conditions,"Asd");
         const result = await tenantFloorRooms.aggregate([
             {
                 $match: {
@@ -346,7 +355,7 @@ const fetchRoomDetails = async (tenantId, roomId) => {
                                 pipeline: [
                                     {
                                         $match: {
-                                            $expr: { $eq: ["$room_contract_id", "$$contractId"] }
+                                            $expr: conditions
                                         }
                                     },
                                     {
@@ -423,7 +432,6 @@ const fetchRoomDetails = async (tenantId, roomId) => {
                 }
             }
         ])
-        console.log(result, "result")
         const res = { status: 200, error: "", data: result }
         return res;
         //res.json(result[0] || {})

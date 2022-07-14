@@ -63,8 +63,9 @@ exports.roomDetails = async (req, res, next) => {
     if (!roomId) {
         return res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
     }
+    const roomPaymentId = req.query.roomPaymentId ?  req.query.roomPaymentId  : null;
     try {
-        const result = await fetchRoomDetails(req.userId, roomId);
+        const result = await fetchRoomDetails(req.userId, roomId, roomPaymentId);
         res.send(result);
     } catch (error) {
         return res.send(error);
