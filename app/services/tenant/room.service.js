@@ -341,7 +341,7 @@ const fetchRoomDetails = async (tenantId, roomId) => {
                         },
                         {
                             $lookup: {
-                                from: "order_masters",
+                                from: "tenant_room_payments",
                                 let: { "contractId": "$_id" },
                                 pipeline: [
                                     {
