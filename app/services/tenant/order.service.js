@@ -404,7 +404,7 @@ const fetchTenantRoomOrderDetails = async (tenantId, status, limit, skip) => {
 
 
 
-const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, skip, startDate, endDate, tenantUserId, roomPaymentId) => {
+const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, skip, startDate, endDate, roomId, roomPaymentId) => {
 
     
         try {
@@ -430,11 +430,10 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
                 conditions.push({  $in: ["$paymeny_status", paymentStatus]  });
             }
 
-            if (tenantUserId) {
-                tid = tenantUserId;
-                var tUId = mongoose.Types.ObjectId(tenantUserId);
-                conditions.push({ $eq: ["$tenant_id", tUId]} );
-                tenantConditions.push( { $eq: ["$_id", tUId]}  );
+            if (roomId) {
+                var rUId = mongoose.Types.ObjectId(roomId);
+                conditions.push({ $eq: ["$floor_room_id", rUId]} );
+                tenantConditions.push( { $eq: ["$_id", "$$tenantId"]}  );
             } else  {
                 tenantConditions.push( { $eq: ["$_id", "$$tenantId"] }  );
                 tenantConditions.push( { $eq: ["$parent_id", tid]}   );

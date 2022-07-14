@@ -1,0 +1,16 @@
+tags:
+  - name: tenants
+    description: Operations about tenants
+schemes:
+  - https
+paths:  
+  /api/tenant/tenants:
+    get:
+      tags:
+        - tenants
+      description: To List of tenants registered for parent tenant
+      responses:
+        '200':
+          description: A successful response
+      security:
+        - x-access-token: []    

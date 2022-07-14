@@ -11,6 +11,44 @@ const helpers = require('./app/helpers');
 const routes = require('./app/routes')
 const services = require('./app/services');
 
+//swagger
+const swaggerJsDoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: '3.0.1',
+    info: {
+      version: "1.0.0",
+      title: " Management and Authentication service",
+      description: "Management and Authentication of Tenants",
+      contact: {
+        name: "karthikb5566@gmail.com"
+      },
+      servers: ["http://localhost:8000"],
+    },
+    basePath: '/',
+    components: {
+      securitySchemes: {
+        "x-access-token": {
+          "type": "apiKey",
+          "name": "api_key",
+          "in": "header"
+        },
+      }
+    },
+    security: [{
+      "x-access-token": []
+    }]
+
+  },
+  // ['.routes/*.js']
+  apis: ["./app/swagger.yml"]
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
 const _ = require('lodash');
 const { logger } = require("./app/helpers/init_logger");
 var a = require('crypto').randomBytes(64).toString('hex');
