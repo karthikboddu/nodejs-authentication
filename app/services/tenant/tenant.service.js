@@ -67,7 +67,9 @@ const saveTenants = async (data,role,parentId) => {
                           reject({ status: 500, message: err })
                           return;
                         } else {
-                          saveTenantRoomContract(data, parentId, data.roomId, t._id)
+                          if (data.addRoomContract) {
+                            saveTenantRoomContract(data, parentId, data.roomId, t._id)
+                          }
                         }
                         resolve({
                             status: 200,

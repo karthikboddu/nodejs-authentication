@@ -16,6 +16,6 @@ module.exports = function(app) {
     app.post("/api/tenant/tenants", [authJwt.verifyToken],controller.createTenant);
     app.post("/api/tenant/login", controller.signInTenant);
     app.post("/api/tenant/SSOLogin",controller.createTenantSSOLogin);
-    app.get("/api/tenant/settings",[authJwt.verifyToken], controller.getTenantsSettings);
+    app.get("/api/tenant/settings",[authJwt.verifyToken], controller.getGlobalSettings);
     
 }

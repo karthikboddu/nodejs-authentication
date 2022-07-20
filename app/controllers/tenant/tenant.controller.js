@@ -33,7 +33,7 @@ exports.createTenant = async (req, res, next) => {
     }
     const userRole = tenantData.userRole ? tenantData.userRole : 'user';
     try {
-      console.log(parentId,"parentid")
+      
         const role = await getRolesByName(userRole);
         
         const result = await saveTenants(tenantData,role,parentId);
@@ -88,6 +88,29 @@ exports.createTenantSSOLogin = async (req, res, next) => {
 
 }
 
+exports.getGlobalSettings = async (req, res, next) => {
+
+  try {
+      const data = {
+        googleRecaptcha : process.env.GOOGLE_RECAPTCHA_KEY,
+        paymentEnv : process.env.PAYMENT_ENV,
+        signUpEnabled: process.env.SIGN_UP_ENABLED,
+        ssoEnabled : process.env.SSO_ENABLED,
+        googleSettings : {
+          expoClientId : process.env.EXPO_CLIENT_ID,
+          iosClientId : process.env.IOS_CLIENT_ID,
+          androidClientId : process.env.ANDRIOD_CLIENT_ID,
+          webClientId : process.env.WEB_CLIENT_ID, 
+        }
+      }
+      res.api.data = data;
+      return res.status(200).send(res.api);
+  } catch (error) {
+    return next(error);
+  }
+
+}
+
 exports.getTenantsSettings = async (req, res, next) => {
 
   try {
@@ -104,6 +127,12 @@ exports.getTenantsSettings = async (req, res, next) => {
           merchantKey : process.env.MERCHANT_KEY,
           callBackUrl : process.env.CALL_BACK_URL,
           urlScheme : process.env.URL_SCHEME
+        },
+        googleSettings : {
+          expoClientId : process.env.EXPO_CLIENT_ID,
+          iosClientId : process.env.IOS_CLIENT_ID,
+          androidClientId : process.env.ANDRIOD_CLIENT_ID,
+          webClientId : process.env.WEB_CLIENT_ID, 
         }
       }
       res.api.data = data;

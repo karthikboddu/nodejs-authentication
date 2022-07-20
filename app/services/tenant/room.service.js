@@ -145,14 +145,6 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
                     parent_id : parentId,
                     status: true
                 })
-            const orderMasterObject = new orderMaster({
-                tenant_id: tenantId,
-                room_contract_id: tenantRoomContractObject._id,
-                amount_paid: data.price,
-                payment_status: data.paymentStatus,
-                status: true
-            })
-
 
 
             tenantRoomContract.findOne({ tenant_id: tenantId, floor_room_id: roomId, status: true })
@@ -166,7 +158,6 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
                                 reject({ status: 500, message: err })
                                 return;
                             }
-
                             const tenantRoomPaymentsObject = new tenantRoomPayments(
                                 {
                                     tenant_id: tenantId,
@@ -199,6 +190,20 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
                                     reject({ status: 500, message: err })
                                     return;
                                 }
+
+                                const buildingData = {
+                                    total_amount : data.buildingAmount + data.amount
+                                }
+
+                                // tenantBuilding.findByIdAndUpdate(data.buildingId, buildingData, {useFindAndModify: false})
+                                // .then(res => {
+                                // })
+                                // .catch(err => {
+                                //     console.log(err, "err")
+                                //     reject({ status: 500, message: err })
+                          
+                                // });
+
                                 tenantRoomPaymentsObject1.save((err, t) => {
                                     if (err) {
                                         reject({ status: 500, message: err })
