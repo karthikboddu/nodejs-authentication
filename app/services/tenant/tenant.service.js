@@ -234,9 +234,32 @@ const saveSSOTenants = async (data,role,parentId) => {
 }
 
 
+const updateTenantDetails = async (req,tenantId,data) => {
+    
+  return new Promise((resolve, reject) => {
+
+  tenant.findByIdAndUpdate(tenantId, data, {useFindAndModify: false})
+    .then(res => {
+          resolve({
+            status: 200,
+            data: res,
+            message: "updated successfully!"
+        });
+    })
+    .catch(err => {
+        console.log(err, "err")
+        reject({ status: 500, message: err })
+
+      });
+
+  })
+}
+
+
 module.exports = {
     listTenants,
     saveTenants,
     logInTenants,
-    saveSSOTenants
+    saveSSOTenants,
+    updateTenantDetails
 }

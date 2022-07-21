@@ -1,6 +1,6 @@
 const errorCode = require('../../common/errorCode'),
       _ = require('lodash'),
-      {listTenants,saveTenants,logInTenants,saveSSOTenants} = require('../../services/tenant/tenant.service'),
+      {listTenants,saveTenants,logInTenants,saveSSOTenants,updateTenantDetails} = require('../../services/tenant/tenant.service'),
       {getRolesByName}  = require('../../helpers/roles.helper');
 
 exports.tenants = async (req, res, next) => {
@@ -21,6 +21,24 @@ exports.tenants = async (req, res, next) => {
     } catch (error) {
       return res.send(error);
     }
+}
+
+exports.updateTenant = async (req, res, next) => {
+
+  try {
+ 
+    const tenantData = req.body;
+
+    if(!tenantData) {
+      return res.status(500).send({ message: errorCode.BAD_REQUEST });
+    }
+
+    
+    const result = await updateTenantDetails(req, req.userId, tenantData);
+    res.send(result);
+  } catch (error) {
+    return res.send(error);
+  }
 }
 
 exports.createTenant = async (req, res, next) => {
