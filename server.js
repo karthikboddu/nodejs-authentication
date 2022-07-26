@@ -10,10 +10,9 @@ const config = require('./app/config')
 const helpers = require('./app/helpers');
 const routes = require('./app/routes')
 const services = require('./app/services');
-const server = require('http').createServer(app);
-const io = require("socket.io")(server);
-const socketManage = require('./socketManage')(io)
-io.on('connection', socketManage );
+
+// const socketManage = require('./socketManage')(io)
+
 
 
 //swagger
@@ -103,6 +102,10 @@ app.get("/", (req, res) => {
   res.json({ message: "welcome to sample" , requestId: req.rid});
 });
 
+// app.get('/socket.io/', (req, res) => {
+
+//   res.send('Hello world');
+// });
 
 app.set('routes', routes(app));
 
@@ -197,8 +200,23 @@ app.use((err, req, res, next) => {
   })
 
 })
+const server = require('http').Server(app);
+const io = require("socket.io")(server,{cors: {origin:"*"}});
 
-app.listen(app.get('config').api.port, () => {
+io.on('connection', (socket) => {
+  
+  console.log('a user connected');
+  
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+  
+  socket.on('my message', (msg) => {
+    console.log('message: ' + msg);
+  });
+});
+
+server.listen(app.get('config').api.port, () => {
   console.log(`server is running at port ${app.get('config').api.port}.`);
 });
 
