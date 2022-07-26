@@ -10,6 +10,11 @@ const config = require('./app/config')
 const helpers = require('./app/helpers');
 const routes = require('./app/routes')
 const services = require('./app/services');
+const server = require('http').createServer(app);
+const io = require("socket.io")(server);
+const socketManage = require('./socketManage')(io)
+io.on('connection', socketManage );
+
 
 //swagger
 const swaggerJsDoc = require("swagger-jsdoc");
