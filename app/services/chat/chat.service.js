@@ -1,6 +1,7 @@
 const db = require("../../models"),
     userConversations = db.tenant.userConversation,
     Promise = require('bluebird');
+    const _           = require('lodash');
 
 var mongoose = require('mongoose');
 
@@ -85,7 +86,7 @@ const transformRecord = (record) => {
         to_tenant_id: record.to_tenant_id,
         parent_id: record.parent_id,
         text: record.text,
-        user: record.from_tenant_id,
+        user:  trasformUserRecord(record.from_tenant_id),
         asset_url: record.asset_url,
         asset_type: record.asset_type,
         seen: record.seen,
@@ -96,6 +97,15 @@ const transformRecord = (record) => {
         created_at: record.created_at,
         updated_at: record.updated_at
     };
+}
+
+function trasformUserRecord (record)  {
+    console.log(record,"record")
+    return {
+        _id : record._id,
+        name : record.full_name,
+        avatar : record.photoUrl
+    }
 }
 
 
