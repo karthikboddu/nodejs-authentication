@@ -1,7 +1,7 @@
 const { getPagination } = require("../../common/util");
 const errorCode = require('../../common/errorCode');
 const _           = require('lodash');
-const {listChatConversations, saveChatConversations} = require('../../services/chat/chat.service')
+const {listChatConversations, saveChatConversations, transformRecord} = require('../../services/chat/chat.service')
 
 
 exports.createChatConversation = async (req, res, next) => {
@@ -43,7 +43,7 @@ exports.listChatConversation = async (req, res, next) => {
 
         const pagination = getPagination(page, size, totalCount);
         res.api.data = {
-          conversations: result.data,
+          conversation : _.map(result.data, (record) => transformRecord(record)),
           _pagination : pagination
         };
         req.app.get('log').info(_.assign(req.app.get('logEntry'), {

@@ -79,8 +79,28 @@ const saveChatConversations = async (req, res, data, tenantId, parentId) => {
 
 }
 
+const transformRecord = (record) => {
+    return {
+        _id: record._id,
+        to_tenant_id: record.to_tenant_id,
+        parent_id: record.parent_id,
+        text: record.text,
+        user: record.from_tenant_id,
+        asset_url: record.asset_url,
+        asset_type: record.asset_type,
+        seen: record.seen,
+        sent: record.sent,
+        received: record.received,
+        pending: record.pending,
+        is_active: record.is_active,
+        created_at: record.created_at,
+        updated_at: record.updated_at
+    };
+}
+
 
 module.exports = {
     listChatConversations,
-    saveChatConversations
+    saveChatConversations,
+    transformRecord
 };
