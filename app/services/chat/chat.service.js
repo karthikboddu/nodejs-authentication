@@ -14,7 +14,7 @@ const listChatConversations = async (req, res, tenantId, skip, limit, toTenantId
         try {
             userConversations.find({ from_tenant_id: tenantId, to_tenant_id: toTenantId })
                 .populate({
-                    path: 'from_tenant_id',
+                    path: 'to_tenant_id',
                     select: ['username', 'full_name', 'email', 'mobile_no', 'address', 'start_at', 'end_at', 'created_at', 'photoUrl']
                 })
                 .limit(limit).skip(skip).sort({ updated_at: -1 })
@@ -83,10 +83,10 @@ const saveChatConversations = async (req, res, data, tenantId, parentId) => {
 const transformRecord = (record) => {
     return {
         _id: record._id,
-        to_tenant_id: record.to_tenant_id,
+        from_tenant_id: record.from_tenant_id,
         parent_id: record.parent_id,
         text: record.text,
-        user:  trasformUserRecord(record.from_tenant_id),
+        user:  trasformUserRecord(record.to_tenant_id),
         asset_url: record.asset_url,
         asset_type: record.asset_type,
         seen: record.seen,
