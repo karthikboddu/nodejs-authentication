@@ -10,6 +10,7 @@ const config = require('./app/config')
 const helpers = require('./app/helpers');
 const routes = require('./app/routes')
 const services = require('./app/services');
+const jwt = require('jsonwebtoken');
 
 // const socketManage = require('./socketManage')(io)
 
@@ -203,6 +204,31 @@ app.use((err, req, res, next) => {
 const server = require('http').Server(app);
 const io = require("socket.io")(server,{cors: {origin:"*"}});
 
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  console.log('token', token);
+  next();
+});
+
+io.use(async (socket, next) => {
+  // fetch token from handshake auth sent by FE
+  const token = socket.handshake.auth.token;
+  try {
+    // verify jwt token and get user data
+    const user = await jwt.verify(token, process.env.JWT_SECRET_KEY);
+    console.log('user', user);
+    // save the user data into socket object, to be used further
+    socket.user = user;
+    next();
+  } catch (e) {
+    // if token is invalid, close connection
+    console.log('error', e.message);
+    return next(new Error(e.message));
+  }
+});
+
+
+
 io.on('connection', (socket) => {
   
   console.log('a user connected');
@@ -214,6 +240,31 @@ io.on('connection', (socket) => {
   socket.on('my message', (msg) => {
     console.log('message: ' + msg);
   });
+
+  socket.on("join", (roomName) => {
+    console.log("join: " + roomName);
+    socket.join(roomName);
+  });
+
+  socket.on('message', ({message, roomName, rtoken}, callback) => {
+    console.log('message: ' + message + ' in ' + roomName + 'token' + rtoken);
+
+    // generate data to send to receivers
+    const outgoingMessage = {
+      name: socket.user.name,
+      _id: socket.user.id,
+      text : message,
+      user : socket.user
+    };
+    // send socket to all in room except sender
+    io.emit(rtoken, outgoingMessage);
+    callback({
+      status: "ok"
+    });
+    // send to all including sender
+    // io.to(roomName).emit('message', message);
+  })
+
 });
 
 server.listen(app.get('config').api.port, () => {

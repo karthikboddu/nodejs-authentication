@@ -6,7 +6,8 @@ const _     = require('lodash'),
         'building.routes',
         'floor.routes',
         'room.routes',
-        'order.routes'
+        'order.routes',
+        'chats.routes'
     ];
 
 function init(app) {
