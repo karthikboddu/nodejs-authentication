@@ -56,6 +56,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 const _ = require('lodash');
 const { logger } = require("./app/helpers/init_logger");
+const { saveChatConversations } = require("./app/services/chat/chat.service");
 var a = require('crypto').randomBytes(64).toString('hex');
 
 var corsOptions = {
@@ -215,10 +216,10 @@ io.use(async (socket, next) => {
   const token = socket.handshake.auth.token;
   try {
     // verify jwt token and get user data
-    const user = await jwt.verify(token, process.env.JWT_SECRET_KEY);
-    console.log('user', user);
+    // const user = await jwt.verify(token, process.env.JWT_SECRET_KEY);
+    // console.log('user', user);
     // save the user data into socket object, to be used further
-    socket.user = user;
+    socket.user = token;
     next();
   } catch (e) {
     // if token is invalid, close connection
@@ -246,18 +247,23 @@ io.on('connection', (socket) => {
     socket.join(roomName);
   });
 
-  socket.on('message', ({message, roomName, rtoken}, callback) => {
-    console.log('message: ' + message + ' in ' + roomName + 'token' + rtoken);
+  socket.on('message', ({message, roomName, stoken, to, parentId  }, callback) => {
+    console.log('message: ' + message + ' in ' + roomName + ' token ' + stoken + ' to ' + to);
 
     // generate data to send to receivers
     const outgoingMessage = {
-      name: socket.user.name,
-      _id: socket.user.id,
+      toTenantId : to,
       text : message,
       user : socket.user
     };
     // send socket to all in room except sender
-    io.emit(rtoken, outgoingMessage);
+    try {
+      const result = saveChatConversations(outgoingMessage, socket.user, parentId)
+      io.emit(stoken, result);  
+    } catch (error) {
+      return next(error)
+    }
+    
     callback({
       status: "ok"
     });

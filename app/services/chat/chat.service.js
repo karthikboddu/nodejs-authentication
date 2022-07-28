@@ -25,11 +25,11 @@ const listChatConversations = async (req, res, tenantId, skip, limit, toTenantId
 
 
 
-const saveChatConversations = async (req, res, data, tenantId, parentId) => {
+const saveChatConversations = async ( data, tenantId, parentId) => {
 
     return new Promise((resolve, reject) => {
         try {
-
+            console.log(data.text,"e1r")
             let from = mongoose.Types.ObjectId(tenantId);
             let to = mongoose.Types.ObjectId(data.toTenantId);
             lastConversation.findOneAndUpdate(
@@ -46,13 +46,16 @@ const saveChatConversations = async (req, res, data, tenantId, parentId) => {
                     from_tenant_id : tenantId,
                     to_tenant_id : data.toTenantId,
                     lastMessage: data.text,
+                    parent_id : parentId,
                     updated_at: Date.now(),
                 },
-                { upsert: true, new: true, setDefaultsOnInsert: true },
+                { upsert: true, new: true, setDefaultsOnInsert: true,useFindAndModify: false },
                 function(err, conversation) {
                     if(err) {
-
+                        console.log(tenantId,"err",err)
+                        reject({ status: 500, message: err })
                     } else {
+                        console.log(parentId)
                         const userConversationObject = new userConversations({
                             from_tenant_id: tenantId,
                             to_tenant_id: data.toTenantId,
@@ -64,15 +67,21 @@ const saveChatConversations = async (req, res, data, tenantId, parentId) => {
                         userConversationObject.save((err, t) => {
                             if (err) {
                                 reject({ status: 500, message: err })
+                                return
                             }
                             resolve({
                                 status: 200,
                                 data: t,
                                 message: "Chat created successfully!"
                             });
-                        });
+                        })
                     }
-                });
+                }).catch(err => {
+                    reject({
+                        err
+                    })
+                    return;
+                })
  
         } catch (error) {
             reject({ status: 500, message: error })
@@ -131,6 +140,7 @@ const transformAllConversationByTenantData = (record, tenantId) => {
         lastMessage: record.lastMessage,
         user:  trasformUserRecord(users),
         seen: record.seen,
+        parentId : record.parent_id,
         isActive: record.is_active,
         createdAt: record.created_at,
         updatedAt: record.updated_at

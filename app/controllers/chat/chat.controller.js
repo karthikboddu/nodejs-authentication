@@ -12,7 +12,7 @@ exports.createChatConversation = async (req, res, next) => {
           return res.status(500).send({ message: errorCode.BAD_REQUEST });
         }
         
-        const result = await saveChatConversations(req, res, chatData, req.userId, req.parentId)
+        const result = await saveChatConversations(chatData, req.userId, req.parentId)
         console.log(result,"result")
         res.send(result);
     } catch (error) {
