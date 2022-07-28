@@ -147,7 +147,7 @@ const transformAllConversationByTenantData = (record, tenantId) => {
     });
     return {
         _id: record._id,
-        from_tenant_id: record.from_tenant_id,
+        from_tenant_id: tenantId,
         lastMessage: record.lastMessage,
         user:  trasformUserRecord(users),
         seen: record.seen,
