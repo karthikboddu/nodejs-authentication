@@ -72,12 +72,12 @@ exports.listAllTenantConversations = async (req, res, next) => {
         const skip = (page - 1) * size;
         
         const result = await getAllTenantConversationList(req.userId, skip, limit);
-        console.log("SAdas")
+        
         const totalCount = result ? result.length : 0;
 
         const pagination = getPagination(page, size, totalCount);
         res.api.data = {
-          conversations : _.map(result.data, (record) => transformAllConversationByTenantData(record)),
+          conversations : _.map(result.data, (record) => transformAllConversationByTenantData(record, req.userId)),
           _pagination : pagination
         };
         req.app.get('log').info(_.assign(req.app.get('logEntry'), {
