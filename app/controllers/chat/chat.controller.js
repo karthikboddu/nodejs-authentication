@@ -13,7 +13,6 @@ exports.createChatConversation = async (req, res, next) => {
         }
         
         const result = await saveChatConversations(chatData, req.userId, req.parentId)
-        console.log(result,"result")
         res.send(result);
     } catch (error) {
         return res.send(error);

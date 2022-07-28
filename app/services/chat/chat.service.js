@@ -29,7 +29,7 @@ const saveChatConversations = async ( data, tenantId, parentId) => {
 
     return new Promise((resolve, reject) => {
         try {
-            console.log(data.text,"e1r")
+
             let from = mongoose.Types.ObjectId(tenantId);
             let to = mongoose.Types.ObjectId(data.toTenantId);
             lastConversation.findOneAndUpdate(
@@ -49,13 +49,17 @@ const saveChatConversations = async ( data, tenantId, parentId) => {
                     parent_id : parentId,
                     updated_at: Date.now(),
                 },
-                { upsert: true, new: true, setDefaultsOnInsert: true,useFindAndModify: false },
-                function(err, conversation) {
+                { upsert: true, new: true, setDefaultsOnInsert: true,useFindAndModify: false })
+                .populate({
+                    path: 'to_tenant_id',
+                    select: ['username', 'full_name', 'email', 'mobile_no', 'address', 'start_at', 'end_at', 'created_at', 'photoUrl']
+                })
+                .exec(function(err, conversation) {
                     if(err) {
                         console.log(tenantId,"err",err)
                         reject({ status: 500, message: err })
                     } else {
-                        console.log(parentId)
+                        
                         const userConversationObject = new userConversations({
                             from_tenant_id: tenantId,
                             to_tenant_id: data.toTenantId,
@@ -69,18 +73,24 @@ const saveChatConversations = async ( data, tenantId, parentId) => {
                                 reject({ status: 500, message: err })
                                 return
                             }
-                            resolve({
-                                status: 200,
-                                data: t,
-                                message: "Chat created successfully!"
-                            });
+                            t.populate({path: 'to_tenant_id',
+                            select: ['username', 'full_name', 'email', 'mobile_no', 'address', 'start_at', 'end_at', 'created_at', 'photoUrl']}, function(err, book) {
+
+                               if (err) {
+                                reject({ status: 500, message: err })
+                                return
+                                } else {
+                                    resolve({
+                                        status: 200,
+                                        data: transformRecord(book),
+                                        message: "Chat created successfully!"
+                                    });
+                                }
+                            })
+
+
                         })
                     }
-                }).catch(err => {
-                    reject({
-                        err
-                    })
-                    return;
                 })
  
         } catch (error) {
@@ -100,6 +110,7 @@ const getAllTenantConversationList = async(tenantId, skip, limit) => {
 }
 
 const transformRecord = (record) => {
+    console.log(record)
     return {
         _id: record._id,
         from_tenant_id: record.from_tenant_id,

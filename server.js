@@ -247,7 +247,7 @@ io.on('connection', (socket) => {
     socket.join(roomName);
   });
 
-  socket.on('message', ({message, roomName, stoken, to, parentId  }, callback) => {
+  socket.on('message', async({message, roomName, stoken, to, parentId  }, callback) => {
     console.log('message: ' + message + ' in ' + roomName + ' token ' + stoken + ' to ' + to);
 
     // generate data to send to receivers
@@ -258,8 +258,8 @@ io.on('connection', (socket) => {
     };
     // send socket to all in room except sender
     try {
-      const result = saveChatConversations(outgoingMessage, socket.user, parentId)
-      io.emit(stoken, result);  
+      const result = await saveChatConversations(outgoingMessage, socket.user, parentId)
+      io.emit(to, result.data);  
     } catch (error) {
       return next(error)
     }
