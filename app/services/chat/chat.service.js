@@ -2,49 +2,23 @@ const db = require("../../models"),
     userConversations = db.tenant.userConversation,
     Promise = require('bluebird');
     const _           = require('lodash');
-
 var mongoose = require('mongoose');
+const { findUserConversationByFromTenantIdAndFromTenantId,
+    findUserConversationFromTenantIdAndFromTenantIdAgg } = require("../../repository/UserConversationRepository");
 
 
 
 const listChatConversations = async (req, res, tenantId, skip, limit, toTenantId) => {
 
-    console.log("users", limit, "-", skip)
-    return new Promise((resolve, reject) => {
         try {
-            userConversations.find({ from_tenant_id: tenantId, to_tenant_id: toTenantId })
-                .populate({
-                    path: 'to_tenant_id',
-                    select: ['username', 'full_name', 'email', 'mobile_no', 'address', 'start_at', 'end_at', 'created_at', 'photoUrl']
-                })
-                .limit(limit).skip(skip).sort({ updated_at: -1 })
-                .then(conversations => {
-
-                    resolve({
-                        data: conversations
-                    });
-                    return;
-
-                })
-                .catch(err => {
-                    reject({
-                        status: 500,
-                        message:
-                            err.message || "Some error occurred while retrieving data."
-                    })
-                    return;
-                })
-
+            const data = await findUserConversationByFromTenantIdAndFromTenantId(tenantId, skip, limit, toTenantId);
+            console.log(data,"data")
+            return data;
         } catch (error) {
             console.log(error)
-            reject({
-                status: 500,
-                message:
-                    err.message || "Some error occurred while retrieving data."
-            })
+            return error;
         }
-    })
-
+ 
 }
 
 
@@ -53,7 +27,6 @@ const saveChatConversations = async (req, res, data, tenantId, parentId) => {
 
     return new Promise((resolve, reject) => {
         try {
-            console.log(userConversations, "parent")
             const userConversationObject = new userConversations({
                 from_tenant_id: tenantId,
                 to_tenant_id: data.toTenantId,
@@ -100,7 +73,6 @@ const transformRecord = (record) => {
 }
 
 function trasformUserRecord (record)  {
-    console.log(record,"record")
     return {
         _id : record._id,
         name : record.full_name,
