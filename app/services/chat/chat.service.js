@@ -43,6 +43,8 @@ const saveChatConversations = async (req, res, data, tenantId, parentId) => {
                 },
                 {
                     recipients: [tenantId, data.toTenantId],
+                    from_tenant_id : tenantId,
+                    to_tenant_id : data.toTenantId,
                     lastMessage: data.text,
                     updated_at: Date.now(),
                 },
@@ -119,9 +121,9 @@ function trasformUserRecord (record)  {
 const transformAllConversationByTenantData = (record) => {
     return {
         _id: record._id,
-        from_tenant_id: record.recipients[0] ? record.recipients[0]._id : null,
+        from_tenant_id: record.from_tenant_id,
         lastMessage: record.lastMessage,
-        user:  trasformUserRecord(record.recipients[1] ? record.recipients[1] : []),
+        user:  trasformUserRecord(record.to_tenant_id),
         seen: record.seen,
         isActive: record.is_active,
         createdAt: record.created_at,

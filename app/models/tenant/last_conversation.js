@@ -3,6 +3,16 @@ module.exports = (mongoose) => {
     const lastConversation = mongoose.model("last_conversation",
                                 new mongoose.Schema({
                                     recipients: [{ type: mongoose.Schema.Types.ObjectId, ref: 'tenant' }],
+                                    from_tenant_id :{
+                                        type : mongoose.Schema.Types.ObjectId,
+                                        required: true,
+                                        ref: "tenant"
+                                    },
+                                    to_tenant_id :{
+                                        type : mongoose.Schema.Types.ObjectId,
+                                        required: true,
+                                        ref: "tenant"
+                                    },
                                     lastMessage: {
                                         type: String,
                                     },

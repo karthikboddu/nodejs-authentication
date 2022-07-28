@@ -38,7 +38,7 @@ const findAllLastConversations = async (tenantId, skip, limit) => {
         lastConversation.find(
             {  recipients:{$all: [{$elemMatch : {$eq : user }}]} }) 
         .populate({
-            path: 'recipients',
+            path: 'to_tenant_id',
             select: ['username', 'full_name', 'email', 'mobile_no', 'address', 'start_at', 'end_at', 'created_at', 'photoUrl']
         })
         .limit(limit).skip(skip).sort({ updated_at: -1 })
