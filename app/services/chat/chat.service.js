@@ -1,10 +1,12 @@
 const db = require("../../models"),
     userConversations = db.tenant.userConversation,
+    lastConversation = db.tenant.lastConversation,
     Promise = require('bluebird');
     const _           = require('lodash');
 var mongoose = require('mongoose');
 const { findUserConversationByFromTenantIdAndFromTenantId,
-    findUserConversationFromTenantIdAndFromTenantIdAgg } = require("../../repository/UserConversationRepository");
+    findUserConversationFromTenantIdAndFromTenantIdAgg,
+    findAllLastConversations } = require("../../repository/UserConversationRepository");
 
 
 
@@ -27,30 +29,63 @@ const saveChatConversations = async (req, res, data, tenantId, parentId) => {
 
     return new Promise((resolve, reject) => {
         try {
-            const userConversationObject = new userConversations({
-                from_tenant_id: tenantId,
-                to_tenant_id: data.toTenantId,
-                parent_id: parentId,
-                text: data.text,
-                asset_url: data.assetUrl ? data.assetUrl : null,
-                asset_type: data.assetType ? data.assetType : 'TEXT',
-            });
-            userConversationObject.save((err, t) => {
-                if (err) {
-                    reject({ status: 500, message: err })
-                }
-                resolve({
-                    status: 200,
-                    data: t,
-                    message: "Chat created successfully!"
+
+            let from = mongoose.Types.ObjectId(tenantId);
+            let to = mongoose.Types.ObjectId(data.toTenantId);
+            lastConversation.findOneAndUpdate(
+                {
+                    recipients: {
+                        $all: [
+                            { $elemMatch: { $eq: from } },
+                            { $elemMatch: { $eq: to } },
+                        ],
+                    },
+                },
+                {
+                    recipients: [tenantId, data.toTenantId],
+                    lastMessage: data.text,
+                    updated_at: Date.now(),
+                },
+                { upsert: true, new: true, setDefaultsOnInsert: true },
+                function(err, conversation) {
+                    if(err) {
+
+                    } else {
+                        const userConversationObject = new userConversations({
+                            from_tenant_id: tenantId,
+                            to_tenant_id: data.toTenantId,
+                            parent_id: parentId,
+                            text: data.text,
+                            asset_url: data.assetUrl ? data.assetUrl : null,
+                            asset_type: data.assetType ? data.assetType : 'TEXT',
+                        });
+                        userConversationObject.save((err, t) => {
+                            if (err) {
+                                reject({ status: 500, message: err })
+                            }
+                            resolve({
+                                status: 200,
+                                data: t,
+                                message: "Chat created successfully!"
+                            });
+                        });
+                    }
                 });
-            });
+ 
         } catch (error) {
             reject({ status: 500, message: error })
         }
     })
+}
 
-
+const getAllTenantConversationList = async(tenantId, skip, limit) => {
+    try {
+        const data = await findAllLastConversations(tenantId, skip, limit);
+        return data;
+    } catch (error) {
+        console.log(error);
+        return error;
+    }
 }
 
 const transformRecord = (record) => {
@@ -73,6 +108,7 @@ const transformRecord = (record) => {
 }
 
 function trasformUserRecord (record)  {
+
     return {
         _id : record._id,
         name : record.full_name,
@@ -80,9 +116,24 @@ function trasformUserRecord (record)  {
     }
 }
 
+const transformAllConversationByTenantData = (record) => {
+    return {
+        _id: record._id,
+        from_tenant_id: record.recipients[0] ? record.recipients[0]._id : null,
+        lastMessage: record.lastMessage,
+        user:  trasformUserRecord(record.recipients[1] ? record.recipients[1] : []),
+        seen: record.seen,
+        isActive: record.is_active,
+        createdAt: record.created_at,
+        updatedAt: record.updated_at
+    }
+}
+
 
 module.exports = {
     listChatConversations,
     saveChatConversations,
-    transformRecord
+    transformRecord,
+    getAllTenantConversationList,
+    transformAllConversationByTenantData
 };

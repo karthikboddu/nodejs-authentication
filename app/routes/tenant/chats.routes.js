@@ -13,7 +13,8 @@ module.exports = function(app) {
     });
 
     app.post("/api/chat/chats",[authJwt.verifyToken], controller.createChatConversation);
-    app.get("/api/chat/chats/:tenantId",[authJwt.verifyToken], controller.listChatConversation);
+    app.get("/api/chat/chats/:tenantId",[authJwt.verifyToken], controller.listChatConversationByTenant);
+    app.get("/api/chat/conversations",[authJwt.verifyToken], controller.listAllTenantConversations);
 
 
 }

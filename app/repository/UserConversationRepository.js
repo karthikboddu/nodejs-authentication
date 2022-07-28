@@ -1,5 +1,6 @@
 const db = require("../models"),
     userConversations = db.tenant.userConversation,
+    lastConversation = db.tenant.lastConversation,
     Promise = require('bluebird');
     const mongoose = require('mongoose');
 
@@ -19,7 +20,6 @@ const findUserConversationByFromTenantIdAndFromTenantId = (tenantId, skip, limit
                 data: conversations
             });
             return;
-
         })
         .catch(err => {
             reject({
@@ -28,6 +28,32 @@ const findUserConversationByFromTenantIdAndFromTenantId = (tenantId, skip, limit
             return;
         })
 
+    })
+}
+
+const findAllLastConversations = async (tenantId, skip, limit) => {
+
+    return new Promise((resolve, reject) => {
+        let user = mongoose.Types.ObjectId(tenantId);
+        lastConversation.find(
+            {  recipients:{$all: [{$elemMatch : {$eq : user }}]} }) 
+        .populate({
+            path: 'recipients',
+            select: ['username', 'full_name', 'email', 'mobile_no', 'address', 'start_at', 'end_at', 'created_at', 'photoUrl']
+        })
+        .limit(limit).skip(skip).sort({ updated_at: -1 })
+        .then(conversations => {
+            resolve({
+                data: conversations
+            });
+            return;
+        })
+        .catch(err => {
+            reject({
+                err
+            })
+            return;
+        })
     })
 }
 
@@ -85,5 +111,6 @@ const findUserConversationFromTenantIdAndFromTenantIdAgg = async(tenantId, skip,
 
 module.exports = {
     findUserConversationByFromTenantIdAndFromTenantId,
-    findUserConversationFromTenantIdAndFromTenantIdAgg
+    findUserConversationFromTenantIdAndFromTenantIdAgg,
+    findAllLastConversations
 }

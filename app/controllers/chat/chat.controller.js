@@ -1,7 +1,8 @@
 const { getPagination } = require("../../common/util");
 const errorCode = require('../../common/errorCode');
 const _           = require('lodash');
-const {listChatConversations, saveChatConversations, transformRecord} = require('../../services/chat/chat.service')
+const {listChatConversations, saveChatConversations, transformRecord,getAllTenantConversationList,
+    transformAllConversationByTenantData} = require('../../services/chat/chat.service')
 
 
 exports.createChatConversation = async (req, res, next) => {
@@ -21,7 +22,7 @@ exports.createChatConversation = async (req, res, next) => {
 
 
 
-exports.listChatConversation = async (req, res, next) => {
+exports.listChatConversationByTenant = async (req, res, next) => {
     try {
         let {page, size} = req.query;
         if (!page) {
@@ -44,6 +45,39 @@ exports.listChatConversation = async (req, res, next) => {
         const pagination = getPagination(page, size, totalCount);
         res.api.data = {
           conversation : _.map(result.data, (record) => transformRecord(record)),
+          _pagination : pagination
+        };
+        req.app.get('log').info(_.assign(req.app.get('logEntry'), {
+          'status': res.api.status
+        }));
+  
+        res.send(res.api);
+    } catch (error) {
+        return res.send(error);
+    }
+}
+
+
+exports.listAllTenantConversations = async (req, res, next) => {
+
+    try {
+        let {page, size} = req.query;
+        if (!page) {
+            page = 1;
+        }
+        if (!size) {
+            size = 10;
+        }
+        const limit = parseInt (size);
+        const skip = (page - 1) * size;
+        
+        const result = await getAllTenantConversationList(req.userId, skip, limit);
+        console.log("SAdas")
+        const totalCount = result ? result.length : 0;
+
+        const pagination = getPagination(page, size, totalCount);
+        res.api.data = {
+          conversations : _.map(result.data, (record) => transformAllConversationByTenantData(record)),
           _pagination : pagination
         };
         req.app.get('log').info(_.assign(req.app.get('logEntry'), {
