@@ -43,8 +43,6 @@ const saveChatConversations = async ( data, tenantId, parentId) => {
                 },
                 {
                     recipients: [tenantId, data.toTenantId],
-                    from_tenant_id : tenantId,
-                    to_tenant_id : data.toTenantId,
                     lastMessage: data.text,
                     parent_id : parentId,
                     updated_at: Date.now(),
