@@ -261,7 +261,7 @@ io.on('connection', (socket) => {
       const result = await saveChatConversations(outgoingMessage, socket.user, parentId)
       io.emit(to, result.data);  
     } catch (error) {
-      return next(error)
+      console.log(error);
     }
     
     callback({
