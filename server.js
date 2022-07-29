@@ -271,7 +271,33 @@ io.on('connection', (socket) => {
     // io.to(roomName).emit('message', message);
   })
 
+  socket.on('typing', async({message, stoken, isTyping, to }, callback) => {
+    console.log('message: ' + message + ' in ' + ' token ' + stoken + ' to ' + to + ' istyping ' + isTyping);
+    const typing = isTyping;
+    // generate data to send to receivers
+    const outgoingMessage = {
+      isTyping : typing,
+      senderToken : stoken,
+      receiverToken : to
+    };
+    // send socket to all in room except sender
+    try {
+      io.emit(to, outgoingMessage);  
+    } catch (error) {
+      return next(error)
+    }
+    
+    callback({
+      status: "ok"
+    });
+    // send to all including sender
+    // io.to(roomName).emit('message', message);
+  })
+
+
 });
+
+
 
 server.listen(app.get('config').api.port, () => {
   console.log(`server is running at port ${app.get('config').api.port}.`);
