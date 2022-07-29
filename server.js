@@ -271,7 +271,7 @@ io.on('connection', (socket) => {
     // io.to(roomName).emit('message', message);
   })
 
-  socket.on('typing', async({message, stoken, isTyping, to }, callback) => {
+  socket.on('typing', async({message, stoken , to, isTyping }, callback) => {
     console.log('message: ' + message + ' in ' + ' token ' + stoken + ' to ' + to + ' istyping ' + isTyping);
     const typing = isTyping;
     // generate data to send to receivers
@@ -284,7 +284,7 @@ io.on('connection', (socket) => {
     try {
       io.emit(to, outgoingMessage);  
     } catch (error) {
-      return next(error)
+      console.log(error);
     }
     
     callback({
