@@ -71,7 +71,7 @@ const saveChatConversations = async ( data, tenantId, parentId) => {
                                 reject({ status: 500, message: err })
                                 return
                             }
-                            t.populate({path: 'to_tenant_id',
+                            t.populate({path: 'from_tenant_id',
                             select: ['username', 'full_name', 'email', 'mobile_no', 'address', 'start_at', 'end_at', 'created_at', 'photoUrl']}, function(err, book) {
 
                                if (err) {
