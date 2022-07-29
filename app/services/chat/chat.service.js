@@ -114,7 +114,7 @@ const transformRecord = (record) => {
         from_tenant_id: record.from_tenant_id,
         parent_id: record.parent_id,
         text: record.text,
-        user:  trasformUserRecord(record.to_tenant_id),
+        user:  trasformUserRecord(record.from_tenant_id),
         asset_url: record.asset_url,
         asset_type: record.asset_type,
         seen: record.seen,

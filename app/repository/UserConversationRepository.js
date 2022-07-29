@@ -11,7 +11,7 @@ const findUserConversationByFromTenantIdAndFromTenantId = (tenantId, skip, limit
         userConversations.find(
             {$or: [  { $and: [{ 'from_tenant_id': tenantId }, { 'to_tenant_id': toTenantId }] },  { $and: [{ 'from_tenant_id': toTenantId }, { 'to_tenant_id': tenantId }] }   ]})
         .populate({
-            path: 'to_tenant_id',
+            path: 'from_tenant_id',
             select: ['username', 'full_name', 'email', 'mobile_no', 'address', 'start_at', 'end_at', 'created_at', 'photoUrl']
         })
         .limit(limit).skip(skip).sort({ updated_at: -1 })
