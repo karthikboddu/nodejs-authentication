@@ -14,7 +14,7 @@ const findUserConversationByFromTenantIdAndFromTenantId = (tenantId, skip, limit
             path: 'from_tenant_id',
             select: ['username', 'full_name', 'email', 'mobile_no', 'address', 'start_at', 'end_at', 'created_at', 'photoUrl']
         })
-        .limit(limit).skip(skip)
+        .limit(limit).skip(skip).sort({ updated_at: -1 })
         .then(conversations => {
             resolve({
                 data: conversations
