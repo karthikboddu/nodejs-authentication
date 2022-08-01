@@ -119,6 +119,15 @@ exports.getGlobalSettings = async (req, res, next) => {
           iosClientId : process.env.IOS_CLIENT_ID,
           androidClientId : process.env.ANDRIOD_CLIENT_ID,
           webClientId : process.env.WEB_CLIENT_ID, 
+        },
+        paymentEnabled : process.env.PAYMENT_ENABLED,
+        paymentMethod : process.env.PAYMENT_METHOD,
+        paymentEnv : process.env.PAYMENT_ENV,
+        paytmPaymentSettings : {
+          merchantId : process.env.MID,
+          merchantKey : process.env.MERCHANT_KEY,
+          callBackUrl : process.env.CALL_BACK_URL,
+          urlScheme : process.env.URL_SCHEME
         }
       }
       res.api.data = data;
