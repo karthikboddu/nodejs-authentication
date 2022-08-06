@@ -62,7 +62,7 @@ const saveChatConversations = async ( data, tenantId, parentId) => {
                             from_tenant_id: tenantId,
                             to_tenant_id: data.toTenantId,
                             parent_id: parentId,
-                            text: data.text ? data.text : null,
+                            text: data.text ? data.text : "",
                             asset_url: data.assetUrl ? data.assetUrl : null,
                             asset_type: data.assetType ? data.assetType : 'TEXT',
                         });
