@@ -257,6 +257,7 @@ io.on('connection', (socket) => {
       user : socket.user,
       assetUrl : image
     };
+    console.log(outgoingMessage,"outgoingMessage");
     // send socket to all in room except sender
     try {
       const result = await saveChatConversations(outgoingMessage, socket.user, parentId)
