@@ -138,14 +138,18 @@ function trasformUserRecord (record)  {
 
 const transformAllConversationByTenantData = (record, tenantId) => {
     let users = {}; 
+    let fromUsers = {}; 
     record.recipients.forEach(element => {
         if (element._id != tenantId) {
             users = element;
+        } else {
+            fromUsers = element;
         }
     });
     return {
         _id: record._id,
         from_tenant_id: tenantId,
+        fromUser : trasformUserRecord(fromUsers),
         lastMessage: record.lastMessage,
         user:  trasformUserRecord(users),
         seen: record.seen,
