@@ -310,3 +310,4 @@ server.listen(app.get('config').api.port, () => {
 logger.info(
   'Listening on server : ' + `${app.get('config').api.host}` + ' - port :  ' + app.get('config').api.port
 );
+module.exports = app;

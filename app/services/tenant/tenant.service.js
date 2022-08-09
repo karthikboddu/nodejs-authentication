@@ -15,20 +15,47 @@ const db = require("../../models"),
 const listTenants = async (req, limit, skip, buildingId) => {
 
     return new Promise((resolve, reject) => {
-      var parentId = req.userId;
+      var parentId = req.userId || req.parentId;
 
-      tenantRoomContract.find({parent_id :parentId, building_id: buildingId, status:true}).populate({ path: 'tenant_id', select: ['username','full_name','email','mobile_no','address','start_at','end_at','created_at'] })
-        .limit(limit).skip(skip).sort({updated_at: -1})
+      let condition = {};
+      if (parentId) {
+         condition = { parent_id : parentId, status : true}
+      } else {
+         condition = { status : true}
+      }
+      
+
+      if (buildingId) {
+       
+          tenantRoomContract.find({parent_id :parentId, building_id: buildingId, status:true})
+          .populate({ path: 'tenant_id', select: ['username','full_name','email','mobile_no','address','start_at','end_at','created_at'] })
+            .limit(limit).skip(skip).sort({updated_at: -1})
+                .then(d => {
+                    resolve({ status: 200, data: d})
+                })
+                .catch(err => {
+                    reject({
+                        status: 500,
+                        message:
+                          err.message || "Some error occurred while retrieving data."
+                      })
+                });
+
+        } else {
+          tenant.find(condition)
+            .limit(limit).skip(skip).sort({updated_at: -1})
             .then(d => {
-                resolve({ status: 200, data: d})
+              
+                resolve({ status: 200, data:  _.map(d, (record) => trasformUserRecord(record))})
             })
             .catch(err => {
                 reject({
                     status: 500,
                     message:
-                      err.message || "Some error occurred while retrieving tutorials."
+                      err.message || "Some error occurred while retrieving data."
                   })
-              });
+            });
+        }
     })
 }
 
@@ -255,11 +282,22 @@ const updateTenantDetails = async (req,tenantId,data) => {
   })
 }
 
+const trasformUserRecord = (record) => {
+
+  return {
+      _id : record._id,
+      name : record.full_name,
+      avatar : record.photoUrl,
+      mobileNumber : record.mobile_no
+  }
+}
+
 
 module.exports = {
     listTenants,
     saveTenants,
     logInTenants,
     saveSSOTenants,
-    updateTenantDetails
+    updateTenantDetails,
+    trasformUserRecord
 }
