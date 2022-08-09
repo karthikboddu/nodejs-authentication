@@ -15,7 +15,7 @@ const db = require("../../models"),
 const listTenants = async (req, limit, skip, buildingId) => {
 
     return new Promise((resolve, reject) => {
-      var parentId = req.userId || req.parentId;
+      var parentId =  req.parentId ? req.parentId : req.userId;
 
       let condition = {};
       if (parentId) {
@@ -23,7 +23,7 @@ const listTenants = async (req, limit, skip, buildingId) => {
       } else {
          condition = { status : true}
       }
-      
+      console.log(condition);
 
       if (buildingId) {
        
