@@ -12,7 +12,7 @@ module.exports = function(app) {
     }); 
 
 
-    app.get("/api/tenant/tenants",[authJwt.verifyToken,authJwt.isAdmin], controller.tenants);
+    app.get("/api/tenant/tenants",[authJwt.verifyToken], controller.tenants);
     app.post("/api/tenant/tenants", [authJwt.verifyToken],controller.createTenant);
     app.post("/api/tenant/login", controller.signInTenant);
     app.post("/api/tenant/SSOLogin",controller.createTenantSSOLogin);
