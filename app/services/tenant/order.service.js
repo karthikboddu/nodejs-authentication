@@ -480,7 +480,7 @@ const updateOrderDetails = async (data, userId) => {
 
                     if (orderData.room_payments_id) {
                         const savePaymentData = {
-                            paymeny_status: orderStatus
+                            payment_status: orderStatus
                         }
                         tenantRoomPayments.findByIdAndUpdate(orderData.room_payments_id, savePaymentData, { useFindAndModify: false })
                             .then(res => {
@@ -590,7 +590,7 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
         }
 
         if (status) {
-            conditions.push({ $in: ["$paymeny_status", paymentStatus] });
+            conditions.push({ $in: ["$payment_status", paymentStatus] });
         }
 
         if (roomId) {
@@ -719,7 +719,7 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
 const saveOrderDetailsAndComplete = async (data, parentId) => {
     return new Promise((resolve, reject) => {
         const saveData = {
-            paymeny_status: data.paymentStatus,
+            payment_status: data.paymentStatus,
             updated_at: new Date()
         }
         tenantRoomPayments.findByIdAndUpdate(data.roomPaymentId, saveData, { useFindAndModify: false })

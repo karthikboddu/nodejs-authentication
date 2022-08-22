@@ -177,7 +177,7 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
                 payment_for_date: new Date(),
                 room_payment_type: 'ROOM_RENT',
                 room_contract_id: savedTenantRoomContract.data._id,
-                paymeny_status: "C",
+                payment_status: "C",
                 description : data.description ? data.description : ''
             }
         );
@@ -526,7 +526,7 @@ const fetchTenantRoomDetails = async (tenantId, status, limit, skip) => {
                                     $and: [
                                         { $eq: ["$room_contract_id", "$$contractId"] },
                                         { $eq: ["$tenant_id", tid] },
-                                        { $in: ["$paymeny_status", paymentStatus] },
+                                        { $in: ["$payment_status", paymentStatus] },
                                         { $in: ["$payment_status", paymentStatus] }
                                     ]
 
@@ -561,7 +561,7 @@ const fetchTenantRoomDetails = async (tenantId, status, limit, skip) => {
                                     $and: [
                                         { $eq: ["$room_contract_id", "$$contractId"] },
                                         { $eq: ["$tenant_id", tid] },
-                                        { $in: ["$paymeny_status", paymentStatus] }
+                                        { $in: ["$payment_status", paymentStatus] }
                                     ]
 
                                 },
