@@ -1,12 +1,17 @@
 const db = require("../../models"),
-    tenant = db.tenant.tenantModel ,
+    tenant = db.tenant.tenantModel,
     tenantFloorRooms = db.tenant.tenantFloorRooms,
     tenantRoomContract = db.tenant.tenantRoomContract,
+    tenantBuilding = db.tenant.tenantBuilding,
     tenantRoomPayments = db.tenant.tenantRoomPayments,
     orderMaster = db.tenant.orderMaster;
-    
+
 var mongoose = require('mongoose');
 const { getPagination } = require("../../common/util");
+const { findOneByTenantIdBuildingIdAndActive, findAndUpdateByBuildingId } = require("../../repository/TenantBuildingRepository");
+const { findOneByRoomId } = require("../../repository/TenantFloorRoomsRepository");
+const { findRoomContractOneByRoomId, saveTenantRoomContracts } = require("../../repository/TenantRoomContractRepository");
+const { saveTenantRoomPayments } = require("../../repository/TenantRoomPaymentsRepository");
 
 const saveFloorRooms = async (data, tenantId, floorId) => {
     return new Promise((resolve, reject) => {
@@ -125,115 +130,105 @@ const listFloorRooms = async (tenantId, floorId) => {
 
 
 const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
-    return new Promise((resolve, reject) => {
+    // const session = mongoose.startSession();
+    try {
+        // session.startTransaction();
+        const buildingDetails = await findOneByTenantIdBuildingIdAndActive(parentId, data.buildingId, true);
+        if (!buildingDetails.data) {
+            return ({ status: 404, message: 'Building Not Found.' })
+        }
+        const floorRoomsDetails = await findOneByRoomId(parentId, roomId, true);
+        if (!floorRoomsDetails.data) {
+            return ({ status: 404, message: 'Floor Rooms Not Found.' })
+        }
+        const tenantRoomContractObject = new tenantRoomContract(
+            {
+                tenant_id: tenantId,
+                floor_room_id: roomId,
+                advance_amount: floorRoomsDetails.data.room_amount,
+                advance_paid: data.advancePaid,
+                price: floorRoomsDetails.data.room_amount,
+                no_of_persons: data.noOfPersons,
+                total_amount: data.totalAmount,
+                building_id: data.buildingId,
+                building_floor_id: data.buildingFloorId,
+                parent_id: parentId,
+                status: true
+            })
+            
+        const roomContractDetails = await findRoomContractOneByRoomId({ floor_room_id: roomId, status: true });
 
-        try {
-            const balance = data.actualPrice - data.price;
-            const tenantRoomContractObject = new tenantRoomContract(
-                {
-                    tenant_id: tenantId,
-                    floor_room_id: roomId,
-                    advance_amount: data.price * 2,
-                    advance_paid: data.advancePaid,
-                    actual_price: data.actualPrice,
-                    price: data.price,
-                    no_of_persons: data.noOfPersons,
-                    total_amount: data.totalAmount,
-                    balance_amount: balance,
-                    building_id : data.buildingId,
-                    building_floor_id: data.buildingFloorId,
-                    parent_id : parentId,
-                    status: true
-                })
-
-
-            tenantRoomContract.findOne({ tenant_id: tenantId, floor_room_id: roomId, status: true })
-                .then(existingRoom => {
-                    if (existingRoom) {
-                        reject({ status: 404, message: 'Tenant Id is already mapped to room' })
-
-                    } else {
-                        tenantRoomContractObject.save((err, t) => {
-                            if (err) {
-                                reject({ status: 500, message: err })
-                                return;
-                            }
-                            const tenantRoomPaymentsObject = new tenantRoomPayments(
-                                {
-                                    tenant_id: tenantId,
-                                    floor_room_id: roomId,
-                                    actual_price: balance,
-                                    price: balance,
-                                    total_amount: balance,
-                                    payment_for_date: new Date(),
-                                    room_payment_type: 'ROOM_RENT',
-                                    room_contract_id: t._id,
-                                    paymeny_status: "C"
-                                }
-                            );
-                            const tenantRoomPaymentsObject1 = new tenantRoomPayments(
-                                {
-                                    tenant_id: tenantId,
-                                    floor_room_id: roomId,
-                                    actual_price: data.price,
-                                    price: data.price,
-                                    total_amount: data.price,
-                                    payment_for_date: new Date(),
-                                    room_payment_type: 'BALANCE_AMOUNT',
-                                    room_contract_id: t._id
-                                }
-                            );
-
-                            tenantRoomPaymentsObject.save((err, t) => {
-                                
-                                if (err) {
-                                    reject({ status: 500, message: err })
-                                    return;
-                                }
-
-                                const buildingData = {
-                                    total_amount : data.buildingAmount + data.amount
-                                }
-
-                                // tenantBuilding.findByIdAndUpdate(data.buildingId, buildingData, {useFindAndModify: false})
-                                // .then(res => {
-                                // })
-                                // .catch(err => {
-                                //     console.log(err, "err")
-                                //     reject({ status: 500, message: err })
-                          
-                                // });
-
-                                tenantRoomPaymentsObject1.save((err, t) => {
-                                    if (err) {
-                                        reject({ status: 500, message: err })
-                                        return;
-                                    }   
-                                })
-                            })
-                            resolve({
-                                status: 200,
-                                data: t,
-                                message: "Tenant Room was registered successfully!"
-                            });
-                        });
-                    }
-                })
-                .catch(err => {
-                    reject({
-                        status: 500,
-                        message:
-                            err.message || "Some error occurred while retrieving."
-                    })
-                });
-
-
-        } catch (error) {
-            reject({ status: 500, message: error })
-            console.log(error)
+        if (roomContractDetails.data) {
+            return ({ status: 404, message: 'Floor Rooms is not empty.' })
         }
 
-    });
+        const savedTenantRoomContract = await saveTenantRoomContracts(tenantRoomContractObject);
+
+        if (!savedTenantRoomContract.data) {
+            return ({ status: 500, message: 'Oops ... Something went wrong ....'  })
+        }
+
+
+        const tenantRoomPaymentsObject = new tenantRoomPayments(
+            {
+                tenant_id: tenantId,
+                floor_room_id: roomId,
+                price: data.price,
+                payment_for_date: new Date(),
+                room_payment_type: 'ROOM_RENT',
+                room_contract_id: savedTenantRoomContract.data._id,
+                paymeny_status: "C",
+                description : data.description ? data.description : ''
+            }
+        );
+
+        const savedTenantRoomPaymentC = await saveTenantRoomPayments(tenantRoomPaymentsObject);
+
+        if (!savedTenantRoomPaymentC.data) {
+            return ({ status: 500, message: 'Oops ... Something went wrong ....'  })
+        }
+
+
+        const tenantRoomPaymentsObject1 = new tenantRoomPayments(
+            {
+                tenant_id: tenantId,
+                floor_room_id: roomId,
+                price: floorRoomsDetails.data.room_amount - data.price,
+                payment_for_date: new Date(),
+                room_payment_type: 'BALANCE_AMOUNT',
+                room_contract_id: savedTenantRoomContract.data._id,
+                description : data.description ? data.description : ''
+            }
+        );
+
+
+        const savedTenantRoomPaymentP = await saveTenantRoomPayments(tenantRoomPaymentsObject1);
+
+        if (!savedTenantRoomPaymentP.data) {
+            return ({ status: 500, message: 'Oops ... Something went wrong ....'  })
+        }
+
+        const buildingData = {
+            total_amount: buildingDetails.data.total_amount + data.price
+        }
+
+        const resultBuilding = await findAndUpdateByBuildingId( buildingData, data.buildingId);
+        if (!resultBuilding.data) {
+            return ({ status: 500, message: 'Oops ... Something went wrong ....' })
+        }
+
+        // await session.commitTransaction();
+        // session.endSession();
+        // mongoose.close();
+
+        return ({ status: 200, data : savedTenantRoomPaymentP.data});
+    } catch (error) {
+        // await session.abortTransaction();
+        // session.endSession();
+        // mongoose.close();
+        console.log(error)
+        return ({ status: 500, message: error })
+    }
 }
 
 const listRoomDetails = async (tenantId, floorId) => {
@@ -257,14 +252,14 @@ const listRoomDetails = async (tenantId, floorId) => {
                     pipeline: [
                         {
                             $match: {
-                                $expr: 
-                                    { 
-                                    $and : [
-                                        {$eq: ["$floor_room_id", "$$roomId"]},
+                                $expr:
+                                {
+                                    $and: [
+                                        { $eq: ["$floor_room_id", "$$roomId"] },
                                         { $eq: ["$status", true] }
-                            
+
                                     ]
-                                    }
+                                }
                             }
                         },
                         {
@@ -318,7 +313,7 @@ const fetchRoomDetails = async (tenantId, roomId, roomPaymentId) => {
     try {
         var tid = mongoose.Types.ObjectId(tenantId);
         var fid = mongoose.Types.ObjectId(roomId);
-        
+
         var conditions = {};
         if (roomPaymentId) {
             var paymentId = mongoose.Types.ObjectId(roomPaymentId);
@@ -326,7 +321,7 @@ const fetchRoomDetails = async (tenantId, roomId, roomPaymentId) => {
         } else {
             conditions = { $eq: ["$room_contract_id", "$$contractId"] };
         }
-        console.log(conditions,"Asd");
+        console.log(conditions, "Asd");
         const result = await tenantFloorRooms.aggregate([
             {
                 $match: {
@@ -343,13 +338,13 @@ const fetchRoomDetails = async (tenantId, roomId, roomPaymentId) => {
                     pipeline: [
                         {
                             $match: {
-                                $expr: { 
-                                    $and : [
-                                        {$eq: ["$floor_room_id", "$$roomId"]},
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$floor_room_id", "$$roomId"] },
                                         { $eq: ["$status", true] }
-                            
+
                                     ]
-                                    
+
                                 },
                             }
                         },
@@ -420,7 +415,7 @@ const fetchRoomDetails = async (tenantId, roomId, roomPaymentId) => {
                                 ],
                                 as: "buildingDetails"
                             },
-                        },                        
+                        },
 
                         {
                             $project: {
@@ -450,7 +445,7 @@ const fetchRoomDetails = async (tenantId, roomId, roomPaymentId) => {
 
 const fetchTenantRoomDetails = async (tenantId, status, limit, skip) => {
     console.log("users", tenantId)
-    const paymentStatus =  status ? status.split(',') : [];
+    const paymentStatus = status ? status.split(',') : [];
 
     try {
         var tid = mongoose.Types.ObjectId(tenantId);
@@ -479,7 +474,7 @@ const fetchTenantRoomDetails = async (tenantId, status, limit, skip) => {
                     ],
                     as: "buildingDetails"
                 },
-            },  
+            },
             {
                 $lookup: {
                     from: "tenant_floor_rooms",
@@ -498,7 +493,7 @@ const fetchTenantRoomDetails = async (tenantId, status, limit, skip) => {
                     ],
                     as: "roomDetails"
                 },
-            },            
+            },
             {
                 $lookup: {
                     from: "tenants",
@@ -519,7 +514,7 @@ const fetchTenantRoomDetails = async (tenantId, status, limit, skip) => {
                     as: "tenantDetails"
                 },
             },
-            
+
             {
                 $lookup: {
                     from: "tenant_room_payments",
@@ -527,23 +522,24 @@ const fetchTenantRoomDetails = async (tenantId, status, limit, skip) => {
                     pipeline: [
                         {
                             $match: {
-                                $expr: { 
-                                    $and : [
-                                        {$eq: ["$room_contract_id", "$$contractId"]},
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$room_contract_id", "$$contractId"] },
                                         { $eq: ["$tenant_id", tid] },
-                                        { $in: ["$paymeny_status", paymentStatus] }
+                                        { $in: ["$paymeny_status", paymentStatus] },
+                                        { $in: ["$payment_status", paymentStatus] }
                                     ]
-                                    
+
                                 },
                             },
                         },
- 
+
 
                         {
                             $skip: skip
                         }, {
                             $limit: limit
-                        }, 
+                        },
                         {
                             $project: {
                                 __v: 0,
@@ -554,20 +550,20 @@ const fetchTenantRoomDetails = async (tenantId, status, limit, skip) => {
                 },
             },
 
-           {
+            {
                 $lookup: {
                     from: "tenant_room_payments",
                     let: { "contractId": "$_id" },
                     pipeline: [
                         {
                             $match: {
-                                $expr: { 
-                                    $and : [
-                                        {$eq: ["$room_contract_id", "$$contractId"]},
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$room_contract_id", "$$contractId"] },
                                         { $eq: ["$tenant_id", tid] },
                                         { $in: ["$paymeny_status", paymentStatus] }
                                     ]
-                                    
+
                                 },
                             },
                         },
@@ -577,17 +573,17 @@ const fetchTenantRoomDetails = async (tenantId, status, limit, skip) => {
                             }
                         },
                         {
-                            $group:{
-                              _id: null,
-                              count: {
-                                $sum: "$total_amount"
-                              }
+                            $group: {
+                                _id: null,
+                                count: {
+                                    $sum: "$total_amount"
+                                }
                             }
-                          },
+                        },
                     ],
                     as: "totalAmount"
                 },
-            },            
+            },
 
             {
                 $project: {
@@ -601,10 +597,10 @@ const fetchTenantRoomDetails = async (tenantId, status, limit, skip) => {
                 }
             }
         ])
-        console.log(result, "result") 
+        console.log(result, "result")
 
 
-        const res = { status: 200, error: "", data: result[0] ? result[0] : result}
+        const res = { status: 200, error: "", data: result[0] ? result[0] : result }
         return res;
         //res.json(result[0] || {})
     } catch (error) {
@@ -624,80 +620,81 @@ const unlinkTenantRoomContract = async (data, parentId) => {
                 status: data.status,
             }
             tenant.findByIdAndUpdate(data.tenantId, saveData, { useFindAndModify: false })
-            .then(tenantResult => {
-                if (!tenantResult) {
-                  reject({ status: 404, message: "Not found!" })
-                } else {
+                .then(tenantResult => {
+                    if (!tenantResult) {
+                        reject({ status: 404, message: "Not found!" })
+                    } else {
 
                         tenantRoomContract.findByIdAndUpdate(data.contractId, saveData, { useFindAndModify: false })
-                        .then(result => {
-                        if (!result) {
-                            reject({ status: 404, message: "Not found!" })
-                        } else {
+                            .then(result => {
+                                if (!result) {
+                                    reject({ status: 404, message: "Not found!" })
+                                } else {
 
-                                                resolve({
-                                                    status: 200,
-                                                    data: {},
-                                                    error : {}
-                                                });
-                            // const orderMasterObject = new orderMaster({
-                            //     tenant_id: tenantId,
-                            //     room_contract_id: tenantRoomContractObject._id,
-                            //     amount_paid: data.price,
-                            //     payment_status: data.paymentStatus,
-                            //     status: true
-                            // })
-                
-                            // tenantRoomPayments.updateMany({ room_contract_id: data.contractId, tenant_id : data.tenantId},{ $set : {status:data.status}})
-                            //     .then(existingPayments => {
-                            //         if (existingPayments) {
-                            //             console.log("a",existingPayments)
-                            //             orderMaster.updateMany({ room_contract_id: data.contractId, tenant_id : data.tenantId}, { $set : {status:data.status}})
-                            //             .then(existingOrders => {
-                            //                     resolve({
-                            //                         status: 200,
-                            //                         data: {},
-                            //                         error : {}
-                            //                     });
-                            //             })
-                            //             .catch(err => {
-                            //                 reject({
-                            //                     status: 500,
-                            //                     message:
-                            //                         err.message || "Some error occurred while retrieving."
-                            //                 })
-                            //             });
+                                    resolve({
+                                        status: 200,
+                                        data: {},
+                                        error: {}
+                                    });
+                                    // const orderMasterObject = new orderMaster({
+                                    //     tenant_id: tenantId,
+                                    //     room_contract_id: tenantRoomContractObject._id,
+                                    //     amount_paid: data.price,
+                                    //     payment_status: data.paymentStatus,
+                                    //     status: true
+                                    // })
 
-                            //         } else {
-                            //             reject({ status: 404, message: "Not found!" })
-                            //         }
-                            //     })
-                            //     .catch(err => {
-                            //         reject({
-                            //             status: 500,
-                            //             message:
-                            //                 err.message || "Some error occurred while retrieving."
-                            //         })
-                            //     });
+                                    // tenantRoomPayments.updateMany({ room_contract_id: data.contractId, tenant_id : data.tenantId},{ $set : {status:data.status}})
+                                    //     .then(existingPayments => {
+                                    //         if (existingPayments) {
+                                    //             console.log("a",existingPayments)
+                                    //             orderMaster.updateMany({ room_contract_id: data.contractId, tenant_id : data.tenantId}, { $set : {status:data.status}})
+                                    //             .then(existingOrders => {
+                                    //                     resolve({
+                                    //                         status: 200,
+                                    //                         data: {},
+                                    //                         error : {}
+                                    //                     });
+                                    //             })
+                                    //             .catch(err => {
+                                    //                 reject({
+                                    //                     status: 500,
+                                    //                     message:
+                                    //                         err.message || "Some error occurred while retrieving."
+                                    //                 })
+                                    //             });
 
-                        }})
-                        .catch(err => {
-                            reject({
-                                status: 500,
-                                message:
-                                    err.message || "Some error occurred while retrieving."
+                                    //         } else {
+                                    //             reject({ status: 404, message: "Not found!" })
+                                    //         }
+                                    //     })
+                                    //     .catch(err => {
+                                    //         reject({
+                                    //             status: 500,
+                                    //             message:
+                                    //                 err.message || "Some error occurred while retrieving."
+                                    //         })
+                                    //     });
+
+                                }
                             })
-                        });
-        }
-    })
-    .catch(err => {
-        reject({
-            status: 500,
-            message:
-                err.message || "Some error occurred while retrieving."
-        })
-    });
-   
+                            .catch(err => {
+                                reject({
+                                    status: 500,
+                                    message:
+                                        err.message || "Some error occurred while retrieving."
+                                })
+                            });
+                    }
+                })
+                .catch(err => {
+                    reject({
+                        status: 500,
+                        message:
+                            err.message || "Some error occurred while retrieving."
+                    })
+                });
+
 
 
         } catch (error) {

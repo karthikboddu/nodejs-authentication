@@ -17,29 +17,25 @@ module.exports = (mongoose) => {
                                     required: true,
                                     ref: "tenant_room_contract"
                                 },
-                                actual_price: {
-                                    type: Number,
-                                    required :true
-                                },
                                 price: {
                                     type: Number,
                                     required :false
-                                },
-                                total_amount: {
-                                    type: Number,
-                                    required :false,
-                                    default: 0
                                 },
                                 room_payment_type: {
                                     type: String,
                                     required :false,
                                     default: 'ROOM'
                                 },
+                                description: {
+                                    type: String,
+                                    required :false,
+                                    default: ''
+                                },
                                 payment_for_date: {
                                     type : Date,
                                     default : Date.now,
                                 },               
-                                paymeny_status: {
+                                payment_status: {
                                     type: String,
                                     required :false,
                                     default: 'P'

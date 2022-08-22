@@ -36,10 +36,6 @@ module.exports = (mongoose) => {
                                     required :true,
                                     default: false
                                 },
-                                actual_price: {
-                                    type: Number,
-                                    required :true
-                                },
                                 price: {
                                     type: Number,
                                     required :false

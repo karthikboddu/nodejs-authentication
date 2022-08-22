@@ -21,5 +21,7 @@ module.exports = function(app) {
 
     app.post("/api/order/createOrderAndComplete", [authJwt.verifyToken],controller.createOrderAndComplete);
 
+    app.get("/api/order/bulkInitRoomPayment", [authJwt.verifyToken,authJwt.isAdmin],controller.bulkInitRoomPayments);
+
 
   }
