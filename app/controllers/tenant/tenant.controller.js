@@ -57,7 +57,6 @@ exports.createTenant = async (req, res, next) => {
 
   const tenantData = req.body;
   const parentId = req.userId ? req.userId : null;
-
   if (!tenantData) {
     return res.status(500).send({ message: errorCode.BAD_REQUEST });
   }

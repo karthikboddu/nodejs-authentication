@@ -2,7 +2,7 @@ const errorCode = require('../../common/errorCode');
 const _           = require('lodash');
 const {generateToken, initiateRoomTransactionDetails, updateOrderDetails,
    fetchTenantRoomOrderDetails, fetchRecentAllTenantRoomOrderDetails,
-   saveOrderDetailsAndComplete} = require('../../services/tenant/order.service')
+   saveOrderDetailsAndComplete,initiateBulkRoomTransactionDetails} = require('../../services/tenant/order.service')
 const { getPagination } = require('../../common/util');
 
 
@@ -31,8 +31,17 @@ exports.initRoomPayment = async (req, res, next) => {
         res.status(500).send({ message: errorCode.BAD_REQUEST });
       }
 
-      const result = await initiateRoomTransactionDetails(orderData, req.userId);
-      console.log(result,"result")
+      const result = await initiateRoomTransactionDetails(orderData, req.userId, req.parentId);
+      res.send(result);
+    } catch (error) {
+      return res.send(error);
+    }
+}
+
+exports.bulkInitRoomPayments = async (req, res, next) => {
+
+  try {
+      const result = await initiateBulkRoomTransactionDetails(req.userId, req.parentId);
       res.send(result);
     } catch (error) {
       return res.send(error);

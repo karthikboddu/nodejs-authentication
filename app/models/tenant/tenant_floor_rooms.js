@@ -24,7 +24,12 @@ module.exports = (mongoose) => {
                                         type: Number,
                                         required :true,
                                         default: 3
-                                    },                                    
+                                    },        
+                                    room_amount: {
+                                        type: Number,
+                                        required :false,
+                                        default:0
+                                    },                              
                                     status: {
                                         type: Boolean,
                                         default :false

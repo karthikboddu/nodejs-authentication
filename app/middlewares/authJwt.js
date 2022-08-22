@@ -8,7 +8,7 @@ const { jwtSignAccessRefreshToken, jwtSignAccessRefreshTokenTenant } = require('
 const { verifyTokenPromise, verifyRefreshTokenPromise } = require('./validateJwt')
 const errorCode = require('../common/errorCode')
 
-verifyToken = async(req, res, next) => {
+verifyToken = async (req, res, next) => {
 
   let token = req.headers["x-access-token"];
   let result = {};
@@ -76,7 +76,7 @@ verifyRefreshToken = async (req, res, next) => {
     }
 
   }) || {};
-  if(result.status){
+  if (result.status) {
     return res.status(401).send(result);
   }
   if (tokenDecoded.id) {
@@ -87,17 +87,17 @@ verifyRefreshToken = async (req, res, next) => {
     }).populate({ path: 'user_role', select: ['name'] })
       .exec((err, user) => {
 
-        const jwtData = jwtSignAccessRefreshTokenTenant(user.id,user.user_role.name,user.full_name);
+        const jwtData = jwtSignAccessRefreshTokenTenant(user.id, user.user_role.name, user.full_name);
         result = {
           status: 200,
           data: jwtData
         }
         return res.status(200).send(result);
-    });   
+      });
 
 
   }
-  
+
 }
 
 
@@ -121,7 +121,7 @@ verifyAccessToken = async (req, res, next) => {
   const tokenD = await verifyTokenPromise(
     token
   ).catch(err => {
-    
+
     result = {
       status: 401,
       errors: err,
@@ -138,7 +138,7 @@ verifyAccessToken = async (req, res, next) => {
     };
     return res.status(200).send(result);
   }
-  if(result){
+  if (result) {
     return res.status(401).send(result);
   }
 
@@ -211,7 +211,7 @@ isModerator = (req, res, next) => {
   });
 };
 
-verifyTokenNext = async(req, res, next) => {
+verifyTokenNext = async (req, res, next) => {
 
   let token = req.headers["x-access-token"];
   let result = {};
@@ -226,19 +226,19 @@ verifyTokenNext = async(req, res, next) => {
         data: ''
       }
     });
-  
-  
+
+
     if (result.status) {
       return res.status(403).send(result);
     }
-  
+
     if (tokenDecoded.id) {
       req.userId = tokenDecoded.id;
       req.parentId = tokenDecoded.parentId;
     }
   }
 
- 
+
   next();
 }
 
