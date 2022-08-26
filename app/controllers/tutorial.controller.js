@@ -2,18 +2,18 @@ const db = require('../models');
 
 const Tutorial = db.tutorials;
 
-exports.create = (req,res) => {
- 
- if(!req.body.title){
- res.status(400).send({message : "Content cannot be empty " });
- }
+exports.create = (req, res) => {
 
- const tutorial = new Tutorial({
- title : req.body.title,
- description : req.body.description,
- published : req.body.published ? req.body.published : false
+  if (!req.body.title) {
+    res.status(400).send({ message: "Content cannot be empty " });
+  }
 
- });
+  const tutorial = new Tutorial({
+    title: req.body.title,
+    description: req.body.description,
+    published: req.body.published ? req.body.published : false
+
+  });
 
   tutorial
     .save(tutorial)
@@ -30,7 +30,7 @@ exports.create = (req,res) => {
 
 };
 
-exports.findAll = (req,res) => {
+exports.findAll = (req, res) => {
 
   const title = req.query.title;
   var condition = title ? { title: { $regex: new RegExp(title), $options: "i" } } : {};
@@ -50,7 +50,7 @@ exports.findAll = (req,res) => {
 
 };
 
-exports.findOne = (req,res) => {
+exports.findOne = (req, res) => {
 
   const id = req.params.id;
 
@@ -69,7 +69,7 @@ exports.findOne = (req,res) => {
 
 };
 
-exports.update = (req,res) => {
+exports.update = (req, res) => {
 
 
   if (!req.body) {
@@ -97,7 +97,7 @@ exports.update = (req,res) => {
 };
 
 
-exports.delete = (req,res) => {
+exports.delete = (req, res) => {
 
   const id = req.params.id;
 
@@ -122,9 +122,9 @@ exports.delete = (req,res) => {
 
 };
 
-exports.deleteAll = (req,res) => {
+exports.deleteAll = (req, res) => {
 
- Tutorial.deleteMany({})
+  Tutorial.deleteMany({})
     .then(data => {
       res.send({
         message: `${data.deletedCount} Tutorials were deleted successfully!`
@@ -142,7 +142,7 @@ exports.deleteAll = (req,res) => {
 };
 
 
-exports.findAllPublished = (req,res) => {
+exports.findAllPublished = (req, res) => {
 
   Tutorial.find({ published: true })
     .then(data => {

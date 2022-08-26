@@ -170,7 +170,7 @@ app.use(function (err, req, res, next) {
 
     return res.json(res.api);
   }
-
+  console.log(err)
   // setting appropriate error objects
   res.api.errors.code = 'endpoint';
   res.api.errors.message = 'Oops something broke!';

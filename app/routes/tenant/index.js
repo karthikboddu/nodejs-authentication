@@ -7,7 +7,8 @@ const _     = require('lodash'),
         'floor.routes',
         'room.routes',
         'order.routes',
-        'chats.routes'
+        'chats.routes',
+        'notes.routes'
     ];
 
 function init(app) {

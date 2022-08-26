@@ -16,5 +16,6 @@ module.exports = (mongoose,dbConfig) => {
     db.tenantRoomPayments = require('./tenant_room_payments')(mongoose);
     db.userConversation = require('./user_conversation')(mongoose);
     db.lastConversation = require('./last_conversation')(mongoose);
+    db.userNotes = require('./user_notes')(mongoose);
     return db
 }
