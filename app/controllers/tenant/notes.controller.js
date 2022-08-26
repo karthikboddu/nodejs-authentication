@@ -43,7 +43,18 @@ exports.findAll = (req, res) => {
   var condition = title ? { title: { $regex: new RegExp(title), $options: "i" } 
   , tenant_id : req.userId, parent_id : req.parentId, is_active: true } : {tenant_id : req.userId, parent_id : req.parentId, is_active: true};
 
+  let { page, size } = req.query;
+  if (!page) {
+    page = 1;
+  }
+  if (!size) {
+    size = 100;
+  }
+  const limit = parseInt(size);
+  const skip = (page - 1) * size;
+
   userNotes.find(condition)
+  .limit(limit).skip(skip).sort({ updated_at: -1 })
     .then(result => {
       res.send({status : 200, data : result});
     })
