@@ -1,10 +1,7 @@
 const https = require('https');
 const Promise = require('bluebird');
 const db = require("../../models"),
-    Role = db.role,
-    tenant = db.tenant.tenantModel,
     tenantRoomPayments = db.tenant.tenantRoomPayments,
-    tenantRoomContract = db.tenant.tenantRoomContract,
     orderMaster = db.tenant.orderMaster,
     tenantBuilding = db.tenant.tenantBuilding;
 const _ = require('lodash');
@@ -33,7 +30,7 @@ const generateToken = async (data, userId) => {
         orderMaster.findOne({ room_payments_id: data.orderId, payment_status: "P" })
             .then(orders => {
                 if (!orders) {
-                    console.log("not exists")
+
                     const orderMasterObject = new orderMaster({
                         tenant_id: userId,
                         room_contract_id: data.roomContractId,
@@ -547,12 +544,6 @@ const fetchTenantRoomOrderDetails = async (tenantId, status, limit, skip) => {
                     return;
                 })
 
-
-
-
-            // const res = { status: 200, error: "", data: result[0] ? result[0] : result}
-            // return res;
-            //res.json(result[0] || {})
         } catch (error) {
             console.log(error)
             reject({

@@ -288,7 +288,8 @@ const trasformUserRecord = (record) => {
     _id: record._id,
     name: record.full_name,
     avatar: record.photoUrl,
-    mobileNumber: record.mobile_no
+    mobileNumber: record.mobile_no,
+    parentId: record.parent_id
   }
 }
 

@@ -7,9 +7,8 @@ const db = require("../../models"),
     orderMaster = db.tenant.orderMaster;
 
 var mongoose = require('mongoose');
-const { getPagination } = require("../../common/util");
 const { findOneByTenantIdBuildingIdAndActive, findAndUpdateByBuildingId } = require("../../repository/TenantBuildingRepository");
-const { findOneByRoomId } = require("../../repository/TenantFloorRoomsRepository");
+const { findOneByRoomId, listTenantFloorRoomDetails, fetchTenantRoomDetailsByRoomId, fetchTenantRoomContractDetails } = require("../../repository/TenantFloorRoomsRepository");
 const { findRoomContractOneByRoomId, saveTenantRoomContracts } = require("../../repository/TenantRoomContractRepository");
 const { saveTenantRoomPayments } = require("../../repository/TenantRoomPaymentsRepository");
 
@@ -64,9 +63,7 @@ const saveFloorRooms = async (data, tenantId, floorId) => {
 }
 
 const listFloorRooms = async (tenantId, floorId) => {
-
-    console.log("users")
-    var userId = "61ff91da4d32cf28c89c47b3";
+    console.log(tenantId)
     tenantRoomContract.aggregate([
         {
             $lookup: {
@@ -99,33 +96,13 @@ const listFloorRooms = async (tenantId, floorId) => {
             }
         }
 
-        // Deconstructs the array field from the
-        // input document to output a document
-        // for each element
     ]).exec((err, res) => {
         if (err) {
             console.log(err)
         }
         console.log(res, "res")
     })
-    console.log(users, "users")
 
-    // return new Promise((resolve, reject) => {
-
-
-
-    //     tenantFloorRooms.find({ tenant_id: tenantId,building_floor_id:  floorId})
-    //         .then(d => {
-    //             resolve({ status: 200, data: d})
-    //         })
-    //         .catch(err => {
-    //             reject({
-    //                 status: 500,
-    //                 message:
-    //                   err.message || "Some error occurred while retrieving tutorials."
-    //               })
-    //           });
-    // })
 }
 
 
@@ -231,76 +208,21 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
     }
 }
 
+/**
+ * To List the rooms by floor Id.
+ * @param {*} tenantId 
+ * @param {*} floorId 
+ * @returns 
+ */
 const listRoomDetails = async (tenantId, floorId) => {
-    console.log("users", tenantId)
+
     try {
         var tid = mongoose.Types.ObjectId(tenantId);
         var fid = mongoose.Types.ObjectId(floorId);
-        const result = await tenantFloorRooms.aggregate([
-            {
-                $match: {
-                    "tenant_id": tid,
-                    "building_floor_id": fid
-                }
-            },
+        const result = await listTenantFloorRoomDetails(tid, fid)
 
-            {
-
-                $lookup: {
-                    from: "tenant_room_contracts",
-                    let: { "roomId": "$_id" },
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr:
-                                {
-                                    $and: [
-                                        { $eq: ["$floor_room_id", "$$roomId"] },
-                                        { $eq: ["$status", true] }
-
-                                    ]
-                                }
-                            }
-                        },
-                        {
-                            $lookup: {
-                                from: "order_masters",
-                                let: { "contractId": "$_id" },
-                                pipeline: [
-                                    {
-                                        $match: {
-                                            $expr: { $eq: ["$room_contract_id", "$$contractId"] }
-                                        }
-                                    },
-                                    {
-                                        $project: {
-                                            _id: 0,
-                                        }
-                                    }
-                                ],
-                                as: "orderDetails"
-                            },
-                        },
-
-                        {
-                            $project: {
-                                _v: 0,
-                            }
-                        }
-                    ],
-                    as: "contractDetails"
-                }
-            },
-            {
-                $project: {
-                    __v: 0,
-                }
-            }
-        ])
-        console.log(result, "result")
         const res = { status: 200, error: "", data: result }
         return res;
-        //res.json(result[0] || {})
     } catch (error) {
         console.log(error, "Eror")
         const res = { status: 500, error: error.message, data: "" }
@@ -308,11 +230,18 @@ const listRoomDetails = async (tenantId, floorId) => {
     }
 }
 
+/**
+ * To Fetch the room details by roomId or roomPaymentId
+ * @param {*} tenantId 
+ * @param {*} roomId 
+ * @param {*} roomPaymentId 
+ * @returns 
+ */
 const fetchRoomDetails = async (tenantId, roomId, roomPaymentId) => {
 
     try {
         var tid = mongoose.Types.ObjectId(tenantId);
-        var fid = mongoose.Types.ObjectId(roomId);
+        var rid = mongoose.Types.ObjectId(roomId);
 
         var conditions = {};
         if (roomPaymentId) {
@@ -321,120 +250,12 @@ const fetchRoomDetails = async (tenantId, roomId, roomPaymentId) => {
         } else {
             conditions = { $eq: ["$room_contract_id", "$$contractId"] };
         }
-        console.log(conditions, "Asd");
-        const result = await tenantFloorRooms.aggregate([
-            {
-                $match: {
-                    "tenant_id": tid,
-                    "_id": fid
-                }
-            },
+        console.log(conditions, "conditions");
 
-            {
+        const result = await fetchTenantRoomDetailsByRoomId(tid, rid, conditions)
 
-                $lookup: {
-                    from: "tenant_room_contracts",
-                    let: { "roomId": "$_id" },
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: {
-                                    $and: [
-                                        { $eq: ["$floor_room_id", "$$roomId"] },
-                                        { $eq: ["$status", true] }
-
-                                    ]
-
-                                },
-                            }
-                        },
-                        {
-                            $lookup: {
-                                from: "tenant_room_payments",
-                                let: { "contractId": "$_id" },
-                                pipeline: [
-                                    {
-                                        $match: {
-                                            $expr: conditions
-                                        }
-                                    },
-                                    {
-                                        $project: {
-                                            __v: 0,
-                                        }
-                                    },
-                                    {
-                                        $limit: 1
-                                    }
-                                ],
-                                as: "orderDetails"
-                            },
-                        },
-                        {
-                            $lookup: {
-                                from: "tenants",
-                                let: { "tid": "$tenant_id" },
-                                pipeline: [
-                                    {
-                                        $match: {
-                                            $expr: { $eq: ["$_id", "$$tid"] }
-                                        }
-                                    },
-                                    {
-                                        $project: {
-                                            __v: 0,
-                                            password: 0,
-                                            aadhar_id: 0
-                                        }
-                                    },
-                                    {
-                                        $limit: 1
-                                    }
-                                ],
-                                as: "tenantDetails"
-                            },
-                        },
-                        {
-                            $lookup: {
-                                from: "tenant_buildings",
-                                let: { "bid": "$building_id" },
-                                pipeline: [
-                                    {
-                                        $match: {
-                                            $expr: { $eq: ["$_id", "$$bid"] }
-                                        }
-                                    },
-                                    {
-                                        $project: {
-                                            __v: 0,
-                                        }
-                                    },
-                                    {
-                                        $limit: 1
-                                    }
-                                ],
-                                as: "buildingDetails"
-                            },
-                        },
-
-                        {
-                            $project: {
-                                __v: 0,
-                            }
-                        }
-                    ],
-                    as: "contractDetails"
-                }
-            },
-            {
-                $project: {
-                    __v: 0,
-                }
-            }
-        ])
         const res = { status: 200, error: "", data: result }
         return res;
-        //res.json(result[0] || {})
     } catch (error) {
         console.log(error, "Eror")
         const res = { status: 500, error: error.message, data: "" }
@@ -442,167 +263,25 @@ const fetchRoomDetails = async (tenantId, roomId, roomPaymentId) => {
     }
 }
 
-
+/**
+ * fetch Tenant Room Contract Details
+ * @param {*} tenantId 
+ * @param {*} status 
+ * @param {*} limit 
+ * @param {*} skip 
+ * @returns 
+ */
 const fetchTenantRoomDetails = async (tenantId, status, limit, skip) => {
-    console.log("users", tenantId)
+
     const paymentStatus = status ? status.split(',') : [];
 
     try {
         var tid = mongoose.Types.ObjectId(tenantId);
-        const result = await tenantRoomContract.aggregate([
-            {
-                $match: {
-                    "tenant_id": tid,
-                    "status": true
-                }
-            },
-            {
-                $lookup: {
-                    from: "tenant_buildings",
-                    let: { "bid": "$building_id" },
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: { $eq: ["$_id", "$$bid"] }
-                            }
-                        },
-                        {
-                            $project: {
-                                __v: 0
-                            }
-                        }
-                    ],
-                    as: "buildingDetails"
-                },
-            },
-            {
-                $lookup: {
-                    from: "tenant_floor_rooms",
-                    let: { "fid": "$floor_room_id" },
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: { $eq: ["$_id", "$$fid"] }
-                            }
-                        },
-                        {
-                            $project: {
-                                __v: 0
-                            }
-                        }
-                    ],
-                    as: "roomDetails"
-                },
-            },
-            {
-                $lookup: {
-                    from: "tenants",
-                    let: { "id": "$tenant_id" },
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: { $eq: ["$_id", "$$id"] }
-                            }
-                        },
-                        {
-                            $project: {
-                                password: 0,
-                                aadhar_id: 0
-                            }
-                        }
-                    ],
-                    as: "tenantDetails"
-                },
-            },
-
-            {
-                $lookup: {
-                    from: "tenant_room_payments",
-                    let: { "contractId": "$_id" },
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: {
-                                    $and: [
-                                        { $eq: ["$room_contract_id", "$$contractId"] },
-                                        { $eq: ["$tenant_id", tid] },
-                                        { $in: ["$payment_status", paymentStatus] },
-                                        { $in: ["$payment_status", paymentStatus] }
-                                    ]
-
-                                },
-                            },
-                        },
-
-
-                        {
-                            $skip: skip
-                        }, {
-                            $limit: limit
-                        },
-                        {
-                            $project: {
-                                __v: 0,
-                            }
-                        },
-                    ],
-                    as: "orderDetails"
-                },
-            },
-
-            {
-                $lookup: {
-                    from: "tenant_room_payments",
-                    let: { "contractId": "$_id" },
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: {
-                                    $and: [
-                                        { $eq: ["$room_contract_id", "$$contractId"] },
-                                        { $eq: ["$tenant_id", tid] },
-                                        { $in: ["$payment_status", paymentStatus] }
-                                    ]
-
-                                },
-                            },
-                        },
-                        {
-                            $project: {
-                                __v: 0,
-                            }
-                        },
-                        {
-                            $group: {
-                                _id: null,
-                                count: {
-                                    $sum: "$total_amount"
-                                }
-                            }
-                        },
-                    ],
-                    as: "totalAmount"
-                },
-            },
-
-            {
-                $project: {
-                    __v: 0,
-                }
-            },
-
-            {
-                $project: {
-                    __v: 0,
-                }
-            }
-        ])
-        console.log(result, "result")
-
+      
+        const result = await fetchTenantRoomContractDetails(tid, paymentStatus, limit ,skip);
 
         const res = { status: 200, error: "", data: result[0] ? result[0] : result }
         return res;
-        //res.json(result[0] || {})
     } catch (error) {
         console.log(error, "Eror")
         const res = { status: 500, error: error.message, data: "" }
