@@ -19,7 +19,11 @@ module.exports = (mongoose) => {
                                     description: {
                                         type: String,
                                         required :false
-                                    },                                                           
+                                    },
+                                    color_code: {
+                                        type: String,
+                                        required :false
+                                    },                                                       
                                     is_active: {
                                         type: Boolean,
                                         default :true

@@ -13,6 +13,7 @@ exports.create = (req, res) => {
         tenant_id : req.userId,
         title: req.body.title,
         description: req.body.description,
+        color_code: req.body.colorCode,
         parent_id : req.parentId
     });
 
