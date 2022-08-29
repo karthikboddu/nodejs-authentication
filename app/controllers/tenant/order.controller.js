@@ -28,10 +28,14 @@ exports.initRoomPayment = async (req, res, next) => {
   try {
       const orderData = req.body;
       if(!orderData) {
-        res.status(500).send({ message: errorCode.BAD_REQUEST });
+        return res.status(500).send({ message: errorCode.BAD_REQUEST });
+      }
+      const tenantId = req.query.tenantId ? req.query.tenantId : req.userId;
+      if(!tenantId) {
+        return res.status(500).send({ message: errorCode.BAD_REQUEST });
       }
 
-      const result = await initiateRoomTransactionDetails(orderData, req.userId, req.parentId);
+      const result = await initiateRoomTransactionDetails(orderData, tenantId);
       res.send(result);
     } catch (error) {
       return res.send(error);
