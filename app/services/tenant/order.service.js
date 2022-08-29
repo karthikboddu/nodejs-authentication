@@ -410,8 +410,8 @@ const initiateRoomTransactionDetails = async (data, userId) => {
                 tenant_id: userId,
                 floor_room_id: data.roomId,
                 actual_price: roomContract.data.price,
-                price: roomContract.data.price,
-                total_amount: roomContract.data.price,
+                price: data.amount ? data.amount : roomContract.data.price,
+                total_amount:  data.amount ? data.amount : roomContract.data.price,
                 payment_for_date: firstDay,
                 room_payment_type: data.type ? data.type : 'ROOM_RENT',
                 room_contract_id: roomContract.data._id,
@@ -422,7 +422,7 @@ const initiateRoomTransactionDetails = async (data, userId) => {
         const orderMasterObject = new orderMaster({
             tenant_id: userId,
             room_contract_id: roomContract.data._id,
-            amount_paid: roomContract.data.price,
+            amount_paid:  data.amount ? data.amount : roomContract.data.price,
             room_payments_id: tenantRoomPaymentsObject._id,
             status: true
         })
