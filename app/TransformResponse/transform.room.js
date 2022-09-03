@@ -37,7 +37,7 @@ const transformTenantContractDetails = (record) => {
         parent_id: record.parent_id,
         building_floor_id: record.building_floor_id,
         building_id: record.building_id,
-        orderDetails :  _.map(record.orderDetails, (record) => transformTenantOrderDetails(record)),
+        orderDetails : transformTenantOrderDetails(record.orderDetails[0] ? record.orderDetails[0] : {}),
         tenantDetails : record.tenantDetails[0] ? record.tenantDetails[0] : {},
         buildingDetails : record.buildingDetails[0] ? record.buildingDetails[0] : {}
     }
