@@ -5,12 +5,14 @@ const db = require("../../models"),
     tenantBuilding = db.tenant.tenantBuilding,
     tenantRoomPayments = db.tenant.tenantRoomPayments,
     orderMaster = db.tenant.orderMaster;
+    const _           = require('lodash');
 
 var mongoose = require('mongoose');
 const { findOneByTenantIdBuildingIdAndActive, findAndUpdateByBuildingId } = require("../../repository/TenantBuildingRepository");
 const { findOneByRoomId, listTenantFloorRoomDetails, fetchTenantRoomDetailsByRoomId, fetchTenantRoomContractDetails } = require("../../repository/TenantFloorRoomsRepository");
 const { findRoomContractOneByRoomId, saveTenantRoomContracts } = require("../../repository/TenantRoomContractRepository");
 const { saveTenantRoomPayments } = require("../../repository/TenantRoomPaymentsRepository");
+const { transformTenantRoomDetails } = require("../../TransformResponse/transform.room");
 
 const saveFloorRooms = async (data, tenantId, floorId) => {
     return new Promise((resolve, reject) => {
@@ -253,8 +255,9 @@ const fetchRoomDetails = async (tenantId, roomId, roomPaymentId) => {
         console.log(conditions, "conditions");
 
         const result = await fetchTenantRoomDetailsByRoomId(tid, rid, conditions)
-
-        const res = { status: 200, error: "", data: result }
+        const tranformedData = _.map(result, (record) => transformTenantRoomDetails(record));
+        
+        const res = { status: 200, error: "", data: tranformedData }
         return res;
     } catch (error) {
         console.log(error, "Eror")
