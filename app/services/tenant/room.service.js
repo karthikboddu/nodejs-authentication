@@ -188,7 +188,7 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
         }
 
         const buildingData = {
-            total_amount: buildingDetails.data.total_amount + data.price
+            total_amount: buildingDetails.data.total_amount + parseInt(data.price)
         }
 
         const resultBuilding = await findAndUpdateByBuildingId( buildingData, data.buildingId);

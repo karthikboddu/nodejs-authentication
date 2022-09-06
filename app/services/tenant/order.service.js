@@ -323,7 +323,7 @@ const initiateBulkRoomTransactionDetails = async (userId, parentId) => {
             })
         });
 
-        tenantRoomPayments.insertMany(roomPaymentsToBeCreatedList, opts, function (err, docs) {
+        await tenantRoomPayments.insertMany(roomPaymentsToBeCreatedList, opts, function (err, docs) {
             if (err) {
                 return ({ status: 500, message: err })
             } else {
@@ -331,7 +331,7 @@ const initiateBulkRoomTransactionDetails = async (userId, parentId) => {
             }
         });
 
-        orderMaster.insertMany(orderMasterRoomPaymentsToBeCreatedList, opts ,function (err, docs) {
+        await orderMaster.insertMany(orderMasterRoomPaymentsToBeCreatedList, opts ,function (err, docs) {
             if (err) {
                 return ({ status: 500, message: err })
             } else {
@@ -340,13 +340,15 @@ const initiateBulkRoomTransactionDetails = async (userId, parentId) => {
             }
         });
         await session.commitTransaction();
-        session.endSession();
+        // session.endSession();
+        // mongoose.connection.close()
         // console.log(roomPaymentsToBeCreatedList, " ================================ ", orderMasterRoomPaymentsToBeCreatedList);
         return ({ status: 200, data: {}, message: "Bulk Room Payments Completed - " + roomPaymentsToBeCreatedList.length })
     } catch (error) {
-        console.log(error)
+        console.log("asdasd--", error)
         await session.abortTransaction();
         session.endSession();
+        mongoose.connection.close()
         return ({ status: 500, message: error })
     }
 }
