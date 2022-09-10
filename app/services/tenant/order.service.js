@@ -12,9 +12,11 @@ var mongoose = require('mongoose');
 */
 const PaytmChecksum = require('../../common/PaytmChecksum');
 const { findTenant, findOneTenant } = require('../../repository/UserRepository');
-const { findAllRoomPaymentsByCondition, findOneRoomPaymentsByCondition } = require('../../repository/TenantRoomPaymentsRepository');
+const { findAllRoomPaymentsByCondition, findOneRoomPaymentsByCondition, findRoomPaymentsByIdAndUpdate } = require('../../repository/TenantRoomPaymentsRepository');
 const { findAllRoomContractByCondition, findRoomContractOneByRoomId } = require('../../repository/TenantRoomContractRepository');
 const moment = require('moment');
+const { findOneOrderMasterByCondition, saveOrderMasterRoomPayments, findOrderMasterByIdAndUpdate } = require('../../repository/OrderMasterRepository');
+const { findOneByTenantIdBuildingIdAndActive, findAndUpdateByBuildingId } = require('../../repository/TenantBuildingRepository');
 
 
 
@@ -193,7 +195,7 @@ function buildDates(startDate, endDate) {
         // dateArray.push(moment(currentDate).format('YYYY-MM-DD'))
         //currentDate = moment(currentDate).add(1, 'month');
         dateArray.push(currentDate);
-        currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() , currentDate.getDate() + 30,  currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
+        currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 30, currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
 
     }
     if (currentDate >= stopDate) {
@@ -224,7 +226,7 @@ const initiateBulkRoomTransactionDetails = async (userId, parentId) => {
             });
 
         const tenantIds = _.map(tenantList.data, (record) => record._id)
-        const opts = {session , new : true};
+        const opts = { session, new: true };
 
         const roomContractsList = await findAllRoomContractByCondition({ tenant_id: { $in: tenantIds }, parent_id: userId, status: true });
         const tenantRoomIds = _.map(roomContractsList.data, (record) => record.floor_room_id);
@@ -331,7 +333,7 @@ const initiateBulkRoomTransactionDetails = async (userId, parentId) => {
             }
         });
 
-        await orderMaster.insertMany(orderMasterRoomPaymentsToBeCreatedList, opts ,function (err, docs) {
+        await orderMaster.insertMany(orderMasterRoomPaymentsToBeCreatedList, opts, function (err, docs) {
             if (err) {
                 return ({ status: 500, message: err })
             } else {
@@ -376,21 +378,21 @@ const initiateRoomTransactionDetails = async (data, userId) => {
             return ({ status: 404, data: {}, message: 'Tenant not found' })
         }
         var date = new Date();
-        const opts = {session , new : true};
+        const opts = { session, new: true };
 
         const startDate = new Date(tenantDetails.data.start_at);
 
         const roomPaymentType = data.type ? data.type : 'ROOM_RENT';
 
         var firstDay = new Date(date.getFullYear(), date.getMonth(), startDate.getDate());
-        var lastDay = new Date(date.getFullYear(), date.getMonth() , startDate.getDate() + 30);
+        var lastDay = new Date(date.getFullYear(), date.getMonth(), startDate.getDate() + 30);
 
         console.log(firstDay, "-", lastDay, ' -- ', tenantDetails.data.start_at)
 
         const payments = await findOneRoomPaymentsByCondition({
             floor_room_id: data.roomId,
             tenant_id: userId,
-            status: true, 
+            status: true,
             room_payment_type: roomPaymentType,
             payment_for_date: {
                 '$gte': firstDay, '$lt': lastDay
@@ -413,18 +415,18 @@ const initiateRoomTransactionDetails = async (data, userId) => {
                 floor_room_id: data.roomId,
                 actual_price: roomContract.data.price,
                 price: data.amount ? data.amount : roomContract.data.price,
-                total_amount:  data.amount ? data.amount : roomContract.data.price,
+                total_amount: data.amount ? data.amount : roomContract.data.price,
                 payment_for_date: firstDay,
                 room_payment_type: data.type ? data.type : 'ROOM_RENT',
                 room_contract_id: roomContract.data._id,
-                description : data.description ? data.description : ''
+                description: data.description ? data.description : ''
             }
         );
 
         const orderMasterObject = new orderMaster({
             tenant_id: userId,
             room_contract_id: roomContract.data._id,
-            amount_paid:  data.amount ? data.amount : roomContract.data.price,
+            amount_paid: data.amount ? data.amount : roomContract.data.price,
             room_payments_id: tenantRoomPaymentsObject._id,
             status: true
         })
@@ -448,7 +450,7 @@ const initiateRoomTransactionDetails = async (data, userId) => {
 
         })
         await session.commitTransaction();
-        session.endSession();
+        // session.endSession();
         return ({
             status: 200,
             data: {},
@@ -456,66 +458,73 @@ const initiateRoomTransactionDetails = async (data, userId) => {
         });
 
     } catch (error) {
-        console.log(error)
+        console.log("error  -- ", error)
         await session.abortTransaction();
         session.endSession();
+        mongoose.connection.close()
         return ({ status: 500, message: error })
     }
 }
 
 const updateOrderDetails = async (data, userId) => {
-    return new Promise((resolve, reject) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+
         const orderStatus = data.status;
         const saveData = {
             payment_status: data.status,
             payment_response: data.paymentResponse ? data.paymentResponse : ''
         }
-        orderMaster.findByIdAndUpdate(data.orderId, saveData, { useFindAndModify: false })
-            .then(orderData => {
-                if (!orderData) {
-                    reject({ status: 404, message: "Not found!" })
-                } else {
-                    console.log("updated ")
 
-                    if (orderData.room_payments_id) {
-                        const savePaymentData = {
-                            payment_status: orderStatus
-                        }
-                        tenantRoomPayments.findByIdAndUpdate(orderData.room_payments_id, savePaymentData, { useFindAndModify: false })
-                            .then(res => {
-                                const buildingData = {
-                                    total_amount: data.buildingAmount + data.amount
-                                }
-                                console.log(buildingData)
-                                tenantBuilding.findByIdAndUpdate(data.buildingId, buildingData, { useFindAndModify: false })
-                                    .then(res => {
-                                    })
-                                    .catch(err => {
-                                        console.log(err, "err")
-                                        reject({ status: 500, message: err })
+        const updatedOrderMaster = await findOrderMasterByIdAndUpdate(data.orderId, saveData);
 
-                                    });
-                            })
-                            .catch(err => {
-                                console.log(err, "err")
-                                reject({ status: 500, message: err })
+        if (!updatedOrderMaster.data) {
+            return ({ status: 404, message: "Not found!" })
+        }
+        if (updatedOrderMaster.data.room_payments_id) {
+            const savePaymentData = {
+                payment_status: orderStatus
+            }
+            const existingBuilding = await findOneByTenantIdBuildingIdAndActive(userId, data.buildingId, true);
 
-                            });
-                    }
-                    resolve({
-                        status: 200,
-                        data: data,
-                        message: "updated payment successfully!"
-                    });
-                }
-            })
-            .catch(err => {
-                console.log(err, "err")
-                reject({ status: 500, message: err })
+            if (!existingBuilding.data) {
+                return ({ status: 404, message: "Not found!" })
+            }
 
-            });
+            const updatedRoomPayments = await findRoomPaymentsByIdAndUpdate(updatedOrderMaster.data.room_payments_id, savePaymentData);
 
-    });
+            if (!updatedRoomPayments.data) {
+                return ({ status: 500, message: "something went wrong" })
+            }
+
+            const buildingData = {
+                total_amount: existingBuilding.data.total_amount + data.amount
+            }
+
+            const updatedBuildingData = await findAndUpdateByBuildingId(buildingData, data.buildingId);
+
+            if (!updatedBuildingData.data) {
+                return ({ status: 500, message: "something went wrong" });
+
+            } else {
+
+                await session.commitTransaction();
+                return ({
+                    status: 200,
+                    data: updatedBuildingData.data,
+                    message: "updated payment successfully!"
+                });
+            }
+        }
+    } catch (error) {
+        console.log("error ---- ", error)
+        await session.abortTransaction();
+        session.endSession();
+        mongoose.connection.close()
+        return ({ status: 500, message: error })
+    }
 }
 
 
@@ -710,102 +719,94 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
 }
 
 const saveOrderDetailsAndComplete = async (data, parentId) => {
-    return new Promise((resolve, reject) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+
         const saveData = {
             payment_status: data.paymentStatus,
             updated_at: new Date()
         }
-        tenantRoomPayments.findByIdAndUpdate(data.roomPaymentId, saveData, { useFindAndModify: false })
-            .then(paymentData => {
-                if (!paymentData) {
 
-                    reject({ status: 404, message: "Not found!" })
+        const paymentData = await findRoomPaymentsByIdAndUpdate(data.roomPaymentId, saveData);
+        if (!paymentData.data) {
 
-                } else {
+            return ({ status: 404, message: "Not found!" });
+        } else {
 
-                    orderMaster.findOne({ room_payments_id: data.roomPaymentId, payment_status: "P" })
-                        .then(orders => {
-                            if (!orders) {
-                                const orderMasterObject = new orderMaster({
-                                    tenant_id: data.tenantId,
-                                    room_contract_id: paymentData.room_contract_id,
-                                    amount_paid: paymentData.price,
-                                    room_payments_id: paymentData._id,
-                                    status: true,
-                                    payment_status: data.paymentStatus,
-                                    payment_response: data.paymentResponse ? data.paymentResponse : '{}',
-                                    payment_type: "INTERNAL"
-                                })
-                                orderMasterObject.save((err, t) => {
-                                    if (err) {
-                                        console.log(err)
-                                        reject({ status: 500, message: err })
-                                        return;
-                                    }
-                                    const buildingData = {
-                                        total_amount: data.amount
-                                    }
-                                    tenantBuilding.findByIdAndUpdate(data.buildingId, buildingData, { useFindAndModify: false })
-                                        .then(res => {
-                                        })
-                                        .catch(err => {
-                                            console.log(err, "err")
-                                            reject({ status: 500, message: err })
+            const orderMasterData = await findOneOrderMasterByCondition({ room_payments_id: data.roomPaymentId, payment_status: "P" })
+            if (!orderMasterData.data) {
+                const orderMasterObject = new orderMaster({
+                    tenant_id: data.tenantId,
+                    room_contract_id: paymentData.data.room_contract_id,
+                    amount_paid: paymentData.data.price,
+                    room_payments_id: paymentData.data._id,
+                    status: true,
+                    payment_status: data.paymentStatus,
+                    payment_response: data.paymentResponse ? data.paymentResponse : '{}',
+                    payment_type: "INTERNAL"
+                });
 
-                                        });
-                                    resolve({
-                                        status: 200,
-                                        data: t,
-                                        message: "Tenant Room payment successfully!"
-                                    });
-                                });
-                            } else {
-                                const ordersData = {
-                                    payment_status: data.paymentStatus,
-                                    payment_type: "INTERNAL",
-                                    payment_response: data.paymentResponse ? data.paymentResponse : '{}'
-                                }
-                                orderMaster.findByIdAndUpdate(orders._id, ordersData, { useFindAndModify: false })
-                                    .then(paymentData => {
+                const savedOrderMaster = await saveOrderMasterRoomPayments(orderMasterObject);
 
-                                        const buildingData = {
-                                            total_amount: data.amount
-                                        }
-                                        tenantBuilding.findByIdAndUpdate(data.buildingId, buildingData, { useFindAndModify: false })
-                                            .then(res => {
-                                            })
-                                            .catch(err => {
-                                                console.log(err, "err")
-                                                reject({ status: 500, message: err })
-
-                                            });
-
-                                        resolve({
-                                            status: 200,
-                                            data: paymentData,
-                                            message: "Tenant Room payment successfully!"
-                                        });
-                                    })
-                                    .catch(err => {
-                                        console.log(err, "err")
-                                        reject({ status: 500, message: err })
-                                    });
-                            }
-                        })
-                        .catch(err => {
-                            console.log(err, "err")
-                            reject({ status: 500, message: err })
-
-                        });
-
+                if (!savedOrderMaster.data) {
+                    return ({ status: 500, message: "something went wrong" });
                 }
-            })
-            .catch(err => {
-                console.log(err, "err")
-                reject({ status: 500, message: err })
+            } else {
+                const ordersData = {
+                    payment_status: data.paymentStatus,
+                    payment_type: "INTERNAL",
+                    payment_response: data.paymentResponse ? data.paymentResponse : '{}'
+                }
+                const updateOrderData = await findOrderMasterByIdAndUpdate(orderMasterData.data._id, ordersData);
+                if (!updateOrderData.data) {
+                    return ({
+                        status: 201,
+                        data: t,
+                        message: "Tenant Room payment Not updated"
+                    });
+                }
+            }
 
-            });
-    })
+
+            const buildingData = await findOneByTenantIdBuildingIdAndActive(parentId, data.buildingId, true);
+            if (!buildingData.data) {
+                return ({ status: 404, message: "Not found!" });
+            }
+
+
+
+            const saveBuildingData = {
+                total_amount: buildingData.data.total_amount + parseInt(data.amount)
+            }
+
+            const savedBuildingData = await findAndUpdateByBuildingId(saveBuildingData, data.buildingId);
+
+            if (savedBuildingData.data) {
+                await session.commitTransaction();
+                return ({
+                    status: 200,
+                    data: savedBuildingData.data,
+                    message: "Tenant Room payment Updated successfully!"
+                });
+            } else {
+                return ({
+                    status: 201,
+                    data: t,
+                    message: "Tenant Room payment Not updated"
+                });
+            }
+
+
+        }
+    } catch (error) {
+        console.log(error)
+        await session.abortTransaction();
+        session.endSession();
+        mongoose.connection.close()
+        return ({ status: 500, message: error });
+    }
+
 }
 
 module.exports = {

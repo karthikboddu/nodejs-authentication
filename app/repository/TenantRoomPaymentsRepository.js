@@ -65,8 +65,29 @@ tenantRoomPayments = db.tenant.tenantRoomPayments,
         })
     }
 
+    const findRoomPaymentsByIdAndUpdate = async (roomPaymentId, saveData) => {
+
+        return new Promise((resolve, reject) => {
+            tenantRoomPayments.findByIdAndUpdate(roomPaymentId, saveData, { useFindAndModify: false })
+                .then(payments => {
+                    resolve({
+                        data: payments
+                    });
+                    return;
+                })
+                .catch(err => {
+                    reject({
+                        err
+                    })
+                    return;
+                })
+
+        })
+    }
+
     module.exports = {
         saveTenantRoomPayments,
         findAllRoomPaymentsByCondition,
-        findOneRoomPaymentsByCondition
+        findOneRoomPaymentsByCondition,
+        findRoomPaymentsByIdAndUpdate
     }
