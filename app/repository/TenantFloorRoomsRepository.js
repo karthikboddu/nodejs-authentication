@@ -336,7 +336,7 @@ const db = require("../models"),
                             $group: {
                                 _id: null,
                                 count: {
-                                    $sum: "$total_amount"
+                                    $sum: "$price"
                                 }
                             }
                         },
