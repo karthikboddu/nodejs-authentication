@@ -48,10 +48,6 @@ const saveChatConversations = async ( data, tenantId, parentId) => {
                     updated_at: Date.now(),
                 },
                 { upsert: true, new: true, setDefaultsOnInsert: true,useFindAndModify: false })
-                .populate({
-                    path: 'to_tenant_id',
-                    select: ['username', 'full_name', 'email', 'mobile_no', 'address', 'start_at', 'end_at', 'created_at', 'photoUrl']
-                })
                 .exec(function(err, conversation) {
                     if(err) {
                         console.log(tenantId,"err",err)
