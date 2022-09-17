@@ -247,15 +247,16 @@ io.on('connection', (socket) => {
     socket.join(roomName);
   });
 
-  socket.on('message', async({message, roomName, stoken, to, parentId, image  }, callback) => {
-    console.log('message: ' + message + ' in ' + roomName + ' token ' + stoken + ' to ' + to + ' image ' + image);
+  socket.on('message', async({message, roomName, stoken, to, parentId, image, assetType  }, callback) => {
+    console.log('message: ' + message + ' in ' + roomName + ' token ' + stoken + ' to ' + to + ' image ' + image + + ' assetType ' + assetType);
 
     // generate data to send to receivers
     const outgoingMessage = {
       toTenantId : to,
       text : message,
       user : socket.user,
-      assetUrl : image
+      assetUrl : image,
+      assetType : assetType
     };
     console.log(outgoingMessage,"outgoingMessage");
     // send socket to all in room except sender
