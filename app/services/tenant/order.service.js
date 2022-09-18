@@ -466,7 +466,7 @@ const initiateRoomTransactionDetails = async (data, userId) => {
     }
 }
 
-const updateOrderDetails = async (data, userId) => {
+const updateOrderDetails = async (data, userId, parentId) => {
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -487,8 +487,7 @@ const updateOrderDetails = async (data, userId) => {
             const savePaymentData = {
                 payment_status: orderStatus
             }
-            const existingBuilding = await findOneByTenantIdBuildingIdAndActive(userId, data.buildingId, true);
-
+            const existingBuilding = await findOneByTenantIdBuildingIdAndActive(parentId, data.buildingId, true);
             if (!existingBuilding.data) {
                 return ({ status: 404, message: "Not found!" })
             }

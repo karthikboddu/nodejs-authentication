@@ -61,7 +61,7 @@ exports.updateOrderStatus = async (req, res, next) => {
         res.status(500).send({ message: errorCode.BAD_REQUEST });
       }
 
-      const result = await updateOrderDetails(orderData, req.userId);
+      const result = await updateOrderDetails(orderData, req.userId,  req.parentId);
       console.log(result,"result")
       res.send(result);
     } catch (error) {
