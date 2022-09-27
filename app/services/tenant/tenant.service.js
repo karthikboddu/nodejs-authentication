@@ -116,7 +116,6 @@ const saveTenants = async (data, role, parentId) => {
 
   } catch (error) {
     return ({ status: 500, message: error })
-    console.log(error)
   }
 }
 

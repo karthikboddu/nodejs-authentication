@@ -667,6 +667,32 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
                                 }
                             }
                         },
+                        {
+
+                            $lookup: {
+                                from: "tenant_buildings",
+                                let: { "buildingId": "$building_id" },
+                                pipeline: [
+                                    {
+                                        $match: {
+                                            $expr: {
+                                                $and: [
+                                                    { $eq: ["$_id", "$$buildingId"] }
+                                                ]
+                                            }
+                                        }
+                                    },
+            
+                                    {
+                                        $project: {
+                                            _v: 0,
+            
+                                        }
+                                    }
+                                ],
+                                as: "buildingDetails"
+                            }
+                        },
 
                         {
                             $project: {
@@ -677,7 +703,7 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
                         }
                     ],
                     as: "contractDetails"
-                }
+                },
             },
             {
 

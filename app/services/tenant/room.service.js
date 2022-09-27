@@ -24,6 +24,7 @@ const saveFloorRooms = async (data, tenantId, floorId) => {
                     building_floor_id: floorId,
                     room_name: data.roomName,
                     room_code: data.roomCode,
+                    room_amount: data.roomAmount,
                     status: true
                 })
 
@@ -166,19 +167,22 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
         if (!savedTenantRoomPaymentC.data) {
             return ({ status: 500, message: 'Oops ... Something went wrong ....'  })
         }
+        let tenantRoomPaymentsBalanceObject = {}
 
+        if (floorRoomsDetails.data.room_amount * 2 - data.price > 0) {
+            tenantRoomPaymentsBalanceObject = new tenantRoomPayments(
+                {
+                    tenant_id: tenantId,
+                    floor_room_id: roomId,
+                    price: floorRoomsDetails.data.room_amount * 2 - data.price,
+                    payment_for_date: new Date(),
+                    room_payment_type: 'BALANCE_AMOUNT',
+                    room_contract_id: savedTenantRoomContract.data._id,
+                    description : data.description ? data.description : ''
+                }
+            );
+        }
 
-        const tenantRoomPaymentsObject1 = new tenantRoomPayments(
-            {
-                tenant_id: tenantId,
-                floor_room_id: roomId,
-                price: floorRoomsDetails.data.room_amount - data.price,
-                payment_for_date: new Date(),
-                room_payment_type: 'BALANCE_AMOUNT',
-                room_contract_id: savedTenantRoomContract.data._id,
-                description : data.description ? data.description : ''
-            }
-        );
 
 
         const savedTenantRoomPaymentP = await saveTenantRoomPayments(tenantRoomPaymentsObject1);

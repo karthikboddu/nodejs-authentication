@@ -120,7 +120,7 @@ const signInData = (req, res, data) => {
 
 const requestPasswordReset = async (email) => {
 
-  const user = await User.findOne({ email });
+  const user = await tenant.findOne({ email });
   console.log(Token, "user")
   if (!user) throw new Error("User does not exist");
 
