@@ -36,6 +36,17 @@ module.exports = {
         'aesIv' : process.env.AES_IV,
         'aesAlgo' : process.env.AES_ALGO,
         'googleRecaptcha' : process.env.GOOGLE_RECAPTCHA_KEY
+    },
+    'cloud' : {
+        'aws' : {
+            'ENABLED' : process.env.AWS_S3
+        },
+        'cloudinary' : {
+            'ENABLED' : process.env.CLOUDINARY,
+            'cloudName' : process.env.CLOUDINARY_USER_NAME,
+            'apiKey': process.env.CLOUDINARY_API_KEY,
+            'apiSecret': process.env.CLOUDINARY_API_SECRET,
+        }
     }
         
 };

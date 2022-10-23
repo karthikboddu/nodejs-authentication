@@ -399,6 +399,10 @@ const initiateRoomTransactionDetails = async (data, userId) => {
             }
         });
 
+        if (firstDay >= now) {
+            return ({ status: 404, message: 'Room Payments found' })
+        }
+
         if (payments.data) {
             return ({ status: 404, message: 'Room Payments found' })
         }

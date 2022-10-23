@@ -2,6 +2,8 @@
 "use strict";
 const db = require("../models");
 const Role = db.role;
+const contentType = db.tenant.contentType;
+
 const mongoose = require('mongoose')
 
 module.exports = (cfg, data) => {
@@ -48,6 +50,35 @@ function initial() {
 
         console.log("added 'admin' to roles collection");
       });
+    }
+  });
+
+  contentType.estimatedDocumentCount((err, count) => {
+    if (!err && count === 0) {
+      new contentType({
+        name: "PDF",
+        code: "pdf",
+        is_active : true
+      }).save(err => {
+        if (err) {
+          console.log("error", err);
+        }
+
+        console.log("added 'pdf' to contenttype collection");
+      });
+
+      new contentType({
+        name: "IMAGE",
+        code: "image",
+        is_active : true
+      }).save(err => {
+        if (err) {
+          console.log("error", err);
+        }
+
+        console.log("added 'image' to contentype collection");
+      });
+
     }
   });
 }

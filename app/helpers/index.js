@@ -3,7 +3,9 @@
 const _     = require('lodash'),
     modules = [
         'init_mongodb',
-        'init_redis'
+        'init_redis',
+        'init_aws_s3',
+        'init_cloudinary'
     ];
 
 function init(cfg) {

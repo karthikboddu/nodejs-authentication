@@ -17,5 +17,9 @@ module.exports = (mongoose,dbConfig) => {
     db.userConversation = require('./user_conversation')(mongoose);
     db.lastConversation = require('./last_conversation')(mongoose);
     db.userNotes = require('./user_notes')(mongoose);
+    db.contentType = require('./content_type')(mongoose);
+    db.asset = require('./asset')(mongoose);
+    db.upload = require('./upload')(mongoose);
+    
     return db
 }
