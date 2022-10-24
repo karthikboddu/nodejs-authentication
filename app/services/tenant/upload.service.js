@@ -7,9 +7,8 @@ const { saveUpload, findAndUpdateByUploadId } = require("../../repository/Upload
 const { generatePdfWithImageAndPassword } = require("../../common/pdfkit");
 const asset = db.tenant.asset;
 const upload = db.tenant.upload;
-const contentType = db.tenant.contentType;
-const tenant = db.tenant.tenantModel;
 const {findOneTenant} = require('../../repository/UserRepository');
+const Constants = require("../../common/Constants");
 
 const uplaodAssetForTenant = async (req, parentId, tenantId) => {
 
@@ -32,17 +31,19 @@ const uplaodAssetForTenant = async (req, parentId, tenantId) => {
         const buf1Hash = crypto.createHash('md5').update(req.file.buffer).digest('hex');
 
 
-        const assetData = await findOneAsset({ hash: buf1Hash, tenant_id: req.userId, is_active: true });
+        const assetData = await findOneAsset({ hash: buf1Hash, tenant_id: tenantId, parent_id : req.userId, is_active: true, status: Constants.UPLOAD_STATUS.COMPLETE });
 
         console.log(assetData, " ===assetData")
+
+        const cdnType = process.env.CLOUDINARY == "ON" ? 'cloudinary' : 'aws';
 
         const uploadObject = new upload({
             tenant_id: tenantData.data._id,
             parent_id: req.userId,
             code: crypto.createHash('md5').update(Date.now.toString()).digest('hex'),
-            type: 'local',
+            type: cdnType,
             size: req.file.size,
-            status: 'IN_PROGRESS',
+            status: Constants.UPLOAD_STATUS.IN_PROGRESS,
             error_details: '',
             is_active: true
         })
@@ -51,8 +52,6 @@ const uplaodAssetForTenant = async (req, parentId, tenantId) => {
         if (!savedUploadData.data) {
             return ({ status: 201, message: "Couldn't upload file" })
         }
-
-        // console.log(uploadObject,"buffhash");
 
 
         var hash = crypto.createHash('md5').update(process.env.NODE_ENV).digest('hex');
@@ -69,10 +68,7 @@ const uplaodAssetForTenant = async (req, parentId, tenantId) => {
         var versionNumber = 1;
 
         if (assetData.data) {
-            console.log(versionNumber, "versiono")
             versionNumber = assetData.data.version + 1;
-            console.log(versionNumber, "versiono")
-
         }
 
         const path = hash.concat("/").concat(parentIdPath)
@@ -101,7 +97,7 @@ const uplaodAssetForTenant = async (req, parentId, tenantId) => {
             version: versionNumber,
             content_type_id: pdfContentType.data._id,
             file_size: req.file.size,
-            status: 'IN_PROGRESS',
+            status: Constants.UPLOAD_STATUS.IN_PROGRESS,
             is_active: true
         });
 
@@ -116,29 +112,48 @@ const uplaodAssetForTenant = async (req, parentId, tenantId) => {
             userPassword: assetKey
         }
 
-        console.log(assetObject, "buffhash");
         const pdfBuffer = await generatePdfWithImageAndPassword(options, req.file.buffer);
 
-        const params = {
-            Bucket: process.env.AWS_BUCKET,
-            Key: path, // File name you want to save as in S3
-            Body: pdfBuffer
-        };
+        var buf = pdfBuffer.toString('base64');
+        if (process.env.CLOUDINARY == "ON") {
+            const init_cloudinary = req.app.get('core').init_cloudinary;
+            
+            const result = await init_cloudinary.uploader.upload("data:application/pdf;base64," + buf, {
+                            public_id: path,
+                            resource_type: "raw"
+                           });
+            if (result.secure_url) {
+                const updateAssetData = {
+                    status: Constants.UPLOAD_STATUS.COMPLETE,
+                    asset_url : result.secure_url
+                }
+                await findAndUpdateByAssetId(updateAssetData, savedAssetData.data._id)
 
-        const s3Data = await pushObjectToS3(s3, params);
+            }                           
 
-        if (!s3Data.result) {
-            const updateAssetData = {
-                status: 'FAILED'
+            console.log(result,"cloudinary")
+            
+        } else {
+            const params = {
+                Bucket: process.env.AWS_BUCKET,
+                Key: path, // File name you want to save as in S3
+                Body: pdfBuffer
+            };
+            const s3Data = await pushObjectToS3(s3, params);
+
+            if (!s3Data.result) {
+                const updateAssetData = {
+                    status: Constants.UPLOAD_STATUS.FAIL
+                }
+                console.log("failed")
+                await findAndUpdateByUploadId(updateAssetData, savedUploadData.data._id);
+
+                return ({ status: 409, message: "Couldn't Upload File to S3" })
             }
-            console.log("failed")
-            const existingUploadData = await findAndUpdateByUploadId(updateAssetData, savedUploadData.data._id);
-
-            return ({ status: 409, message: "Couldn't Upload File to S3" })
         }
 
         const updateAssetData = {
-            status: 'COMPLETE'
+            status: Constants.UPLOAD_STATUS.COMPLETE
         }
 
         const existingUploadData = await findAndUpdateByUploadId(updateAssetData, savedUploadData.data._id);

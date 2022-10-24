@@ -37,6 +37,10 @@ module.exports = (mongoose) => {
                 type: String,
                 required :true
             },
+            asset_url: {
+                type: String,
+                required :false
+            },
             version: {
                 type: Number,
                 required :true
@@ -48,6 +52,10 @@ module.exports = (mongoose) => {
             },
             file_size: {
                 type: Number,
+                required :true
+            },
+            status: {
+                type: String,
                 required :true
             },
             is_active: {
