@@ -185,7 +185,7 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
 
 
 
-        const savedTenantRoomPaymentP = await saveTenantRoomPayments(tenantRoomPaymentsObject1);
+        const savedTenantRoomPaymentP = await saveTenantRoomPayments(tenantRoomPaymentsBalanceObject);
 
         if (!savedTenantRoomPaymentP.data) {
             return ({ status: 500, message: 'Oops ... Something went wrong ....'  })
