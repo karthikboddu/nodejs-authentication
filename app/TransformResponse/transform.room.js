@@ -10,6 +10,7 @@ const transformTenantRoomDetails = (record) => {
         status: record.status,
         tenant_id: record.tenant_id,
         contractDetails: transformTenantContractDetails(record.contractDetails[0] ? record.contractDetails[0] : {}),
+        tenantLinked : record.contractDetails[0] ? true : false,
         building_floor_id: record.building_floor_id,
         room_name: record.room_name,
         room_code: record.room_code,
@@ -19,7 +20,10 @@ const transformTenantRoomDetails = (record) => {
     };
 }
 const transformTenantContractDetails = (record) => {
-
+    console.log(record,"---record")
+    if (Object.keys(record).length === 0)  {
+        return {}
+    }
     return {
         _id: record._id,
         advance_paid: record.advance_paid,
