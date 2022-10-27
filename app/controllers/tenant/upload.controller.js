@@ -18,6 +18,8 @@ exports.uploadAssets = async (req, res, next) => {
 
     const tenantId = req.params.tenantId;
 
+    const deliveryType = req.query.deliveryType;
+
     if (!tenantId) {
       return res.status(400).send({ status: 400, message: errorCode.BAD_REQUEST });
     }
@@ -26,7 +28,7 @@ exports.uploadAssets = async (req, res, next) => {
       return ({ status: 404, message: " File Not Found." })
     }
 
-    const result = await uplaodAssetForTenant(req, req.parentId, tenantId);
+    const result = await uplaodAssetForTenant(req, req.parentId, tenantId, deliveryType);
 
     if (result.status != 200) {
       res.api.status = result.status;

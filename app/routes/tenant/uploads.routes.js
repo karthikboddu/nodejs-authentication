@@ -19,7 +19,7 @@ const iv = randomBytes(16); // ... replace with your initialization vector
 const fileFilter = (req, file, cb) => {
     console.log(file,"file.fieldname");
     req.fileName = file.originalname;
-    if (file.mimetype.startsWith('image')) {
+    if (file.mimetype.startsWith('image') || file.mimetype.startsWith('video') || file.mimetype.startsWith('mp3')) {
       cb(null, true);
     } else {
       cb('invalid image file!', false);
@@ -87,8 +87,8 @@ module.exports = function(app) {
     })
 
 
-    app.post("/api/upload/assets/:tenantId", [authJwt.verifyToken,authJwt.isAdmin,uploads.single('photos')],controller.uploadAssets);
-    app.get("/api/upload/url/:tenantId", [authJwt.verifyToken,authJwt.isAdmin],controller.getDownloadUrl);
+    app.post("/api/upload/assets/:tenantId", [authJwt.verifyToken,uploads.single('photos')],controller.uploadAssets);
+    app.get("/api/upload/url/:tenantId", [authJwt.verifyToken],controller.getDownloadUrl);
 
     
 }

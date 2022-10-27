@@ -3,7 +3,7 @@
 const db = require("../models");
 const Role = db.role;
 const contentType = db.tenant.contentType;
-
+const deliveryType = db.tenant.deliveryType;
 const mongoose = require('mongoose')
 
 module.exports = (cfg, data) => {
@@ -77,6 +77,46 @@ function initial() {
         }
 
         console.log("added 'image' to contentype collection");
+      });
+
+    }
+  });
+  deliveryType.estimatedDocumentCount((err, count) => {
+    if (!err && count === 0) {
+      new deliveryType({
+        name: "PROFILE PIC",
+        code: "profile_pic",
+        is_active : true
+      }).save(err => {
+        if (err) {
+          console.log("error", err);
+        }
+
+        console.log("added 'profile_pic' to contenttype collection");
+      });
+
+      new deliveryType({
+        name: "IDENTITY",
+        code: "identity",
+        is_active : true
+      }).save(err => {
+        if (err) {
+          console.log("error", err);
+        }
+
+        console.log("added 'identity' to contentype collection");
+      });
+
+      new deliveryType({
+        name: "MESSAGE ASSET",
+        code: "message_asset",
+        is_active : true
+      }).save(err => {
+        if (err) {
+          console.log("error", err);
+        }
+
+        console.log("added 'message_asset' to contentype collection");
       });
 
     }

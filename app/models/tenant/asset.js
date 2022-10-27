@@ -50,6 +50,11 @@ module.exports = (mongoose) => {
                 required: true,
                 ref: "content_type"
             },
+            delivery_type_id: {
+                type : mongoose.Schema.Types.ObjectId,
+                required: true,
+                ref: "delivery_type"
+            },
             file_size: {
                 type: Number,
                 required :true

@@ -2,7 +2,7 @@ const _           = require('lodash');
 
 
 const transformTenantRoomDetails = (record) => {
-    console.log(record)
+    console.log(record,"asset")
 
     return {
         _id: record._id,

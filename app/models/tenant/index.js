@@ -20,6 +20,7 @@ module.exports = (mongoose,dbConfig) => {
     db.contentType = require('./content_type')(mongoose);
     db.asset = require('./asset')(mongoose);
     db.upload = require('./upload')(mongoose);
+    db.deliveryType = require('./delivery_type')(mongoose);
     
     return db
 }

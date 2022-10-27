@@ -9,8 +9,11 @@ const asset = db.tenant.asset;
 const upload = db.tenant.upload;
 const {findOneTenant} = require('../../repository/UserRepository');
 const Constants = require("../../common/Constants");
+const { findOneDeliveryType } = require("../../repository/DeliveryTypeRepository");
+const { pushObjectToCloudinary } = require("../../common/cloudinary");
+const { updateTenantDetails } = require("./tenant.service");
 
-const uplaodAssetForTenant = async (req, parentId, tenantId) => {
+const uplaodAssetForTenant = async (req, parentId, tenantId, deliveryType) => {
 
     try {
         var now = new Date();
@@ -28,8 +31,8 @@ const uplaodAssetForTenant = async (req, parentId, tenantId) => {
         }   
 
         const s3 = req.app.get('core').init_aws_s3;
-        const buf1Hash = crypto.createHash('md5').update(req.file.buffer).digest('hex');
 
+        const buf1Hash = crypto.createHash('md5').update(req.file.buffer).digest('hex');
 
         const assetData = await findOneAsset({ hash: buf1Hash, tenant_id: tenantId, parent_id : req.userId, is_active: true, status: Constants.UPLOAD_STATUS.COMPLETE });
 
@@ -56,8 +59,23 @@ const uplaodAssetForTenant = async (req, parentId, tenantId) => {
 
         var hash = crypto.createHash('md5').update(process.env.NODE_ENV).digest('hex');
 
+        var fileExt = req.file.originalname.split('.').pop();
 
-        const fileName = req.file.originalname.substr(0, req.file.originalname.lastIndexOf(".")) + ".pdf";
+        var extension = '';
+
+        if (deliveryType.toString() == Constants.deliveryType.PROFILE_PIC) {
+            extension = fileExt;
+        } else if (deliveryType.toString() == Constants.deliveryType.IDENTITY) {
+            extension = Constants.contentType.PDF;
+        } else if (deliveryType.toString() == Constants.deliveryType.MESSAGE_ASSET) {
+            extension = fileExt;
+        } else {
+          return ({ status: 404, message: "Delivery Type Not Found ... " })
+        }
+
+        const contentCode = (deliveryType.toString() == Constants.deliveryType.IDENTITY) ? Constants.contentType.PDF : req.file.mimetype.split('/')[0];
+
+        const fileName = req.file.originalname.substr(0, req.file.originalname.lastIndexOf(".")) + "." +`${extension}`;
 
         var parentIdPath = '';
 
@@ -71,26 +89,35 @@ const uplaodAssetForTenant = async (req, parentId, tenantId) => {
             versionNumber = assetData.data.version + 1;
         }
 
+
         const path = hash.concat("/").concat(parentIdPath)
-            .concat(req.userId).concat("/pdf").concat("/").concat(versionNumber).concat("/").concat(fileName);
+            .concat(req.userId).concat("/").concat(extension).concat("/").concat(versionNumber).concat("/").concat(fileName);
         console.log(path, " ===path")
 
-        const pdfContentType = await findOneContentType({ code: "pdf" });
+        console.log(fileExt," - ", extension, " = ", fileName, " - ",contentCode)
+
+
+        const pdfContentType = await findOneContentType({ code: contentCode, is_active:true });
 
 
         if (!pdfContentType.data) {
-            return ({ status: 404, message: " Content Type Not Found." })
+            return ({ status: 404, message: "Content Type Not Found." })
+        }
+
+        const deliveryTypeResult = await findOneDeliveryType({ code: deliveryType, is_active:true });
+
+        if (!deliveryTypeResult.data) {
+            return ({ status: 404, message: "Delivery Type Not Found." })
         }
 
         const assetKey = crypto.randomUUID();
-        console.log(now.toUTCString(),"Date.now.toString()")
 
         const assetObject = new asset({
             tenant_id: tenantData.data._id,
             parent_id: req.userId,
             upload_id: savedUploadData.data._id,
             name: req.file.originalname,
-            code: crypto.createHash('md5').update(now.toString()).digest('hex'),
+            code: crypto.createHash('md5').update(now.valueOf().toString()).digest('hex'),
             hash: buf1Hash,
             asset_path: path,
             asset_key: assetKey,
@@ -98,7 +125,8 @@ const uplaodAssetForTenant = async (req, parentId, tenantId) => {
             content_type_id: pdfContentType.data._id,
             file_size: req.file.size,
             status: Constants.UPLOAD_STATUS.IN_PROGRESS,
-            is_active: true
+            is_active: true,
+            delivery_type_id : deliveryTypeResult.data._id
         });
 
 
@@ -112,16 +140,32 @@ const uplaodAssetForTenant = async (req, parentId, tenantId) => {
             userPassword: assetKey
         }
 
-        const pdfBuffer = await generatePdfWithImageAndPassword(options, req.file.buffer);
+        var pdfBuffer = '';
 
-        var buf = pdfBuffer.toString('base64');
         if (process.env.CLOUDINARY == "ON") {
             const init_cloudinary = req.app.get('core').init_cloudinary;
+            var result = '';
+
+            if (deliveryType.toString() == Constants.deliveryType.IDENTITY) {
+                pdfBuffer = await generatePdfWithImageAndPassword(options, req.file.buffer);
+
+                result = await init_cloudinary.uploader.upload("data:application/pdf;base64," + pdfBuffer.toString('base64')
+                            , {
+                                public_id: path,
+                                resource_type: "raw"
+                            });
+            }  else {
+                result = await pushObjectToCloudinary(init_cloudinary, req.file.buffer, path);
+                console.log(result)
+                if (result.secure_url) {
+                    const payload = {
+                        photoUrl: result.secure_url
+                      }
+                      console.log(payload)
+                    await updateTenantDetails(req, req.userId, payload);
+                }
+            }
             
-            const result = await init_cloudinary.uploader.upload("data:application/pdf;base64," + buf, {
-                            public_id: path,
-                            resource_type: "raw"
-                           });
             if (result.secure_url) {
                 const updateAssetData = {
                     status: Constants.UPLOAD_STATUS.COMPLETE,
@@ -129,6 +173,13 @@ const uplaodAssetForTenant = async (req, parentId, tenantId) => {
                 }
                 await findAndUpdateByAssetId(updateAssetData, savedAssetData.data._id)
 
+            } else {
+                const updateAssetData = {
+                    status: Constants.UPLOAD_STATUS.FAIL,
+                    asset_url : result.secure_url
+                }
+                await findAndUpdateByAssetId(updateAssetData, savedAssetData.data._id)
+                return ({ status: 409, message: "Couldn't Upload File to S3" })
             }                           
 
             console.log(result,"cloudinary")
