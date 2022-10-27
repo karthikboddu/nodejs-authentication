@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const { generateSignedUrl, pushObjectToS3 } = require('../../common/aws');
 const db = require("../../models");
-const { uplaodAssetForTenant } = require('../../services/tenant/upload.service');
+const { uplaodAssetForTenant, uplaodAssetTenantProfile } = require('../../services/tenant/upload.service');
 const errorCode = require('../../common/errorCode');
 const { findOneAsset } = require('../../repository/AssetRepository');
 const Constants = require('../../common/Constants');
@@ -25,10 +25,45 @@ exports.uploadAssets = async (req, res, next) => {
     }
 
     if (!req.file) {
-      return ({ status: 404, message: " File Not Found." })
+      return res.status(404).send({ status: 404, message: "File Not Found." })
     }
 
     const result = await uplaodAssetForTenant(req, req.parentId, tenantId, deliveryType);
+
+    if (result.status != 200) {
+      res.api.status = result.status;
+      res.api.errors = {
+        message: result.message
+      };
+    }
+
+    req.app.get('log').info(_.assign(req.app.get('logEntry'), {
+      'status': res.api.status
+    }));
+
+    res.send(res.api);
+  } catch (error) {
+    console.log(error, "error")
+    return res.send(error);
+  }
+
+}
+
+exports.uploadUserAssets = async (req, res, next) => {
+
+  try {
+
+    const deliveryType = req.query.deliveryType;
+
+    if (!deliveryType) {
+      return res.status(404).send({ status: 404, message: "Delivery Type Not Found ... " });
+    }
+
+    if (!req.file) {
+      return res.status(404).send({ status: 404, message: "File Not Found." })
+    }
+
+    const result = await uplaodAssetTenantProfile(req, req.parentId, req.userId, deliveryType);
 
     if (result.status != 200) {
       res.api.status = result.status;
