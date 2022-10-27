@@ -14,7 +14,6 @@ const PaytmChecksum = require('../../common/PaytmChecksum');
 const { findTenant, findOneTenant } = require('../../repository/UserRepository');
 const { findAllRoomPaymentsByCondition, findOneRoomPaymentsByCondition, findRoomPaymentsByIdAndUpdate } = require('../../repository/TenantRoomPaymentsRepository');
 const { findAllRoomContractByCondition, findRoomContractOneByRoomId } = require('../../repository/TenantRoomContractRepository');
-const moment = require('moment');
 const { findOneOrderMasterByCondition, saveOrderMasterRoomPayments, findOrderMasterByIdAndUpdate } = require('../../repository/OrderMasterRepository');
 const { findOneByTenantIdBuildingIdAndActive, findAndUpdateByBuildingId } = require('../../repository/TenantBuildingRepository');
 
