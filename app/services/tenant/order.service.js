@@ -156,7 +156,7 @@ const generateToken = async (data, userId) => {
                             });
 
                             post_res.on('end', function () {
-
+                                console.log(response,"paytm")
                                 var d = JSON.parse(response);
                                 d.orderId = orders._id;
                                 d.buildingId = data.buildingId;
