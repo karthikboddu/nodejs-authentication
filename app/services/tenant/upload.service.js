@@ -264,8 +264,8 @@ const uplaodAssetTenantProfile = async (req, parentId, tenantId, deliveryType) =
         } else if (deliveryType.toString() == Constants.deliveryType.MESSAGE_ASSET) {
             extension = fileExt;
         } else {
-          return ({ status: 404, message: "Delivery Type Not Found ... " })
-        }
+          return ({ status: 404, message: "Delivery Type Not Found ..." })
+        } 
 
         const contentCode = req.file.mimetype.split('/')[0];
 
