@@ -7,7 +7,7 @@ const storage = multer.memoryStorage({
       callback(null, '');
   }
 });
-var multerS3 = require('multer-s3')
+// var multerS3 = require('multer-s3')
 const AWS = require("aws-sdk");
 
 const {createReadStream, createWriteStream} = require('fs');
@@ -71,20 +71,20 @@ module.exports = function(app) {
     //     console.log(e);
     //  });
 
-    var upload = multer({
-      storage: multerS3({
-          s3: s3,
-          bucket: process.env.AWS_BUCKET,
-          metadata: function (req, file, cb) {
-              req.fileName = file.originalname;
-              console.log(file,"file.fieldname");
-              cb(null, { fieldName: file.fieldname });
-          },
-          key: function (req, file, cb) {
-              cb(null, file.originalname)
-          }
-      })
-    })
+    // var upload = multer({
+    //   storage: multerS3({
+    //       s3: s3,
+    //       bucket: process.env.AWS_BUCKET,
+    //       metadata: function (req, file, cb) {
+    //           req.fileName = file.originalname;
+    //           console.log(file,"file.fieldname");
+    //           cb(null, { fieldName: file.fieldname });
+    //       },
+    //       key: function (req, file, cb) {
+    //           cb(null, file.originalname)
+    //       }
+    //   })
+    // })
 
 
     app.post("/api/upload/assets/:tenantId", [authJwt.verifyToken,authJwt.isAdmin,uploads.single('photos')],controller.uploadAssets);
