@@ -5,16 +5,11 @@ const { uplaodAssetForTenant, uplaodAssetTenantProfile } = require('../../servic
 const errorCode = require('../../common/errorCode');
 const { findOneAsset } = require('../../repository/AssetRepository');
 const Constants = require('../../common/Constants');
+const { findOneDeliveryType } = require('../../repository/DeliveryTypeRepository');
 
 exports.uploadAssets = async (req, res, next) => {
 
   try {
-
-    // const image = await axios
-    // .get(signedUrl, {
-    //     responseType: 'arraybuffer'
-    // })
-    // console.log(image.data);
 
     const tenantId = req.params.tenantId;
 
@@ -86,30 +81,40 @@ exports.uploadUserAssets = async (req, res, next) => {
 
 exports.getDownloadUrl = async (req, res, next) => {
   try {
+    const deliveryType = req.query.deliveryType;
+
+    if (!deliveryType) {
+      return res.status(404).send({ status: 404, message: "Delivery Type Not Found ... " });
+    }
 
     const s3 = req.app.get('core').init_aws_s3;
-    console.log("Start");
+
     const tenantId = req.params.tenantId;
 
     if (!tenantId) {
       return res.status(400).send({ status: 400, message: errorCode.BAD_REQUEST });
     }
+    const deliveryData = await findOneDeliveryType({ code: deliveryType, is_active: true });
 
-    const assetData = await findOneAsset({ tenant_id: tenantId, parent_id: req.userId,is_active: true, status: Constants.UPLOAD_STATUS.COMPLETE });
-
-    if (!assetData.data) {
-      return res.status(400).send({ status: 404, message: " Asset Not Found." })
+    if (!deliveryData.data) {
+      return res.status(400).send({ status: 404, message: "DeliveryType Not Found." })
     }
 
-    console.log(assetData);
+    const assetData = await findOneAsset({
+      tenant_id: tenantId, parent_id: req.userId, is_active: true,
+      status: Constants.UPLOAD_STATUS.COMPLETE, delivery_type_id: deliveryData.data._id
+    });
+
+    if (!assetData.data) {
+      return res.status(400).send({ status: 404, message: "Asset Not Found." })
+    }
+
     var signedUrl = '';
 
     if (process.env.CLOUDINARY == "ON") {
       // const init_cloudinary = req.app.get('core').init_cloudinary;
       //signedUrl = await init_cloudinary.utils.private_download_url(assetData.data.asset_path,'pdf',{resource_type: "raw"});
       signedUrl = assetData.data.asset_url
-      console.log(signedUrl)
-
     } else {
 
       signedUrl = await generateSignedUrl(s3, {
@@ -120,7 +125,59 @@ exports.getDownloadUrl = async (req, res, next) => {
 
     }
 
+    res.api.data = {
+      url: signedUrl,
+      key: assetData.data.asset_key
+    };
+    res.send(res.api)
+  } catch (error) {
+    console.log(error)
+    return res.send(error);
+  }
+}
 
+
+exports.getUserDownloadUrl = async (req, res, next) => {
+  try {
+    const deliveryType = req.query.deliveryType;
+
+    if (!deliveryType) {
+      return res.status(404).send({ status: 404, message: "Delivery Type Not Found ... " });
+    }
+
+    const s3 = req.app.get('core').init_aws_s3;
+
+    const deliveryData = await findOneDeliveryType({ code: deliveryType, is_active: true });
+
+    if (!deliveryData.data) {
+      return res.status(400).send({ status: 404, message: "DeliveryType Not Found." })
+    }
+
+    const assetData = await findOneAsset({
+      tenant_id: req.userId, parent_id: req.parentId, is_active: true,
+      status: Constants.UPLOAD_STATUS.COMPLETE, delivery_type_id: deliveryData.data._id
+    });
+
+    if (!assetData.data) {
+      return res.status(400).send({ status: 404, message: "Asset Not Found." })
+    }
+
+    var signedUrl = '';
+
+    if (process.env.CLOUDINARY == "ON") {
+      // const init_cloudinary = req.app.get('core').init_cloudinary;
+      //signedUrl = await init_cloudinary.utils.private_download_url(assetData.data.asset_path,'pdf',{resource_type: "raw"});
+      signedUrl = assetData.data.asset_url
+
+    } else {
+
+      signedUrl = await generateSignedUrl(s3, {
+        Key: assetData.data.asset_path,
+        Bucket: process.env.AWS_BUCKET,
+        Expires: parseInt(process.env.AWS_S3_SIGNED_URL_EXPIRY) // S3 default is 900 seconds (15 minutes)
+      });
+
+    }
 
     res.api.data = {
       url: signedUrl,

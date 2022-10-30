@@ -49,20 +49,20 @@ const generateToken = async (data, userId) => {
 
                         paytmParams.body = {
                             "requestType": "Payment",
-                            "mid": "nikYWM52585118708761",
+                            "mid": process.env.MID,
                             "websiteName": "WEBSTAGING",
                             "orderId": t._id,
-                            "callbackUrl": "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=" + t._id,
+                            "callbackUrl": process.env.CALL_BACK_URL + t._id,
                             "txnAmount": {
                                 "value": data.amt,
-                                "currency": "INR",
+                                "currency": process.env.CURRENCY,
                             },
                             "userInfo": {
                                 "custId": "CUST_001",
                             },
                         };
 
-                        PaytmChecksum.generateSignature(JSON.stringify(paytmParams.body), "QQ29rwECihxHAs0Q").then(function (checksum) {
+                        PaytmChecksum.generateSignature(JSON.stringify(paytmParams.body), process.env.MERCHANT_KEY).then(function (checksum) {
                             paytmParams.head = {
                                 "signature": checksum
                             };
@@ -113,20 +113,20 @@ const generateToken = async (data, userId) => {
                 } else {
                     paytmParams.body = {
                         "requestType": "Payment",
-                        "mid": "nikYWM52585118708761",
+                        "mid": process.env.MID,
                         "websiteName": "WEBSTAGING",
                         "orderId": orders._id,
-                        "callbackUrl": "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=" + orders._id,
+                        "callbackUrl": process.env.CALL_BACK_URL + orders._id,
                         "txnAmount": {
                             "value": data.amt,
-                            "currency": "INR",
+                            "currency": process.env.CURRENCY,
                         },
                         "userInfo": {
                             "custId": "CUST_001",
                         },
                     };
 
-                    PaytmChecksum.generateSignature(JSON.stringify(paytmParams.body), "QQ29rwECihxHAs0Q").then(function (checksum) {
+                    PaytmChecksum.generateSignature(JSON.stringify(paytmParams.body), process.env.MERCHANT_KEY).then(function (checksum) {
                         paytmParams.head = {
                             "signature": checksum
                         };
@@ -175,7 +175,7 @@ const generateToken = async (data, userId) => {
                 reject({
                     status: 500,
                     message:
-                        err.message || "Some error occurred while retrieving tutorials."
+                        err.message || "Something went wrong ..."
                 })
             });
     })
