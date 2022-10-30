@@ -4,6 +4,7 @@ const {generateToken, initiateRoomTransactionDetails, updateOrderDetails,
    fetchTenantRoomOrderDetails, fetchRecentAllTenantRoomOrderDetails,
    saveOrderDetailsAndComplete,initiateBulkRoomTransactionDetails} = require('../../services/tenant/order.service')
 const { getPagination } = require('../../common/util');
+const { transformUserRecentTransaction, transformAdminRecentTransaction } = require('../../TransformResponse/transform.order');
 
 
 exports.createPaytmToken = async (req, res, next) => {
@@ -90,12 +91,22 @@ exports.tenantRoomOrderDetails = async (req, res, next) => {
       const skip = (page - 1) * size;
 
       const result = await fetchTenantRoomOrderDetails(req.userId, status, limit, skip);
-      const totalCount = result.data.orderDetails ? result.data.orderDetails.length : 0;
+      const totalCount = result.data ? result.data.length : 0;
+
       const pagination = getPagination(page, size, totalCount);
-      result.data._pagination = pagination;
-      console.log(totalCount)
-      res.send(result);
+      
+      const tranformedData = _.map(result.data, (record) => transformUserRecentTransaction(record));
+      res.api.data = {
+        orderDetails: tranformedData,
+        _pagination : pagination
+      };
+      req.app.get('log').info(_.assign(req.app.get('logEntry'), {
+        'status': res.api.status
+      }));
+
+      res.send(res.api);
   } catch (error) {
+    console.log(error)
       return res.send(error);
   }
 }
@@ -119,11 +130,13 @@ exports.recentAllTenantRoomOrderDetails = async (req, res, next) => {
       const skip = (page - 1) * size;
 
       const result = await fetchRecentAllTenantRoomOrderDetails(req.userId, status, limit, skip, startDate, endDate, roomId, roomPaymentId);
+      const tranformedData = _.map(result, (record) => transformAdminRecentTransaction(record));
+
       const totalCount = result ? result.length : 0;
 
       const pagination = getPagination(page, size, totalCount);
       res.api.data = {
-        orderDetails: result,
+        orderDetails: tranformedData,
         _pagination : pagination
       };
       req.app.get('log').info(_.assign(req.app.get('logEntry'), {
@@ -132,6 +145,7 @@ exports.recentAllTenantRoomOrderDetails = async (req, res, next) => {
 
       res.send(res.api);
   } catch (error) {
+      console.log(error)
       return res.send(error);
   }
 }

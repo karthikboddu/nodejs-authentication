@@ -1,8 +1,7 @@
 const _           = require('lodash');
-
+const {transformBuildingDetails} = require('./transform.building');
 
 const transformTenantRoomDetails = (record) => {
-    console.log(record,"asset")
 
     return {
         _id: record._id,
@@ -20,7 +19,7 @@ const transformTenantRoomDetails = (record) => {
     };
 }
 const transformTenantContractDetails = (record) => {
-    console.log(record,"---record")
+
     if (Object.keys(record).length === 0)  {
         return {}
     }
@@ -41,8 +40,8 @@ const transformTenantContractDetails = (record) => {
         parent_id: record.parent_id,
         building_floor_id: record.building_floor_id,
         building_id: record.building_id,
-        orderDetails : transformTenantOrderDetails(record.orderDetails[0] ? record.orderDetails[0] : {}),
-        tenantDetails : record.tenantDetails[0] ? record.tenantDetails[0] : {},
+        orderDetails : transformTenantOrderDetails(record.orderDetails ? (record.orderDetails[0] ? record.orderDetails[0] : {}) : {}),
+        tenantDetails : record.tenantDetails ? (record.tenantDetails[0] ? record.tenantDetails[0] : {}) : {},
         buildingDetails : record.buildingDetails[0] ? record.buildingDetails[0] : {}
     }
 }
@@ -66,4 +65,5 @@ const transformTenantOrderDetails = (record) => {
 }
 module.exports = {
     transformTenantRoomDetails,
+    transformTenantContractDetails
 };
