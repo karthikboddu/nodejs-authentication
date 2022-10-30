@@ -16,7 +16,7 @@ const transformUserRecentTransaction = (record) => {
         payment_for_date: record.payment_for_date,
         payment_status : record.payment_status,
         status: record.status,
-        tenant : transformTenantRoomDetails,
+        tenant : transformTenantDetails(record.tenant_id ? record.tenant_id : {}),
         created_at: record.created_at,
         updated_at: record.updated_at,
     }
