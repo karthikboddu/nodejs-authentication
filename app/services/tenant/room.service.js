@@ -161,15 +161,18 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
                 description : data.description ? data.description : ''
             }
         );
+        
+        if (!data.amountPaid) {
+            const savedTenantRoomPaymentC = await saveTenantRoomPayments(tenantRoomPaymentsObject);
 
-        const savedTenantRoomPaymentC = await saveTenantRoomPayments(tenantRoomPaymentsObject);
-
-        if (!savedTenantRoomPaymentC.data) {
-            return ({ status: 500, message: 'Oops ... Something went wrong ....'  })
+            if (!savedTenantRoomPaymentC.data) {
+                return ({ status: 500, message: 'Oops ... Something went wrong ....'  })
+            }
         }
+
         let tenantRoomPaymentsBalanceObject = {}
 
-        if (floorRoomsDetails.data.room_amount * 2 - data.price > 0) {
+        if (floorRoomsDetails.data.room_amount * 2 - data.price > 0  && !data.amountPaid && !data.advancePaid) {
             tenantRoomPaymentsBalanceObject = new tenantRoomPayments(
                 {
                     tenant_id: tenantId,

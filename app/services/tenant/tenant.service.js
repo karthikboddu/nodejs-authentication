@@ -63,6 +63,7 @@ const saveTenants = async (data, role, parentId) => {
   try {
 
     const expiryDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
+    const startDate = new Date(new Date().setDate(data.startDate));
 
     const tenantObject = new tenant(
       {
@@ -76,6 +77,7 @@ const saveTenants = async (data, role, parentId) => {
         aadhar_id: data.aadharId,
         address: data.address,
         end_at: expiryDate,
+        start_at : startDate,
         status: true,
       })
 
