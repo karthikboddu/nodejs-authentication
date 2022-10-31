@@ -102,6 +102,21 @@ const saveTenants = async (data, role, parentId) => {
       });
     if (tenantDetails.data) {
       if (data.addRoomContract) {
+        const updateTenantData = {
+          parent_id: parentId ? parentId : null,
+          full_name: data.fullName ? data.fullName : '',
+          password: bcrypt.hashSync(data.password, 8),
+          user_role: role._id,
+          username: data.username,
+          email: data.email,
+          mobile_no: data.mobileNo,
+          aadhar_id: data.aadharId,
+          address: data.address,
+          end_at: expiryDate,
+          start_at : startDate,
+          status: true,
+        }
+        await updateTenantDetails(req, tenantDetails.data._id, updateTenantData)
         const resultContract = await saveTenantRoomContract(data, parentId, data.roomId, tenantDetails.data._id)
         
         return ({ status: 200, data : transformTenantDetails(tenantDetails.data)});
@@ -114,8 +129,7 @@ const saveTenants = async (data, role, parentId) => {
       } else {
         if (data.addRoomContract) {
           const resultContract = await saveTenantRoomContract(data, parentId, data.roomId, savedTenantData.data._id)
-
-          return resultContract;
+          return ({ status: 200, data : transformTenantDetails(savedTenantData.data)})
         }
       }
       return ({
