@@ -63,10 +63,12 @@ const saveTenants = async (data, role, parentId) => {
   try {
 
     const expiryDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
-    var startDate = new Date.now();
+    console.log(expiryDate, "--")
+    var startDate = Date.now();
     if (data.startDateOfMonth && data.startDateOfMonth > 0) {
       startDate = new Date(new Date().setDate(parseInt(data.startDateOfMonth)));
     }
+
 
     const tenantObject = new tenant(
       {
@@ -98,7 +100,11 @@ const saveTenants = async (data, role, parentId) => {
         }
       });
     if (tenantDetails.data) {
-      return ({ status: 404, message: 'Tenant already exists' });
+      if (data.addRoomContract) {
+        const resultContract = await saveTenantRoomContract(data, parentId, data.roomId, tenantDetails.data._id)
+
+        return resultContract;
+      }
     } else {
       const savedTenantData = await saveTenantData(tenantObject);
       
@@ -120,6 +126,7 @@ const saveTenants = async (data, role, parentId) => {
     }
 
   } catch (error) {
+    console.log(error)
     return ({ status: 500, message: error })
   }
 }

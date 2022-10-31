@@ -68,6 +68,7 @@ exports.createTenant = async (req, res, next) => {
     const result = await saveTenants(tenantData, role, parentId);
     res.send(result);
   } catch (error) {
+    console.log(error)
     return res.send(error);
   }
 
