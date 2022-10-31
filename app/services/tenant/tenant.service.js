@@ -63,7 +63,10 @@ const saveTenants = async (data, role, parentId) => {
   try {
 
     const expiryDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
-    const startDate = new Date(new Date().setDate(data.startDate));
+    var startDate = new Date.now();
+    if (data.startDateOfMonth && data.startDateOfMonth > 0) {
+      startDate = new Date(new Date().setDate(parseInt(data.startDateOfMonth)));
+    }
 
     const tenantObject = new tenant(
       {
