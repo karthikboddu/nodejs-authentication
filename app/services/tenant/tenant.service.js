@@ -116,10 +116,10 @@ const saveTenants = async (data, role, parentId) => {
           start_at : startDate,
           status: true,
         }
-        await updateTenantDetails(req, tenantDetails.data._id, updateTenantData)
+        await updateTenantDetails(null, tenantDetails.data._id, updateTenantData)
         const resultContract = await saveTenantRoomContract(data, parentId, data.roomId, tenantDetails.data._id)
         
-        return ({ status: 200, data : transformTenantDetails(tenantDetails.data)});
+        return resultContract;
       }
     } else {
       const savedTenantData = await saveTenantData(tenantObject);
@@ -129,7 +129,7 @@ const saveTenants = async (data, role, parentId) => {
       } else {
         if (data.addRoomContract) {
           const resultContract = await saveTenantRoomContract(data, parentId, data.roomId, savedTenantData.data._id)
-          return ({ status: 200, data : transformTenantDetails(savedTenantData.data)})
+          return resultContract;
         }
       }
       return ({

@@ -110,9 +110,10 @@ const listFloorRooms = async (tenantId, floorId) => {
 
 
 const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
-    // const session = mongoose.startSession();
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
-        // session.startTransaction();
+
         const buildingDetails = await findOneByTenantIdBuildingIdAndActive(parentId, data.buildingId, true);
         if (!buildingDetails.data) {
             return ({ status: 404, message: 'Building Not Found.' })
@@ -172,12 +173,18 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
 
         let tenantRoomPaymentsBalanceObject = {}
         let savedTenantRoomPaymentP = {};
-        if (floorRoomsDetails.data.room_amount * 2 - data.price > 0  && !data.amountPaid && !data.advancePaid) {
+        let multiply = 1;
+        if (!data.advancePaid) {
+            multiply = 2
+        }
+        const amountRemaining =  data.amountPaid ? !data.amountPaid : floorRoomsDetails.data.room_amount * multiply - data.price > 0;
+        console.log(amountRemaining  || !data.amountPaid && !data.advancePaid,"bool")
+        if (amountRemaining  || !data.amountPaid && !data.advancePaid) {
             tenantRoomPaymentsBalanceObject = new tenantRoomPayments(
                 {
                     tenant_id: tenantId,
                     floor_room_id: roomId,
-                    price: floorRoomsDetails.data.room_amount * 2 - data.price,
+                    price: floorRoomsDetails.data.room_amount * multiply - data.price ,
                     payment_for_date: new Date(),
                     room_payment_type: 'BALANCE_AMOUNT',
                     room_contract_id: savedTenantRoomContract.data._id,
@@ -204,15 +211,13 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
             return ({ status: 500, message: 'Oops ... Something went wrong ....' })
         }
 
-        // await session.commitTransaction();
-        // session.endSession();
-        // mongoose.close();
+        await session.commitTransaction();
 
-        return ({ status: 200, data : savedTenantRoomPaymentP.data});
+        return ({ status: 200, data : savedTenantRoomContract.data});
     } catch (error) {
-        // await session.abortTransaction();
-        // session.endSession();
-        // mongoose.close();
+        await session.abortTransaction();
+        session.endSession();
+        mongoose.connection.close()
         console.log(error)
         return ({ status: 500, message: error })
     }
