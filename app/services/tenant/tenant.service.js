@@ -1,5 +1,6 @@
 const errorCode = require("../../common/errorCode");
 const { saveTenantRoomContract } = require("./room.service");
+const { transformTenantDetails} = require('../../TransformResponse/transform.tenant');
 
 const db = require("../../models"),
   Role = db.role,
@@ -102,8 +103,8 @@ const saveTenants = async (data, role, parentId) => {
     if (tenantDetails.data) {
       if (data.addRoomContract) {
         const resultContract = await saveTenantRoomContract(data, parentId, data.roomId, tenantDetails.data._id)
-
-        return resultContract;
+        
+        return ({ status: 200, data : transformTenantDetails(tenantDetails.data)});
       }
     } else {
       const savedTenantData = await saveTenantData(tenantObject);
