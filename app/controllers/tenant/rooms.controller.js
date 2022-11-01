@@ -1,5 +1,5 @@
 const errorCode = require('../../common/errorCode'),
-      {saveFloorRooms,listFloorRooms,saveTenantRoomContract,listRoomDetails,fetchRoomDetails,fetchTenantRoomDetails, unlinkTenantRoomContract} = require('../../services/tenant/room.service');
+      {saveFloorRooms,listFloorRooms,saveTenantRoomContract,listRoomDetails,fetchRoomDetails,fetchTenantRoomDetails, unlinkTenantRoomContract, updateRoomDetailsByRoomId} = require('../../services/tenant/room.service');
 const { getPagination } = require('../../common/util');
 
 exports.createRoom = async (req, res , next) => {
@@ -107,6 +107,27 @@ exports.unLinkTenantRoomContract = async(req, res, next) => {
     }
     try {
         const result = await unlinkTenantRoomContract(roomTenantData, req.userId);
+        res.send(result);
+    } catch (error) {
+        return res.send(error);
+    }
+}
+
+
+exports.updateRoomDetails = async(req, res, next) => {
+
+    const roomId = req.params.roomId;
+    if (!roomId) {
+        return res.status(400).send({ status: 400, message: errorCode.BAD_REQUEST });
+    }
+
+    const roomData = req.body;
+    
+    if (Object.keys(roomData).length == 0) {
+        return res.status(400).send({ status: 400, message: errorCode.BAD_REQUEST });
+    }
+    try {
+        const result = await updateRoomDetailsByRoomId(roomId, roomData);
         res.send(result);
     } catch (error) {
         return res.send(error);

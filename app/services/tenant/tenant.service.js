@@ -116,9 +116,11 @@ const saveTenants = async (data, role, parentId) => {
           start_at : startDate,
           status: true,
         }
-        await updateTenantDetails(null, tenantDetails.data._id, updateTenantData)
         const resultContract = await saveTenantRoomContract(data, parentId, data.roomId, tenantDetails.data._id)
-        
+        if (resultContract.status == 200) {
+          await updateTenantDetails(null, tenantDetails.data._id, updateTenantData)
+
+        }
         return resultContract;
       }
     } else {

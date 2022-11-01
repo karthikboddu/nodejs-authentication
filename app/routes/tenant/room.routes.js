@@ -22,5 +22,6 @@ module.exports = function(app) {
     app.get("/api/room/tenantRoomDetails",[authJwt.verifyToken], controller.tenantRoomDetails);
 
     app.patch("/api/room/roomContracts",[authJwt.verifyToken,authJwt.isAdmin], controller.unLinkTenantRoomContract);
+    app.patch("/api/room/:roomId",[authJwt.verifyToken,authJwt.isAdmin], controller.updateRoomDetails);
 
 } 

@@ -400,6 +400,28 @@ const unlinkTenantRoomContract = async (data, parentId) => {
     });
 }
 
+
+const updateRoomDetailsByRoomId = async (roomId, data) => {
+
+    return new Promise((resolve, reject) => {
+  
+        tenantFloorRooms.findByIdAndUpdate(roomId, data, { useFindAndModify: false })
+        .then(res => {
+          resolve({
+            status: 200,
+            data: res,
+            message: "updated successfully!"
+          });
+        })
+        .catch(err => {
+          console.log(err, "err")
+          reject({ status: 500, message: err })
+  
+        });
+  
+    })
+  }
+
 module.exports = {
     saveFloorRooms,
     listFloorRooms,
@@ -407,5 +429,6 @@ module.exports = {
     listRoomDetails,
     fetchRoomDetails,
     fetchTenantRoomDetails,
-    unlinkTenantRoomContract
+    unlinkTenantRoomContract,
+    updateRoomDetailsByRoomId
 }
