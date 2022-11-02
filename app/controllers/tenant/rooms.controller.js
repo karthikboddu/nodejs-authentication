@@ -122,12 +122,12 @@ exports.updateRoomDetails = async(req, res, next) => {
     }
 
     const roomData = req.body;
-    
+
     if (Object.keys(roomData).length == 0) {
         return res.status(400).send({ status: 400, message: errorCode.BAD_REQUEST });
     }
     try {
-        const result = await updateRoomDetailsByRoomId(roomId, roomData);
+        const result = await updateRoomDetailsByRoomId(req.userId, roomId, roomData);
         res.send(result);
     } catch (error) {
         return res.send(error);

@@ -362,10 +362,30 @@ const db = require("../models"),
         return result;
     }
 
+    const updateTenantFloorRoomsByRoomId = async (roomId, data) => {
+        return new Promise((resolve, reject) => {
+  
+            tenantFloorRooms.findByIdAndUpdate(roomId, data, { useFindAndModify: false })
+            .then(res => {
+                resolve({
+                    data: res
+                });
+                return;
+            })
+            .catch(err => {
+              console.log(err, "err")
+              reject(err)
+      
+            });
+      
+        })
+    }
+
 
     module.exports = {
         findOneByRoomId,
         listTenantFloorRoomDetails,
         fetchTenantRoomDetailsByRoomId,
-        fetchTenantRoomContractDetails
+        fetchTenantRoomContractDetails,
+        updateTenantFloorRoomsByRoomId
     }

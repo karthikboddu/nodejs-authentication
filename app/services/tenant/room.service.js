@@ -9,7 +9,7 @@ const db = require("../../models"),
 
 var mongoose = require('mongoose');
 const { findOneByTenantIdBuildingIdAndActive, findAndUpdateByBuildingId } = require("../../repository/TenantBuildingRepository");
-const { findOneByRoomId, listTenantFloorRoomDetails, fetchTenantRoomDetailsByRoomId, fetchTenantRoomContractDetails } = require("../../repository/TenantFloorRoomsRepository");
+const { findOneByRoomId, listTenantFloorRoomDetails, fetchTenantRoomDetailsByRoomId, fetchTenantRoomContractDetails, updateTenantFloorRoomsByRoomId } = require("../../repository/TenantFloorRoomsRepository");
 const { findRoomContractOneByRoomId, saveTenantRoomContracts } = require("../../repository/TenantRoomContractRepository");
 const { saveTenantRoomPayments } = require("../../repository/TenantRoomPaymentsRepository");
 const { transformTenantRoomDetails } = require("../../TransformResponse/transform.room");
@@ -401,25 +401,23 @@ const unlinkTenantRoomContract = async (data, parentId) => {
 }
 
 
-const updateRoomDetailsByRoomId = async (roomId, data) => {
+const updateRoomDetailsByRoomId = async (parentId, roomId, data) => {
+    try {
+        const roomData = await findOneByRoomId(parentId, roomId, true);
 
-    return new Promise((resolve, reject) => {
-  
-        tenantFloorRooms.findByIdAndUpdate(roomId, data, { useFindAndModify: false })
-        .then(res => {
-          resolve({
-            status: 200,
-            data: res,
-            message: "updated successfully!"
-          });
-        })
-        .catch(err => {
-          console.log(err, "err")
-          reject({ status: 500, message: err })
-  
-        });
-  
-    })
+        if (!roomData.data) {
+            return ({ status: 404, message: 'Floor Rooms Not Found.' })
+        }
+        const updatedRoomData = await updateTenantFloorRoomsByRoomId(roomId, data);
+        if (!updatedRoomData.data) {
+            return ({ status: 500, message: 'Something went wrong.. ' })
+        }
+    
+        return ({ status: 200, message: 'successfully updated.' , data: {} })   
+    } catch (error) {
+        console.log(error);
+        return ({ status: 500, message: 'Something went wrong.. ' })
+    }
   }
 
 module.exports = {
