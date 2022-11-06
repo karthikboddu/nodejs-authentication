@@ -131,10 +131,18 @@ verifyAccessToken = async (req, res, next) => {
   }) || {};
 
   if (tokenD.id) {
+    let isAdminRole = false;
+
+    if (tokenD.type == 'admin') {
+      isAdminRole = true;
+    }
+    const isAdmin = {
+      isAdmin : isAdminRole
+    }
     result = {
       status: 200,
       message: 'Authorized!',
-      data: ''
+      data : isAdmin
     };
     return res.status(200).send(result);
   }
