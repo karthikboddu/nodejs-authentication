@@ -3,6 +3,7 @@ const db = require("../../models"),
     tenantBuildingBlocks = db.tenant.tenantBuildingBlocks,
     tenantBuildingFloors = db.tenant.tenantBuildingFloors
     Promise = require('bluebird');
+    const crypto = require('crypto');
 
 
 
@@ -15,18 +16,19 @@ const saveTenantBuildingsFloors = async (data,tenantId,buildingId,blockId) => {
     return new Promise((resolve, reject) => {
 
         try {
-
+            const code = crypto.createHash('md5').update(data.floorName).digest('hex')
             const tenantBuildingFloorObject = new tenantBuildingFloors({
                 tenant_id: tenantId,
                 building_id: buildingId,
                 block_id: blockId,
                 floor_name: data.floorName,
-                floor_code: data.floorCode,
+                floor_code: code,
+                no_of_rooms : data.noOfRooms,
                 status: true,
             });
 
-            const floorCode = data.floorCode;
-            tenantBuildingFloors.findOne({ floor_code: floorCode })
+            const floorCode = code;
+            tenantBuildingFloors.findOne({ floor_code: floorCode, building_id : buildingId, tenant_id : tenantId })
             .then(existingBuilding => {
                 if (existingBuilding) {
                     reject ({ status: 404, message: 'TenantBuilding Floor already exists' })

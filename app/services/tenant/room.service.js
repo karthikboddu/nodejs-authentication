@@ -6,6 +6,7 @@ const db = require("../../models"),
     tenantRoomPayments = db.tenant.tenantRoomPayments,
     orderMaster = db.tenant.orderMaster;
     const _           = require('lodash');
+    const crypto = require('crypto');
 
 var mongoose = require('mongoose');
 const { findOneByTenantIdBuildingIdAndActive, findAndUpdateByBuildingId } = require("../../repository/TenantBuildingRepository");
@@ -18,18 +19,19 @@ const saveFloorRooms = async (data, tenantId, floorId) => {
     return new Promise((resolve, reject) => {
 
         try {
+            const code = crypto.createHash('md5').update(data.roomName).digest('hex')
             const tenantFloorRoomsObject = new tenantFloorRooms(
                 {
                     tenant_id: tenantId,
                     building_floor_id: floorId,
                     room_name: data.roomName,
-                    room_code: data.roomCode,
+                    room_code: code,
                     room_amount: data.roomAmount,
                     status: true
                 })
 
-            const checkRoomCode = data.roomCode;
-            tenantFloorRooms.findOne({ room_code: checkRoomCode })
+            const checkRoomCode = code;
+            tenantFloorRooms.findOne({ room_code: checkRoomCode, tenant_id: tenantId,building_floor_id: floorId  })
                 .then(existingRoom => {
                     if (existingRoom) {
                         reject({ status: 404, message: 'Tenant Room already exists' })
@@ -167,6 +169,26 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
             const savedTenantRoomPaymentC = await saveTenantRoomPayments(tenantRoomPaymentsObject);
 
             if (!savedTenantRoomPaymentC.data) {
+                return ({ status: 500, message: 'Oops ... Something went wrong ....'  })
+            }
+        }
+
+        if (data.amountPaid) {
+            const tenantRoomPaymentsAlreadyPaid = new tenantRoomPayments(
+                {
+                    tenant_id: tenantId,
+                    floor_room_id: roomId,
+                    price: floorRoomsDetails.data.room_amount * 2,
+                    payment_for_date: new Date(),
+                    room_payment_type: 'ROOM_RENT',
+                    room_contract_id: savedTenantRoomContract.data._id,
+                    payment_status: "C",
+                    description : data.description ? data.description : ''
+                }
+            );
+            const savedTenantRoomPaymentCPaid = await saveTenantRoomPayments(tenantRoomPaymentsAlreadyPaid);
+
+            if (!savedTenantRoomPaymentCPaid.data) {
                 return ({ status: 500, message: 'Oops ... Something went wrong ....'  })
             }
         }

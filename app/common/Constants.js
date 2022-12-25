@@ -11,6 +11,7 @@ module.exports = {
     'deliveryType' : {
         'PROFILE_PIC' : 'profile_pic',
         'IDENTITY': 'identity',
-        'MESSAGE_ASSET' : 'message_asset'
+        'MESSAGE_ASSET' : 'message_asset',
+        'BUILDING_ASSET' : 'building_asset'
     }
 }

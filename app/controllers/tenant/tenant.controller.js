@@ -58,13 +58,13 @@ exports.createTenant = async (req, res, next) => {
   const tenantData = req.body;
   const parentId = req.userId ? req.userId : null;
   if (!tenantData) {
-    return res.status(500).send({ message: errorCode.BAD_REQUEST });
+    return res.status(400).send({ message: errorCode.BAD_REQUEST });
   }
   const userRole = tenantData.userRole ? tenantData.userRole : 'user';
   try {
 
     const role = await getRolesByName(userRole);
-
+    console.log(role);
     const result = await saveTenants(tenantData, role, parentId);
     res.send(result);
   } catch (error) {

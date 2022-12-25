@@ -24,12 +24,13 @@ exports.uploadAssets = async (req, res, next) => {
     }
 
     const result = await uplaodAssetForTenant(req, req.parentId, tenantId, deliveryType);
-
-    if (result.status != 200) {
+    console.log(result,"res");
+    if (result.status) {
       res.api.status = result.status;
       res.api.errors = {
         message: result.message
       };
+      res.api.data = result.data
     }
 
     req.app.get('log').info(_.assign(req.app.get('logEntry'), {

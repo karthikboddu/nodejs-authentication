@@ -69,7 +69,7 @@ const saveTenants = async (data, role, parentId) => {
     if (data.startDateOfMonth && data.startDateOfMonth > 0) {
       startDate = new Date(new Date().setDate(parseInt(data.startDateOfMonth)));
     }
-
+    console.log(startDate, "--")
 
     const tenantObject = new tenant(
       {
@@ -100,29 +100,34 @@ const saveTenants = async (data, role, parentId) => {
           '$gte': now
         }
       });
+      console.log(tenantDetails)
     if (tenantDetails.data) {
+      const updateTenantData = {
+        parent_id: parentId ? parentId : null,
+        full_name: data.fullName ? data.fullName : '',
+        password: bcrypt.hashSync(data.password, 8),
+        user_role: role._id,
+        username: data.username,
+        email: data.email,
+        mobile_no: data.mobileNo,
+        aadhar_id: data.aadharId,
+        address: data.address,
+        end_at: expiryDate,
+        start_at : startDate,
+        status: true,
+        user_role: role._id
+      }
+      await updateTenantDetails(null, tenantDetails.data._id, updateTenantData)
+      
       if (data.addRoomContract) {
-        const updateTenantData = {
-          parent_id: parentId ? parentId : null,
-          full_name: data.fullName ? data.fullName : '',
-          password: bcrypt.hashSync(data.password, 8),
-          user_role: role._id,
-          username: data.username,
-          email: data.email,
-          mobile_no: data.mobileNo,
-          aadhar_id: data.aadharId,
-          address: data.address,
-          end_at: expiryDate,
-          start_at : startDate,
-          status: true,
-        }
-        const resultContract = await saveTenantRoomContract(data, parentId, data.roomId, tenantDetails.data._id)
-        if (resultContract.status == 200) {
-          await updateTenantDetails(null, tenantDetails.data._id, updateTenantData)
-
-        }
+        const resultContract = await saveTenantRoomContract(data, parentId, data.roomId, tenantDetails.data._id);
         return resultContract;
       }
+      return ({
+        status: 200,
+        data: tenantDetails.data,
+        message: "Tenant was updated successfully!"
+      });
     } else {
       const savedTenantData = await saveTenantData(tenantObject);
       

@@ -119,6 +119,18 @@ function initial() {
         console.log("added 'message_asset' to contentype collection");
       });
 
+      new deliveryType({
+        name: "BUILDING ASSET",
+        code: "building_asset",
+        is_active : true
+      }).save(err => {
+        if (err) {
+          console.log("error", err);
+        }
+
+        console.log("added 'building_asset' to contentype collection");
+      });
+
     }
   });
 }

@@ -69,6 +69,8 @@ const uplaodAssetForTenant = async (req, parentId, tenantId, deliveryType) => {
             extension = Constants.contentType.PDF;
         } else if (deliveryType.toString() == Constants.deliveryType.MESSAGE_ASSET) {
             extension = fileExt;
+        } else if (deliveryType.toString() == Constants.deliveryType.BUILDING_ASSET) {
+            extension = fileExt;
         } else {
           return ({ status: 404, message: "Delivery Type Not Found ... " })
         }
@@ -141,10 +143,10 @@ const uplaodAssetForTenant = async (req, parentId, tenantId, deliveryType) => {
         }
 
         var pdfBuffer = '';
-
+        var result = '';
         if (process.env.CLOUDINARY == "ON") {
             const init_cloudinary = req.app.get('core').init_cloudinary;
-            var result = '';
+            
 
             if (deliveryType.toString() == Constants.deliveryType.IDENTITY) {
                 pdfBuffer = await generatePdfWithImageAndPassword(options, req.file.buffer);
@@ -154,7 +156,7 @@ const uplaodAssetForTenant = async (req, parentId, tenantId, deliveryType) => {
                                 public_id: path,
                                 resource_type: "raw"
                             });
-            }  else {
+            }  else if (deliveryType.toString() == Constants.deliveryType.PROFILE_PIC){
                 result = await pushObjectToCloudinary(init_cloudinary, req.file.buffer, path);
                 console.log(result)
                 if (result.secure_url) {
@@ -164,6 +166,9 @@ const uplaodAssetForTenant = async (req, parentId, tenantId, deliveryType) => {
                       console.log(payload)
                     await updateTenantDetails(req, req.userId, payload);
                 }
+            } else if (deliveryType.toString() == Constants.deliveryType.BUILDING_ASSET) {
+                result = await pushObjectToCloudinary(init_cloudinary, req.file.buffer, path);
+                console.log(result)
             }
             
             if (result.secure_url) {
@@ -212,8 +217,8 @@ const uplaodAssetForTenant = async (req, parentId, tenantId, deliveryType) => {
         if (!existingUploadData.data) {
             return ({ status: 201, message: "Couldn't upload file" })
         }
-
-        return ({ status: 200, message: "Upload Success .." })
+        
+        return ({ status: 200, message: "Upload Success ..", data: result  })
     } catch (error) {
         console.log(error,"Error")
         return ({ status: 500, message: error.message })
