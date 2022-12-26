@@ -61,6 +61,7 @@ const listTenantBuildings = async (req) => {
             ])
 
             const totalAmount = await tenantBuilding.aggregate([
+                {$match: {"tenant_id": tenantId}},
                 {
                     $group : {
                     _id: null,
@@ -80,9 +81,7 @@ const listTenantBuildings = async (req) => {
         } catch (error) {
             console.log(error)
         }   
-        
-        
-    //return await tenantBuilding.find({ tenant_id: req.userId, status:true}).populate({ path: 'tenant_id', select: ['username'] });
+                
 }
 const saveTenantBuildings = async (data,tenantId) => {
 

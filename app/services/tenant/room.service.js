@@ -155,6 +155,7 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
         const tenantRoomPaymentsObject = new tenantRoomPayments(
             {
                 tenant_id: tenantId,
+                parent_id: parentId,
                 floor_room_id: roomId,
                 price: data.price,
                 payment_for_date: new Date(),
@@ -177,6 +178,7 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
             const tenantRoomPaymentsAlreadyPaid = new tenantRoomPayments(
                 {
                     tenant_id: tenantId,
+                    parent_id: parentId,
                     floor_room_id: roomId,
                     price: floorRoomsDetails.data.room_amount * 2,
                     payment_for_date: new Date(),
@@ -205,6 +207,7 @@ const saveTenantRoomContract = async (data, parentId, roomId, tenantId) => {
             tenantRoomPaymentsBalanceObject = new tenantRoomPayments(
                 {
                     tenant_id: tenantId,
+                    parent_id: parentId,
                     floor_room_id: roomId,
                     price: floorRoomsDetails.data.room_amount * multiply - data.price ,
                     payment_for_date: new Date(),

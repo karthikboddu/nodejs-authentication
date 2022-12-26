@@ -296,6 +296,7 @@ const initiateBulkRoomTransactionDetails = async (userId, parentId) => {
                     const tenantRoomPaymentsObject = new tenantRoomPayments(
                         {
                             tenant_id: element.tenant_id._id,
+                            parent_id : element.parent_id,
                             floor_room_id: element.floor_room_id,
                             actual_price: element.price,
                             price: element.price,
@@ -354,7 +355,7 @@ const initiateBulkRoomTransactionDetails = async (userId, parentId) => {
     }
 }
 
-const initiateRoomTransactionDetails = async (data, userId) => {
+const initiateRoomTransactionDetails = async (data, userId, parentId) => {
 
     console.log(data)
     const session = await mongoose.startSession();
@@ -415,6 +416,7 @@ const initiateRoomTransactionDetails = async (data, userId) => {
         const tenantRoomPaymentsObject = new tenantRoomPayments(
             {
                 tenant_id: userId,
+                parent_id : parentId,
                 floor_room_id: data.roomId,
                 actual_price: roomContract.data.price,
                 price: data.amount ? data.amount : roomContract.data.price,
@@ -665,7 +667,8 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
                             $match: {
                                 $expr: {
                                     $and: [
-                                        { $eq: ["$_id", "$$contractId"] }
+                                        { $eq: ["$_id", "$$contractId"] },
+                                        { $eq: ["$parent_id", tid] }
                                     ]
                                 }
                             }

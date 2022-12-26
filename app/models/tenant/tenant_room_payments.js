@@ -7,6 +7,11 @@ module.exports = (mongoose) => {
                                     required: true,
                                     ref: "tenant"
                                 },
+                                parent_id :{
+                                    type : mongoose.Schema.Types.ObjectId,
+                                    required: true,
+                                    ref: "tenant"
+                                },  
                                 floor_room_id: {
                                     type : mongoose.Schema.Types.ObjectId,
                                     required: true,
