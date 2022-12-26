@@ -578,7 +578,7 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
 
     try {
 
-        var tid = tenantId;
+        var tid = mongoose.Types.ObjectId(tenantId);
 
         let conditions = [];
         let tenantConditions = [];
@@ -612,6 +612,8 @@ const fetchRecentAllTenantRoomOrderDetails = async (tenantId, status, limit, ski
             var roomPaymentObjectId = mongoose.Types.ObjectId(roomPaymentId);
             conditions.push({ $eq: ["$_id", roomPaymentObjectId] });
         }
+
+        conditions.push({ $eq: ["$parent_id", tid] });
         console.log(conditions, tenantConditions)
 
         let final_condition = conditions.length ? conditions : [];

@@ -11,7 +11,7 @@ const db = require("../../models"),
   _ = require('lodash'),
   { jwtSignAccessRefreshTokenTenant } = require('../../helpers/jwt_helpers'),
   { findOneTenant, saveTenantData } = require('../../repository/UserRepository');
-
+  var mongoose = require('mongoose');
 
 const listTenants = async (req, limit, skip, buildingId) => {
 
@@ -70,10 +70,10 @@ const saveTenants = async (data, role, parentId) => {
       startDate = new Date(new Date().setDate(parseInt(data.startDateOfMonth)));
     }
     console.log(startDate, "--")
-
+    const pId = mongoose.Types.ObjectId(parentId);
     const tenantObject = new tenant(
       {
-        parent_id: parentId ? parentId : null,
+        parent_id: pId ? pId : null,
         full_name: data.fullName ? data.fullName : '',
         password: bcrypt.hashSync(data.password, 8),
         user_role: role._id,
@@ -103,7 +103,7 @@ const saveTenants = async (data, role, parentId) => {
       console.log(tenantDetails)
     if (tenantDetails.data) {
       const updateTenantData = {
-        parent_id: parentId ? parentId : null,
+        parent_id: pId ? pId : null,
         full_name: data.fullName ? data.fullName : '',
         password: bcrypt.hashSync(data.password, 8),
         user_role: role._id,
