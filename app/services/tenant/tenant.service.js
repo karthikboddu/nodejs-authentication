@@ -63,17 +63,36 @@ const listTenants = async (req, limit, skip, buildingId) => {
 const saveTenants = async (data, role, parentId) => {
   try {
 
-    const expiryDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
-    console.log(expiryDate, "--")
+    var expiryDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
+
     var startDate = Date.now();
     if (data.startDateOfMonth && data.startDateOfMonth > 0) {
       startDate = new Date(new Date().setDate(parseInt(data.startDateOfMonth)));
+      
+      const sDate = new Date(new Date().setDate(parseInt(data.startDateOfMonth)));
+
+      expiryDate = new Date(sDate.setFullYear(sDate.getFullYear() + 1));
+      console.log(startDate, " -- ", expiryDate)
     }
-    console.log(startDate, "--")
-    const pId = mongoose.Types.ObjectId(parentId);
+    
+    const now = Date.now();
+    const parentTenantDetails = await findOneTenant(
+      {
+        _id: parentId,
+        start_at: {
+          '$lte': now
+        },
+        end_at: {
+          '$gte': now
+        }
+      });
+    if (!parentTenantDetails.data) {
+      return ({ status: 404, message: 'Parent Tenant Not Found.' })
+    }
+
     const tenantObject = new tenant(
       {
-        parent_id: pId ? pId : null,
+        parent_id: parentTenantDetails.data._id ? parentTenantDetails.data._id : null,
         full_name: data.fullName ? data.fullName : '',
         password: bcrypt.hashSync(data.password, 8),
         user_role: role._id,
@@ -87,9 +106,9 @@ const saveTenants = async (data, role, parentId) => {
         status: true,
       })
 
-
+      console.log(tenantObject);
     const checkusername = data.username;
-    const now = Date.now();
+
     const tenantDetails = await findOneTenant(
       {
         username: checkusername,
@@ -103,7 +122,7 @@ const saveTenants = async (data, role, parentId) => {
       console.log(tenantDetails)
     if (tenantDetails.data) {
       const updateTenantData = {
-        parent_id: pId ? pId : null,
+        parent_id: parentTenantDetails.data._id ? parentTenantDetails.data._id : null,
         full_name: data.fullName ? data.fullName : '',
         password: bcrypt.hashSync(data.password, 8),
         user_role: role._id,
@@ -117,6 +136,7 @@ const saveTenants = async (data, role, parentId) => {
         status: true,
         user_role: role._id
       }
+      console.log(updateTenantData, " -- ")
       await updateTenantDetails(null, tenantDetails.data._id, updateTenantData)
       
       if (data.addRoomContract) {

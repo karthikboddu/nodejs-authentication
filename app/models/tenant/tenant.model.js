@@ -3,7 +3,9 @@ module.exports = (mongoose) => {
     const tenant = mongoose.model("tenant",
                     new mongoose.Schema({
                         parent_id: {
-                            type: String,
+                            type : mongoose.Schema.Types.ObjectId,
+                            required: true,
+                            ref: "tenant"
                         },
                         user_role: {
                             type : mongoose.Schema.Types.ObjectId,
