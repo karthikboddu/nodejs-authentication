@@ -21,7 +21,7 @@ module.exports = (mongoose) => {
                                 },
                                 building_image: {
                                     type: String,
-                                    required :true
+                                    required :false
                                 },
                                 no_of_floors: {
                                     type: Number,
