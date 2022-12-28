@@ -15,9 +15,11 @@ exports.tenants = async (req, res, next) => {
       size = 100;
     }
     const buildingId = req.query.buildingId ? req.query.buildingId : null;
+    const searchQuery = req.query.name ? req.query.name : "";
+    
     const limit = parseInt(size);
     const skip = (page - 1) * size;
-    const result = await listTenants(req, limit, skip, buildingId);
+    const result = await listTenants(req, limit, skip, buildingId, searchQuery);
 
     const totalCount = result ? result.length : 0;
 

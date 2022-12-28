@@ -12,15 +12,18 @@ const db = require("../../models"),
   { jwtSignAccessRefreshTokenTenant } = require('../../helpers/jwt_helpers'),
   { findOneTenant, saveTenantData } = require('../../repository/UserRepository');
   var mongoose = require('mongoose');
+const { findAllRoomContractByCondition } = require("../../repository/TenantRoomContractRepository");
 
-const listTenants = async (req, limit, skip, buildingId) => {
+const listTenants = async (req, limit, skip, buildingId, searchQuery) => {
+  var parentId = req.parentId ? req.parentId : req.userId;
+
+  const roomContractsList = await findAllRoomContractByCondition({ parent_id: parentId, status: true });
 
   return new Promise((resolve, reject) => {
-    var parentId = req.parentId ? req.parentId : req.userId;
 
     let condition = {};
     if (parentId) {
-      condition = { parent_id: parentId, status: true }
+      condition = { parent_id: parentId, status: true , full_name : { $regex : new RegExp(searchQuery, "i") }}
     } else {
       condition = { status: true }
     }
@@ -47,7 +50,7 @@ const listTenants = async (req, limit, skip, buildingId) => {
         .limit(limit).skip(skip).sort({ updated_at: -1 })
         .then(d => {
 
-          resolve({ status: 200, data: _.map(d, (record) => trasformUserRecord(record)) })
+          resolve({ status: 200, data: _.map(d, (record) => trasformUserRecord(record, roomContractsList)) })
         })
         .catch(err => {
           reject({
@@ -335,14 +338,22 @@ const updateTenantDetails = async (req, tenantId, data) => {
   })
 }
 
-const trasformUserRecord = (record) => {
-
+const trasformUserRecord = (record, roomContractsList) => {
+  var newArray = roomContractsList.data.filter(function (el)
+{
+  return el.tenant_id._id.equals(record._id)
+}
+);
   return {
     _id: record._id,
     name: record.full_name,
     avatar: record.photoUrl,
     mobileNumber: record.mobile_no,
-    parentId: record.parent_id
+    parentId: record.parent_id,
+    email : record.email,
+    roomId : newArray[0] ? newArray[0].floor_room_id : null,
+    buildingId : newArray[0] ? newArray[0].building_id : null,
+    buildingFloorId : newArray[0] ? newArray[0].building_floor_id : null,
   }
 }
 

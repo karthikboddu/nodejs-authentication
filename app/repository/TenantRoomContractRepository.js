@@ -69,9 +69,34 @@ tenantRoomContract = db.tenant.tenantRoomContract,
         })
     }
 
+    const findOneRoomContractByCondition = async (condition) => {
+
+        return new Promise((resolve, reject) => {
+            tenantRoomContract.findOne(condition)
+                .populate({
+                    path: 'tenant_id',
+                    select: ['username', 'full_name', 'email', 'mobile_no', 'address', 'start_at', 'end_at', 'created_at', 'photoUrl']
+                })
+                .then(buildiing => {
+                    resolve({
+                        data: buildiing
+                    });
+                    return;
+                })
+                .catch(err => {
+                    reject({
+                        err
+                    })
+                    return;
+                })
+
+        })
+    }
+
 
     module.exports = {
         findRoomContractOneByRoomId,
         saveTenantRoomContracts,
-        findAllRoomContractByCondition
+        findAllRoomContractByCondition,
+        findOneRoomContractByCondition
     }
