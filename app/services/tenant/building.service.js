@@ -150,10 +150,13 @@ const patchTenantBuildings = async (data,tenantId, buildingId) => {
             }
 
             const buildingCode = code;
-            const existingBuildingData = await findOneByTenantIdAndActiveAndCode(tenantId , true, buildingCode)
-            if (existingBuildingData.data) {
-                return ({ status: 404, message: 'TenantBuilding already exists' })
-            } else {
+            if (data.buildingName.length > 0 ) {
+                const existingBuildingData = await findOneByTenantIdAndActiveAndCode(tenantId , true, buildingCode)
+                if (existingBuildingData.data) {
+                    return ({ status: 404, message: 'TenantBuilding already exists' })
+                }
+            }
+ 
                 const savedBuildingData = await findAndUpdateByBuildingId(saveBuildingData, buildingId);
                 if (!savedBuildingData.data) {
                     return ({ status: 500, message: "Something went wrong.. " })
@@ -164,7 +167,6 @@ const patchTenantBuildings = async (data,tenantId, buildingId) => {
                         message: "Tenant Building was updated successfully!"
                     });
                 }
-            }
         } catch (error) {
             console.log(error)
             return({ status: 500, message: error })
