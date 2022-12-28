@@ -25,6 +25,27 @@ const db = require("../models"),
         })
     }
 
+    const findOneByTenantIdAndActiveAndCode = async (tenantId, active, code) => {
+
+
+        return new Promise((resolve, reject) => {
+            tenantBuilding.findOne({ tenant_id : tenantId, status: active, building_code: code})
+            .then(buildiing => {
+                resolve({
+                    data: buildiing
+                });
+                return;
+            })
+            .catch(err => {
+                reject({
+                    err
+                })
+                return;
+            })
+    
+        })
+    }
+
 
     const findAndUpdateByBuildingId = async (data, buildingId) => {
         return new Promise((resolve, reject) => {
@@ -46,5 +67,6 @@ const db = require("../models"),
 
     module.exports = {
         findOneByTenantIdBuildingIdAndActive,
-        findAndUpdateByBuildingId
+        findAndUpdateByBuildingId,
+        findOneByTenantIdAndActiveAndCode
     }

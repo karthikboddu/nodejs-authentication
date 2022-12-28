@@ -12,6 +12,7 @@ module.exports = function(app) {
 
     app.get("/api/building/buildings",[authJwt.verifyToken,authJwt.isAdmin], controller.buildings);
     app.post("/api/building/tenantBuildings",[authJwt.verifyToken,authJwt.isAdmin], controller.createTenantBuildings);
+    app.patch("/api/building/:buildingId",[authJwt.verifyToken,authJwt.isAdmin], controller.updateTenantBuilding);
     app.get("/api/building/buildings/:buildingId",[authJwt.verifyToken,authJwt.isAdmin], controller.tenantBuildingById);
     app.post("/api/building/tenantBuildingsBlocks/:buildingId",[authJwt.verifyToken,authJwt.isAdmin], controller.createTenantBuildingsBlocks);
     app.get("/api/building/buildingsBlocks/:buildingId",[authJwt.verifyToken,authJwt.isAdmin], controller.buildingsBlocks);

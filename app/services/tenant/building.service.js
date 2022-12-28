@@ -4,6 +4,7 @@ const db = require("../../models"),
     Promise = require('bluebird');
     var mongoose = require('mongoose');
     const crypto = require('crypto');
+const { findAndUpdateByBuildingId, findOneByTenantIdBuildingIdAndActive, findOneByTenantIdBuildingIdAndActiveAndCode, findOneByTenantIdAndActiveAndCode } = require("../../repository/TenantBuildingRepository");
 
 const listTenantBuildings = async (req) => {
 
@@ -137,6 +138,39 @@ const saveTenantBuildings = async (data,tenantId) => {
     })
 }
 
+const patchTenantBuildings = async (data,tenantId, buildingId) => {
+        try {
+            const code = crypto.createHash('md5').update(data.buildingName).digest('hex');
+            const saveBuildingData = {
+                building_name: data.buildingName,
+                building_code: code,
+                building_address: data.buildingAddress,
+                no_of_floors: data.noOfFloors,
+                no_of_rooms: data.noOfRooms,
+            }
+
+            const buildingCode = code;
+            const existingBuildingData = await findOneByTenantIdAndActiveAndCode(tenantId , true, buildingCode)
+            if (existingBuildingData.data) {
+                return ({ status: 404, message: 'TenantBuilding already exists' })
+            } else {
+                const savedBuildingData = await findAndUpdateByBuildingId(saveBuildingData, buildingId);
+                if (!savedBuildingData.data) {
+                    return ({ status: 500, message: "Something went wrong.. " })
+                } else {
+                    return({
+                        status: 200,
+                        data: savedBuildingData.data,
+                        message: "Tenant Building was updated successfully!"
+                    });
+                }
+            }
+        } catch (error) {
+            console.log(error)
+            return({ status: 500, message: error })
+        }
+}
+
 const saveTenantBuildingsBlocks = (data,tenantId,buildingId) => {
 
     return new Promise ((resolve, reject) => {
@@ -197,5 +231,6 @@ module.exports = {
     listTenantBuildings,
     saveTenantBuildingsBlocks,
     listTenantBuildingsBlocks,
-    listTenantBuildingsById
+    listTenantBuildingsById,
+    patchTenantBuildings
 }

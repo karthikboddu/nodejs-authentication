@@ -1,5 +1,5 @@
 const errorCode = require('../../common/errorCode'),
-    { saveTenantBuildings, listTenantBuildings, saveTenantBuildingsBlocks, listTenantBuildingsById,listTenantBuildingsBlocks } = require('../../services/tenant/building.service');
+    { saveTenantBuildings, listTenantBuildings, saveTenantBuildingsBlocks, listTenantBuildingsById,listTenantBuildingsBlocks, patchTenantBuildings } = require('../../services/tenant/building.service');
 
 exports.buildings = async (req, res, next) => {
     try {
@@ -17,11 +17,26 @@ exports.createTenantBuildings = async (req, res, next) => {
     const buildingData = req.body;
     console.log(req.userId)
     if (!buildingData) {
-        res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
+        res.status(500).send({ status: 400, message: errorCode.BAD_REQUEST });
     }
 
     try {
         const result = await saveTenantBuildings(buildingData, req.userId);
+        res.send(result);
+    } catch (error) {
+        return res.send(error);
+    }
+}
+
+exports.updateTenantBuilding = async (req, res, next) => {
+    const buildingData = req.body;
+    const buildingId = req.params.buildingId;
+    if (!buildingData || !buildingId) {
+        res.status(500).send({ status: 400, message: errorCode.BAD_REQUEST });
+    }
+
+    try {
+        const result = await patchTenantBuildings(buildingData, req.userId, buildingId);
         res.send(result);
     } catch (error) {
         return res.send(error);
