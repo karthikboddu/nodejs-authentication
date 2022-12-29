@@ -11,7 +11,7 @@ const helpers = require('./app/helpers');
 const routes = require('./app/routes')
 const services = require('./app/services');
 const jwt = require('jsonwebtoken');
-
+var mongoose = require('mongoose');
 // const socketManage = require('./socketManage')(io)
 
 
@@ -79,6 +79,7 @@ app.use(function (req, res, next) {
     'errors': {},
     'data': [],
   };
+  res.mongoose = mongoose;
   req.app.set('logEntry', {
     'serviceName': 'tenant-api',
     'method': req.method,

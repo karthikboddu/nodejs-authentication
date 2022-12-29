@@ -17,7 +17,7 @@ exports.createTenantBuildings = async (req, res, next) => {
     const buildingData = req.body;
     console.log(req.userId)
     if (!buildingData) {
-        res.status(500).send({ status: 400, message: errorCode.BAD_REQUEST });
+        res.status(400).send({ status: 400, message: errorCode.BAD_REQUEST });
     }
 
     try {
@@ -32,7 +32,7 @@ exports.updateTenantBuilding = async (req, res, next) => {
     const buildingData = req.body;
     const buildingId = req.params.buildingId;
     if (!buildingData || !buildingId) {
-        res.status(500).send({ status: 400, message: errorCode.BAD_REQUEST });
+        res.status(400).send({ status: 400, message: errorCode.BAD_REQUEST });
     }
 
     try {
@@ -48,7 +48,7 @@ exports.createTenantBuildingsBlocks = async (req, res, next) => {
     const buildingId = req.params.buildingId;
     console.log(buildingBlocksData)
     if (!buildingBlocksData || !req.params.buildingId) {
-        res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
+        res.status(400).send({ status: 400, message: errorCode.BAD_REQUEST });
     }
 
     try {
@@ -64,7 +64,7 @@ exports.buildingsBlocks = async (req, res, next) => {
         console.log(req.userId)
         const buildingId = req.params.buildingId;
         if (!req.params.buildingId || !req.userId) {
-            res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
+            res.status(400).send({ status: 400, message: errorCode.BAD_REQUEST });
         }
         const result = await listTenantBuildingsBlocks(req.userId, buildingId);
         res.send(result);
@@ -75,15 +75,21 @@ exports.buildingsBlocks = async (req, res, next) => {
 
 exports.tenantBuildingById = async (req,res, next) => {
     try {
-        console.log(req.userId)
         const buildingId = req.params.buildingId;
         if (!req.params.buildingId || !req.userId) {
-            res.status(500).send({ status: 500, message: errorCode.BAD_REQUEST });
+            return res.status(400).send({ status: 400, message: errorCode.BAD_REQUEST });
+        }
+        if (!res.mongoose.Types.ObjectId.isValid(buildingId)) {
+            return res.status(404).send({ status: 404, message: errorCode.NOT_FOUND });
         }
         const result = await listTenantBuildingsById(req.userId, buildingId);
-        console.log(result,"res")
-        res.send(result);
+        
+        res.api.data = {
+            building : result
+        };
+        res.send(res.api);
     } catch (error) {
+        console.log(error)
         return res.send(error);
     }
 }
