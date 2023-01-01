@@ -323,6 +323,7 @@ const logInTenants = async (req, res, username, password) => {
 
         if (user.user_role.name == 'super_admin') {
           jwtData.isSuperAdmin = true
+          jwtData.isAdmin = true
         } else {
           jwtData.isSuperAdmin = false
         }
