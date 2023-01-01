@@ -1,5 +1,6 @@
 const _           = require('lodash');
 const {transformBuildingDetails} = require('./transform.building');
+const { transformTenantDetails } = require('./transform.tenant');
 
 const transformTenantRoomDetails = (record) => {
 
@@ -41,7 +42,7 @@ const transformTenantContractDetails = (record) => {
         building_floor_id: record.building_floor_id,
         building_id: record.building_id,
         orderDetails : transformTenantOrderDetails(record.orderDetails ? (record.orderDetails[0] ? record.orderDetails[0] : {}) : {}),
-        tenantDetails : record.tenantDetails ? (record.tenantDetails[0] ? record.tenantDetails[0] : {}) : {},
+        tenantDetails : record.tenantDetails ? (record.tenantDetails[0] ? transformTenantDetails(record.tenantDetails[0]) : {}) : {},
         buildingDetails : record.buildingDetails[0] ? record.buildingDetails[0] : {}
     }
 }

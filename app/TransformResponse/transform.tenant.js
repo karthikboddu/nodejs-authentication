@@ -2,7 +2,7 @@ const _ = require('lodash');
 
 
 const transformTenantDetails = (record) => {
-
+    const now = Date.now();
     return {
         _id: record._id,
         parent_id: record.parent_id,
@@ -19,7 +19,8 @@ const transformTenantDetails = (record) => {
         created_at: record.created_at,
         updated_at: record.updated_at,
         createdAt: record.createdAt,
-        updatedAt: record.updatedAt
+        updatedAt: record.updatedAt,
+        isExpired : record.start_at <= now && record.end_at >= now
     }
 
 }
