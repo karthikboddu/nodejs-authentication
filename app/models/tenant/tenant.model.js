@@ -4,7 +4,7 @@ module.exports = (mongoose) => {
                     new mongoose.Schema({
                         parent_id: {
                             type : mongoose.Schema.Types.ObjectId,
-                            required: true,
+                            required: false,
                             ref: "tenant"
                         },
                         user_role: {
