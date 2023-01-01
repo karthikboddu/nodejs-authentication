@@ -140,6 +140,7 @@ verifyAccessToken = async (req, res, next) => {
 
     if (tokenD.type == 'super_admin') {
       isSuperAdminRole = true;
+      isAdminRole = true;
     }
     const isAdmin = {
       isAdmin : isAdminRole,

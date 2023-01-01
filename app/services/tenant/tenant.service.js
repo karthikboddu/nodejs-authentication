@@ -248,7 +248,7 @@ const saveParentTenants = async (data, role, parentId) => {
       }
       return ({
         status: 200,
-        data: t,
+        data: savedTenantData.data,
         message: "Tenant was registered successfully!"
       });
 
