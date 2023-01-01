@@ -5,6 +5,7 @@ const pushObjectToCloudinary = async(cloudinary, buffer, path) => {
 
     return new Promise((resolve, reject) => {
         try {
+            //type: "private"
             cloudinary.uploader.upload_stream({ public_id: path, resource_type: 'raw' }, (err, res) => {
                 if (err) {
                   console.log(err);

@@ -113,8 +113,12 @@ exports.getDownloadUrl = async (req, res, next) => {
     var signedUrl = '';
 
     if (process.env.CLOUDINARY == "ON") {
-      // const init_cloudinary = req.app.get('core').init_cloudinary;
-      //signedUrl = await init_cloudinary.utils.private_download_url(assetData.data.asset_path,'pdf',{resource_type: "raw"});
+  //     const init_cloudinary = req.app.get('core').init_cloudinary;
+  //     const res11 = init_cloudinary.image('f5ddaf0ca7929578b408c909429f68f2/63a5e9b6da67e9a94ea958e2/jpg/4/karthik.jpg', { 
+  //       sign_url: true })
+  // console.log(res11)
+      // signedUrl1 = await init_cloudinary.utils.private_download_url("f5ddaf0ca7929578b408c909429f68f2/63a5e9b6da67e9a94ea958e2/png/4/Screenshot from 2021-03-22 21-31-43.png",'image',{resource_type: "raw"});
+      // console.log(signedUrl1)
       signedUrl = assetData.data.asset_url
     } else {
 

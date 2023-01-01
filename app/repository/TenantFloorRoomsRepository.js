@@ -113,8 +113,7 @@ const db = require("../models"),
                             $match: {
                                 $expr: {
                                     $and: [
-                                        { $eq: ["$floor_room_id", "$$roomId"] },
-                                        { $eq: ["$status", true] }
+                                        { $eq: ["$floor_room_id", "$$roomId"] }
 
                                     ]
 
