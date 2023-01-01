@@ -55,6 +55,26 @@ exports.updateTenant = async (req, res, next) => {
   }
 }
 
+exports.updateTenantById = async (req, res, next) => {
+
+  try {
+
+    const tenantId = req.params.tenantId;
+    const tenantData = req.body;
+
+
+    if (!tenantId || !tenantData) {
+        res.status(400).send({ status: 400, message: errorCode.BAD_REQUEST });
+    }
+
+
+    const result = await updateTenantDetails(req, tenantId, tenantData);
+    res.send(result);
+  } catch (error) {
+    return res.send(error);
+  }
+}
+
 exports.createTenant = async (req, res, next) => {
 
   const tenantData = req.body;
