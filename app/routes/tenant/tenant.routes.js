@@ -18,6 +18,6 @@ module.exports = function(app) {
     app.post("/api/tenant/SSOLogin",controller.createTenantSSOLogin);
     app.get("/api/tenant/settings",[authJwt.verifyToken], controller.getGlobalSettings);
     app.patch("/api/tenant/tenant",[authJwt.verifyToken], controller.updateTenant);
-    app.patch("/api/tenant/tenant/:tenantId",[authJwt.verifyToken], controller.updateTenantById);
-
+    app.patch("/api/tenant/tenant/:tenantId",[authJwt.verifyToken, authJwt.isAdmin], controller.updateTenantById);
+    app.patch("/api/tenant/parentTenant", [authJwt.verifyToken,authJwt.isAdmin],controller.createParentTenant);
 }

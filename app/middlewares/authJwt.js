@@ -132,12 +132,18 @@ verifyAccessToken = async (req, res, next) => {
 
   if (tokenD.id) {
     let isAdminRole = false;
+    let isSuperAdminRole = false;
 
     if (tokenD.type == 'admin') {
       isAdminRole = true;
     }
+
+    if (tokenD.type == 'super_admin') {
+      isSuperAdminRole = true;
+    }
     const isAdmin = {
-      isAdmin : isAdminRole
+      isAdmin : isAdminRole,
+      isSuperAdmin : isSuperAdminRole
     }
     result = {
       status: 200,
@@ -173,7 +179,7 @@ isAdmin = (req, res, next) => {
         }
 
         for (let i = 0; i < roles.length; i++) {
-          if (roles[i].name === "admin") {
+          if (roles[i].name === "admin" || roles[i].name === "super_admin") {
             next();
             return;
           }

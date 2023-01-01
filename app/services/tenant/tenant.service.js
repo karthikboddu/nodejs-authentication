@@ -176,6 +176,90 @@ const saveTenants = async (data, role, parentId) => {
   }
 }
 
+const saveParentTenants = async (data, role, parentId) => {
+  try {
+
+    var expiryDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
+
+    var startDate = Date.now();
+
+    const now = Date.now();
+
+
+    const tenantObject = new tenant(
+      {
+        parent_id: null,
+        full_name: data.fullName ? data.fullName : '',
+        password: bcrypt.hashSync(data.password, 8),
+        user_role: role._id,
+        username: data.username,
+        email: data.email,
+        mobile_no: data.mobileNo,
+        aadhar_id: data.aadharId,
+        address: data.address,
+        end_at: expiryDate,
+        start_at : startDate,
+        status: true,
+      })
+
+      console.log(tenantObject);
+    const checkusername = data.username;
+
+    const tenantDetails = await findOneTenant(
+      {
+        username: checkusername,
+        start_at: {
+          '$lte': now
+        },
+        end_at: {
+          '$gte': now
+        }
+      });
+      console.log(tenantDetails)
+    if (tenantDetails.data) {
+      const updateTenantData = {
+        parent_id: null,
+        full_name: data.fullName ? data.fullName : '',
+        password: bcrypt.hashSync(data.password, 8),
+        user_role: role._id,
+        username: data.username,
+        email: data.email,
+        mobile_no: data.mobileNo,
+        aadhar_id: data.aadharId,
+        address: data.address,
+        end_at: expiryDate,
+        start_at : startDate,
+        status: true,
+        user_role: role._id
+      }
+      console.log(updateTenantData, " -- ")
+      await updateTenantDetails(null, tenantDetails.data._id, updateTenantData)
+  
+      return ({
+        status: 200,
+        data: tenantDetails.data,
+        message: "Tenant was updated successfully!"
+      });
+    } else {
+      const savedTenantData = await saveTenantData(tenantObject);
+      
+      if (!savedTenantData.data) {
+        return ({ status: 500, message: 'Oops ... Something went wrong ....' })
+      }
+      return ({
+        status: 200,
+        data: t,
+        message: "Tenant was registered successfully!"
+      });
+
+    }
+
+  } catch (error) {
+    console.log(error)
+    return ({ status: 500, message: error })
+  }
+}
+
 const logInTenants = async (req, res, username, password) => {
 
   return new Promise((resolve, reject) => {
@@ -235,6 +319,12 @@ const logInTenants = async (req, res, username, password) => {
           jwtData.isAdmin = true
         } else {
           jwtData.isAdmin = false
+        }
+
+        if (user.user_role.name == 'super_admin') {
+          jwtData.isSuperAdmin = true
+        } else {
+          jwtData.isSuperAdmin = false
         }
         resolve({ status: 200, data: jwtData })
       });
@@ -364,5 +454,6 @@ module.exports = {
   logInTenants,
   saveSSOTenants,
   updateTenantDetails,
-  trasformUserRecord
+  trasformUserRecord,
+  saveParentTenants
 }

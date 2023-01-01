@@ -1,6 +1,6 @@
 const errorCode = require('../../common/errorCode'),
   _ = require('lodash'),
-  { listTenants, saveTenants, logInTenants, saveSSOTenants, updateTenantDetails,trasformUserRecord } = require('../../services/tenant/tenant.service'),
+  { listTenants, saveTenants, logInTenants, saveSSOTenants, updateTenantDetails,trasformUserRecord, saveParentTenants } = require('../../services/tenant/tenant.service'),
   { getRolesByName } = require('../../helpers/roles.helper');
   const { getPagination } = require("../../common/util");
 
@@ -88,6 +88,27 @@ exports.createTenant = async (req, res, next) => {
     const role = await getRolesByName(userRole);
     console.log(role);
     const result = await saveTenants(tenantData, role, parentId);
+    res.send(result);
+  } catch (error) {
+    console.log(error)
+    return res.send(error);
+  }
+
+}
+
+exports.createParentTenant = async (req, res, next) => {
+
+  const tenantData = req.body;
+  const parentId = req.userId ? req.userId : null;
+  if (!tenantData) {
+    return res.status(400).send({ message: errorCode.BAD_REQUEST });
+  }
+  const userRole = 'admin';
+  try {
+
+    const role = await getRolesByName(userRole);
+    console.log(role);
+    const result = await saveParentTenants(tenantData, role, parentId);
     res.send(result);
   } catch (error) {
     console.log(error)
