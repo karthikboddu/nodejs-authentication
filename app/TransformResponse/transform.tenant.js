@@ -20,7 +20,7 @@ const transformTenantDetails = (record) => {
         updated_at: record.updated_at,
         createdAt: record.createdAt,
         updatedAt: record.updatedAt,
-        isExpired : record.start_at <= now && record.end_at >= now
+        isExpired : record.start_at >= now && record.end_at <= now
     }
 
 }
