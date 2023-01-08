@@ -10,9 +10,10 @@ const db = require("../../models"),
   Promise = require('bluebird'),
   _ = require('lodash'),
   { jwtSignAccessRefreshTokenTenant } = require('../../helpers/jwt_helpers'),
-  { findOneTenant, saveTenantData } = require('../../repository/UserRepository');
+  { findOneTenant, saveTenantData, findAllTenants } = require('../../repository/UserRepository');
   var mongoose = require('mongoose');
 const { findAllRoomContractByCondition } = require("../../repository/TenantRoomContractRepository");
+const { getRolesByName } = require("../../helpers/roles.helper");
 
 const listTenants = async (req, limit, skip, buildingId, searchQuery) => {
   var parentId = req.parentId ? req.parentId : req.userId;
@@ -77,8 +78,9 @@ const saveTenants = async (data, role, parentId) => {
       expiryDate = new Date(sDate.setFullYear(sDate.getFullYear() + 1));
       console.log(startDate, " -- ", expiryDate)
     }
-    
+    expiryDate.setUTCHours(23, 59, 59, 999);
     const now = Date.now();
+    startDate.setUTCHours(0, 0, 0, 0);
     const parentTenantDetails = await findOneTenant(
       {
         _id: parentId,
@@ -180,11 +182,11 @@ const saveParentTenants = async (data, role, parentId) => {
   try {
 
     var expiryDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
-
+    expiryDate.setUTCHours(23, 59, 59, 999);
     var startDate = Date.now();
 
     const now = Date.now();
-
+    now.setUTCHours(0, 0, 0, 0);
 
     const tenantObject = new tenant(
       {
@@ -430,22 +432,51 @@ const updateTenantDetails = async (req, tenantId, data) => {
 }
 
 const trasformUserRecord = (record, roomContractsList) => {
-  var newArray = roomContractsList.data.filter(function (el)
-{
-  return el.tenant_id._id.equals(record._id)
-}
-);
+  console.log(record);
+  var newArray = []
+  if (roomContractsList.data) {
+    newArray = roomContractsList.data.filter(function (el)
+                {
+                  return el.tenant_id._id.equals(record._id)
+                });
+  }
+
   return {
     _id: record._id,
     name: record.full_name,
     avatar: record.photoUrl,
     mobileNumber: record.mobile_no,
     parentId: record.parent_id,
+    address : record.address,
+    startAt : record.start_at,
+    endAt : record.end_at,
     email : record.email,
     roomId : newArray[0] ? newArray[0].floor_room_id : null,
     buildingId : newArray[0] ? newArray[0].building_id : null,
     buildingFloorId : newArray[0] ? newArray[0].building_floor_id : null,
   }
+}
+
+const listParentTenants = async (req, limit, skip, buildingId, searchQuery) => {
+
+
+    let condition = {};
+    const role = await getRolesByName('admin')
+    const now = new Date();
+
+    condition = { parent_id: null, status: true, user_role : role._id,
+    start_at: {
+      '$lte': now
+    },
+    end_at: {
+      '$gte': now
+    } }
+
+    console.log(condition);
+    const projection = { username : 1, full_name : 1, email : 1, mobile_no :1, address:1, start_at :1 , end_at : 1, created_at: 1, photoUrl : 1 };
+    const tenantList = await findAllTenants(condition, projection, limit, skip);
+    const data = _.map(tenantList.data, (record) => trasformUserRecord(record, []))
+    return data;
 }
 
 
@@ -456,5 +487,6 @@ module.exports = {
   saveSSOTenants,
   updateTenantDetails,
   trasformUserRecord,
-  saveParentTenants
+  saveParentTenants,
+  listParentTenants
 }

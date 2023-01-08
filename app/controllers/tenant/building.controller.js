@@ -4,7 +4,8 @@ const errorCode = require('../../common/errorCode'),
 exports.buildings = async (req, res, next) => {
     try {
         console.log(req.userId)
-        const result = await listTenantBuildings(req);
+        const tenantId = req.query.tenantId ? req.query.tenantId : req.userId;
+        const result = await listTenantBuildings(tenantId);
         res.api.data = result;
         res.send(res.api);
     } catch (error) {

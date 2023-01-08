@@ -6,10 +6,10 @@ const db = require("../../models"),
     const crypto = require('crypto');
 const { findAndUpdateByBuildingId, findOneByTenantIdBuildingIdAndActive, findOneByTenantIdBuildingIdAndActiveAndCode, findOneByTenantIdAndActiveAndCode } = require("../../repository/TenantBuildingRepository");
 
-const listTenantBuildings = async (req) => {
+const listTenantBuildings = async (pTenantId) => {
 
         try {
-            var tenantId = mongoose.Types.ObjectId(req.userId);
+            var tenantId = mongoose.Types.ObjectId(pTenantId);
 
             const result = await tenantBuilding.aggregate([
 

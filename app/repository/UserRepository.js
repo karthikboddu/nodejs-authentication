@@ -58,9 +58,31 @@ const findTenant = async (condition) => {
     })
 }
 
+const findAllTenants = async (condition, projection, limit , skip) => {
+
+    return new Promise((resolve, reject) => {
+        tenant.find(condition, projection)
+        
+        .populate({ path: 'user_role', select: ['name'] })
+        .limit(limit).skip(skip).sort({ updated_at: -1 })
+            .exec((err, user) => {
+                if (err) {
+                    reject({
+                        err
+                    })
+                    return;
+                } else {
+                    resolve({ data: user });
+                    return;
+                }
+            });
+    })
+}
+
 
 module.exports = {
     findOneTenant,
     saveTenantData,
-    findTenant
+    findTenant,
+    findAllTenants
 }

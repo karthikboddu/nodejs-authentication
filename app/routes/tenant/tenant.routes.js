@@ -20,4 +20,5 @@ module.exports = function(app) {
     app.patch("/api/tenant/tenant",[authJwt.verifyToken], controller.updateTenant);
     app.patch("/api/tenant/tenant/:tenantId",[authJwt.verifyToken, authJwt.isAdmin], controller.updateTenantById);
     app.patch("/api/tenant/parentTenant", [authJwt.verifyToken,authJwt.isAdmin],controller.createParentTenant);
+    app.get("/api/tenant/parentTenants",[authJwt.verifyToken, authJwt.isAdmin], controller.getParentTenants);
 }

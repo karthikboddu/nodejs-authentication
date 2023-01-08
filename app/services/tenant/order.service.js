@@ -189,7 +189,7 @@ function buildDates(startDate, endDate) {
     // var stopDate = moment(endDate);
     var currentDate = startDate;
     var stopDate = endDate;
-
+    console.log(currentDate ,"<=", stopDate);
     while (currentDate <= stopDate) {
         // dateArray.push(moment(currentDate).format('YYYY-MM-DD'))
         //currentDate = moment(currentDate).add(1, 'month');
@@ -214,7 +214,7 @@ const initiateBulkRoomTransactionDetails = async (userId, parentId) => {
         const now = Date.now();
         const tenantList = await findTenant(
             {
-                parent_id: userId,
+                parent_id: { $ne: null },
                 status: true,
                 start_at: {
                     '$lte': now
@@ -227,7 +227,7 @@ const initiateBulkRoomTransactionDetails = async (userId, parentId) => {
         const tenantIds = _.map(tenantList.data, (record) => record._id)
         const opts = { session, new: true };
 
-        const roomContractsList = await findAllRoomContractByCondition({ tenant_id: { $in: tenantIds }, parent_id: userId, status: true });
+        const roomContractsList = await findAllRoomContractByCondition({ tenant_id: { $in: tenantIds }, status: true });
         const tenantRoomIds = _.map(roomContractsList.data, (record) => record.floor_room_id);
 
         const roomPaymentsList = await findAllRoomPaymentsByCondition({
@@ -257,12 +257,14 @@ const initiateBulkRoomTransactionDetails = async (userId, parentId) => {
             const startDate = new Date(element.tenant_id.start_at);
 
             const now = new Date();
+            now.setUTCHours(23, 59, 59, 999);
             const tenantPayments = grouped[element.tenant_id._id];
             let tenantPaymentsRentType = _.filter(tenantPayments,
                 { 'room_payment_type': 'ROOM_RENT' }
             );
 
             const datesList = buildDates(startDate, now);
+            console.log(datesList);
             // console.log(element.tenant_id._id, "  --- " ,datesList,"--- datesList--- ");
             const paymentToBeCreated = [];
 
@@ -378,14 +380,20 @@ const initiateRoomTransactionDetails = async (data, userId, parentId) => {
             return ({ status: 404, data: {}, message: 'Tenant not found' })
         }
         var date = new Date();
+        // date.setUTCHours(0, 0, 0, 0);
         const opts = { session, new: true };
 
         const startDate = new Date(tenantDetails.data.start_at);
 
         const roomPaymentType = data.type ? data.type : 'ROOM_RENT';
 
-        var firstDay = new Date(date.getFullYear(), date.getMonth(), startDate.getDate());
+        var firstDay = date;
+        firstDay.setUTCHours(0, 0, 0, 0);
+        firstDay.setFullYear(date.getFullYear())
+        firstDay.setMonth(date.getMonth())
+        firstDay.setDate(startDate.getDate())
         var lastDay = new Date(date.getFullYear(), date.getMonth(), startDate.getDate() + 30);
+        lastDay.setUTCHours(23, 59, 59, 999);
 
         console.log(firstDay, "-", lastDay, ' -- ', tenantDetails.data.start_at)
 

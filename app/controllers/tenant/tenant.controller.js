@@ -1,6 +1,6 @@
 const errorCode = require('../../common/errorCode'),
   _ = require('lodash'),
-  { listTenants, saveTenants, logInTenants, saveSSOTenants, updateTenantDetails,trasformUserRecord, saveParentTenants } = require('../../services/tenant/tenant.service'),
+  { listTenants, saveTenants, logInTenants, saveSSOTenants, updateTenantDetails,trasformUserRecord, saveParentTenants, listParentTenants } = require('../../services/tenant/tenant.service'),
   { getRolesByName } = require('../../helpers/roles.helper');
   const { getPagination } = require("../../common/util");
 
@@ -223,4 +223,38 @@ exports.getTenantsSettings = async (req, res, next) => {
     return next(error);
   }
 
+}
+
+exports.getParentTenants = async (req, res, next) => {
+
+  try {
+    let { page, size } = req.query;
+    if (!page) {
+      page = 1;
+    }
+    if (!size) {
+      size = 100;
+    }
+    const buildingId = req.query.buildingId ? req.query.buildingId : null;
+    const searchQuery = req.query.name ? req.query.name : "";
+    
+    const limit = parseInt(size);
+    const skip = (page - 1) * size;
+    const result = await listParentTenants(req, limit, skip, buildingId, searchQuery);
+    console.log(result,"result");
+    const totalCount = result ? result.length : 0;
+
+    const pagination = getPagination(page, size, totalCount);
+    res.api.data = {
+      tenants : result,
+      _pagination : pagination
+    };
+    req.app.get('log').info(_.assign(req.app.get('logEntry'), {
+      'status': res.api.status
+    }));
+    res.send(res.api);
+  } catch (error) {
+    console.log(error)
+    return next(error);
+  }
 }
