@@ -208,27 +208,25 @@ const userLoginInfo = async (req, res, token, id, type) => {
     ipAddress: ip,
     device: deviceDetails,
   })
-  await userLogin.find({
-    userId: id, ipAddress: ip, device: deviceDetails
-  }, function (err, docs) {
-    console.log(docs.length, "docs")
-    if (docs.length == 0 || docs.length < 0) {
-      userlogin.save((err, user) => {
 
-        console.log(id, "userDetails")
-        userlogin.userId = id;
-        userlogin.save(err => {
-          if (err) {
-            res.status(500).send({ message: err });
-            return;
-          }
-        });
-      })
-    } else {
-      updateLoginInfo(req, docs[0].id, type)
+  const docs = await userLogin.find({
+    userId: id,
+    ipAddress: ip,
+    device: deviceDetails
+  });
+
+  if (docs.length === 0) {
+    userlogin.userId = id;
+  
+    try {
+      await userlogin.save();
+    } catch (err) {
+      res.status(500).send({ message: err });
+      return;
     }
+  } else {
+    updateLoginInfo(req, docs[0].id, type);
   }
-  );
 }
 const getUserLoginInfo = async (req, next, token) => {
   let result = {};
